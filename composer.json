@@ -2,7 +2,7 @@
     "name": "therat/symdep",
     "description": "Additional tool for symfony deploy",
     "require": {
-        "deployer/deployer": "dev-master"
+        "deployer/deployer": "3.0.0-beta.4"
     },
     "license": "MIT",
     "authors": [
