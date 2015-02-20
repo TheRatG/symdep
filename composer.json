@@ -2,7 +2,7 @@
     "name": "therat/symdep",
     "description": "Additional tool for symfony deploy",
     "require": {
-        "deployer/deployer": "3.0.0-beta.4"
+        "deployer/deployer": "dev-master"
     },
     "license": "MIT",
     "authors": [
@@ -11,5 +11,10 @@
             "email": "the_rat_spam@mail.ru"
         }
     ],
-    "minimum-stability": "stable"
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.0-dev"
+        }
+    }
 }
