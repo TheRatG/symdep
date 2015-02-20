@@ -22,8 +22,6 @@ function run($command, $raw = false)
     return runLocally($command);
 }
 
-task('local:start', function () {
-})->desc('Helper task start');
 
 task('local:set_env', function () {
     // Symfony writable dirs
@@ -66,10 +64,17 @@ task('local:update_code', function (InputInterface $input) {
     }
 
     cd($basePath);
-    $isGit = is_dir($basePath . '.git');
+    $isGit = is_dir($basePath . '/.git');
     if ($isGit) {
         $branch = $input->getOption('branch');
         $res = run("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)");
+        if ($res) {
+            run("git pull origin $branch --quiet");
+        } else {
+            if (output()->isVerbose()) {
+                output()->writeln("<comment>Found local git branch. Pulling skipped.</comment>");
+            }
+        }
     } else {
         if (output()->isVerbose()) {
             output()->writeln("<comment>Update code skipped.</comment>");
@@ -128,19 +133,20 @@ task('local:writable_dirs', function () {
 /**
  * Vendors
  */
-task('local:vendors', function () {
-    $releasePath = env()->getReleasePath();
+task('local:vendors', function (InputInterface $input) {
+    if(!$input->getOption('skip-vendors')) {
+        $releasePath = env()->getReleasePath();
 
-    cd($releasePath);
-    $prod = get('env', 'dev');
-    $isComposer = run("if [ -e $releasePath/composer.phar ]; then echo 'true'; fi");
+        cd($releasePath);
+        $prod = get('env', 'dev');
+        $isComposer = run("if [ -e $releasePath/composer.phar ]; then echo 'true'; fi");
 
-    if ('true' !== $isComposer) {
-        run("curl -s http://getcomposer.org/installer | php");
+        if ('true' !== $isComposer) {
+            run("curl -s http://getcomposer.org/installer | php");
+        }
+
+        run("SYMFONY_ENV=$prod php composer.phar install");
     }
-
-    run("SYMFONY_ENV=$prod php composer.phar install");
-
 })->desc('Installing vendors');
 
 /**
@@ -155,8 +161,7 @@ task('local:cache', function () {
     run("php $releasePath/app/console cache:clear --no-warmup --env=$prod");
 
 
-    if(get('doctrine_clear_cache', false))
-    {
+    if (get('doctrine_clear_cache', false)) {
         run("php $releasePath/app/console doctrine:cache:clear-metadata --env=$prod");
         run("php $releasePath/app/console doctrine:cache:clear-query --env=$prod");
         run("php $releasePath/app/console doctrine:cache:clear-result --env=$prod");
@@ -198,6 +203,10 @@ task('local:database:migrate', function () {
 
 })->desc('Migrating database');
 
+//Helper task
+task('local:start', function () {
+})->desc('Helper task start');
+
 task('local:end', function () {
 })->desc('Helper task end');
 
@@ -216,4 +225,5 @@ task('local', [
     'local:database:migrate',
     'local:end'
 ])->option('branch', 'b', 'Project branch', 'master')
+    ->option('skip-vendors', null, 'Skip local:vendors task', false)
     ->desc('Update your local project');
