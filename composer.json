@@ -1,0 +1,15 @@
+{
+    "name": "therat/symdep",
+    "description": "Additional tool for symfony deploy",
+    "require": {
+        "deployer/deployer": "dev-master"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vladimir Pak",
+            "email": "the_rat_spam@mail.ru"
+        }
+    ],
+    "minimum-stability": "dev"
+}
