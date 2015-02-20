@@ -11,5 +11,5 @@
             "email": "the_rat_spam@mail.ru"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }
