@@ -2,7 +2,8 @@
     "name": "therat/symdep",
     "description": "Additional tool for symfony deploy",
     "require": {
-        "deployer/deployer": "2.0.4"
+        "deployer/deployer": "2.0.4",
+        "phpseclib/phpseclib": "2.0.*@dev"
     },
     "license": "MIT",
     "authors": [
