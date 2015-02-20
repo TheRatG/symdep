@@ -1,5 +1,7 @@
 # SymDep
 
+Often I execute a lot of  similar commands for update my local project, thats why this project was created.
+
 ##Install
 
 ```bash
