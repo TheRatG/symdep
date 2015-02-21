@@ -6,8 +6,21 @@ server('local', 'localhost', 22)
     ->path(__DIR__)
     ->user('vagrant', 'vagrant')
     ->setWwwUser('vagrant');
-set('repository', '');
+
 // ----
+
+set('repository', '<project_repository_url>');
+
+server('production-primary', 'ip', 22)
+    ->path('')
+    ->user('')
+    ->setWwwUser('nginx')
+    ->pubKey();
+
+// stage(string name, array server list, array options = array(), bool default = true)
+//stage('dev', ['development-server'], ['branch' => 'develop'], true);
+//stage('test', ['test-primary'], ['branch' => 'master']);
+stage('prod', ['production-primary'], ['branch' => 'master']);
 
 //Helper task
 task('local:start', function () {

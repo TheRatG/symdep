@@ -10,9 +10,9 @@ PHP extension ssh2.
 ## Install
 
 ```bash
-composer require herzult/php-ssh
-composer require phpseclib/phpseclib 2.0.*@dev
-composer require therat/symdep 2.0.*@dev
+composer require --dev phpseclib/phpseclib dev-master
+composer require --dev deployer/deployer dev-master
+composer require --dev therat/symdep dev-master
 ```
 
 Create deploy.php file into your project
