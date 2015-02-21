@@ -5,32 +5,30 @@ Often I execute a lot of  similar commands for update my local project, thats wh
 ## Requirements
 
 Any **symfony** project.
+PHP extension ssh2.
 
 ## Install
 
 ```bash
+composer require herzult/php-ssh
 composer require phpseclib/phpseclib 2.0.*@dev
 composer require therat/symdep 2.0.*@dev
 ```
 
 Create deploy.php file into your project
 
-```php
-<?php
-require 'vendor/therat/symdep/recipe/local.php';
+```bash
+cp vendor/therat/symdep/deploy.php.example deploy.php
+```
 
-// Just stub, use dep local fro update your symfony project
-server('local', 'localhost', 22)
-    ->path(__DIR__)
-    ->user('vagrant', 'vagrant')
-    ->setWwwUser('vagrant');
-set('repository', '');
-// ----
+### Configure Mac Os
 
-//Helper task
-task('local:start', function () {
-})->desc('Helper task start');
+Install or update Mac Port https://www.macports.org/install.php
 
-task('local:end', function () {
-})->desc('Helper task end');
+```bash
+#install libssh2
+sudo port install libssh2
+
+#install PHP extension ssh2.
+sudo pecl install channel://pecl.php.net/ssh2-0.12
 ```
