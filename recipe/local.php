@@ -25,7 +25,7 @@ function run($command, $raw = false)
 
 task('local:set_env', function () {
     // Symfony writable dirs
-    set('writable_dirs', ['app/cache', 'app/logs']);
+    set('writable_dirs', ['app/cache', 'app/logs', 'app/sessions']);
 
     //Doctrine
     set('doctrine_auto_migrate', false);
@@ -131,6 +131,43 @@ task('local:writable_dirs', function () {
 })->desc('Make writable dirs');
 
 /**
+ * Create symlinks for shared directories and files
+ */
+task('local:shared', function () {
+    $basePath = config()->getPath();
+    $sharedPath = "$basePath/shared";
+    $releasePath = env()->getReleasePath();
+
+    // User specified shared directories
+    $sharedDirs = (array)get('shared_dirs', []);
+
+    foreach ($sharedDirs as $dir) {
+        // Remove dir from source
+        run("if [ -d $(echo $releasePath/$dir) ]; then rm -rf $releasePath/$dir; fi");
+
+        // Create shared dir if does not exist
+        run("mkdir -p $sharedPath/$dir");
+
+        // Symlink shared dir to release dir
+        run("ln -nfs $sharedPath/$dir $releasePath/$dir");
+    }
+
+    // User specified shared files
+    $sharedFiles = (array)get('shared_files', []);
+
+    foreach ($sharedFiles as $file) {
+        // Create dir of shared file
+        run("mkdir -p $sharedPath/" . dirname($file));
+
+        // Touch shared file
+        run("touch $sharedPath/$file");
+
+        // Symlink shared file to release file
+        run("ln -nfs $sharedPath/$file $releasePath/$file");
+    }
+})->desc('Creating symlinks for shared files');
+
+/**
  * Vendors
  */
 task('local:vendors', function (InputInterface $input) {
@@ -158,16 +195,16 @@ task('local:cache', function () {
 
     $prod = get('env', 'dev');
 
-    run("php $releasePath/app/console cache:clear --no-warmup --env=$prod");
+    run("php $releasePath/app/console cache:clear --no-warmup --env=$prod --no-debug");
 
 
     if (get('doctrine_clear_cache', false)) {
-        run("php $releasePath/app/console doctrine:cache:clear-metadata --env=$prod");
-        run("php $releasePath/app/console doctrine:cache:clear-query --env=$prod");
-        run("php $releasePath/app/console doctrine:cache:clear-result --env=$prod");
+        run("php $releasePath/app/console doctrine:cache:clear-metadata --env=$prod --no-debug");
+        run("php $releasePath/app/console doctrine:cache:clear-query --env=$prod --no-debug");
+        run("php $releasePath/app/console doctrine:cache:clear-result --env=$prod --no-debug");
     }
 
-    run("php $releasePath/app/console cache:warmup  --env=$prod");
+    run("php $releasePath/app/console cache:warmup  --env=$prod --no-debug");
 
     run("chmod -R g+w $cacheDir");
 })->desc('Clear and warming up cache');
@@ -179,7 +216,7 @@ task('local:assetic:install', function () {
     $releasePath = env()->getReleasePath();
     $prod = get('env', 'dev');
 
-    run("php $releasePath/app/console assets:install --env=$prod --symlink");
+    run("php $releasePath/app/console assets:install --env=$prod --symlink --no-debug");
 
 })->desc('Dumping assets');
 
@@ -198,7 +235,7 @@ task('local:database:migrate', function () {
     }
 
     if ($run) {
-        run("php $releasePath/app/console doctrine:migrations:migrate --env=$prod --no-interaction");
+        run("php $releasePath/app/console doctrine:migrations:migrate --env=$prod --no-interaction --no-debug");
     }
 
 })->desc('Migrating database');
@@ -218,6 +255,7 @@ task('local', [
     'local:set_env',
     'local:prepare',
     'local:update_code',
+    'local:shared',
     'local:writable_dirs',
     'local:vendors',
     'local:cache',
