@@ -1,4 +1,4 @@
 <?php
-require 'local.php';
-require 'test.php';
-require 'prod.php';
+require_once 'local.php';
+require_once 'test.php';
+require_once 'prod.php';
