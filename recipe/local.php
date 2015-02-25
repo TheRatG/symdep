@@ -3,6 +3,9 @@ namespace SymDep\Recipe;
 
 use Symfony\Component\Console\Input\InputInterface;
 
+$basePath = realpath(__DIR__ . '/../../../');
+require_once $basePath . '/therat/symdep/functions.php';
+
 /**
  * All commands runLocally
  * @param $command
@@ -22,16 +25,21 @@ function run($command, $raw = false)
     return runLocally($command);
 }
 
-
 task('local:set_env', function () {
+    set('env', 'dev');
+
+    // Symfony shared dirs
+    set('shared_dirs', ['app/logs', 'app/sessions', 'web/uploads']);
+
+    // Symfony shared files
+    set('shared_files', ['app/config/parameters.yml']);
+
     // Symfony writable dirs
-    set('writable_dirs', ['app/cache', 'app/logs', 'app/sessions']);
+    set('writable_dirs', ['app/cache', 'app/logs']);
 
     //Doctrine
-    set('doctrine_auto_migrate', false);
+    set('doctrine_auto_migrate', true);
     set('doctrine_clear_cache', false);
-
-    set('env', 'dev');
 
     //use in local:writable_dirs
     set('permission_method', 'chmod_bad');
@@ -66,7 +74,7 @@ task('local:update_code', function (InputInterface $input) {
     cd($basePath);
     $isGit = is_dir($basePath . '/.git');
     if ($isGit) {
-        $branch = $input->getOption('branch');
+        $branch = getCurrentBranch($input);
         $res = run("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)");
         if ($res) {
             run("git pull origin $branch --quiet");
@@ -80,7 +88,8 @@ task('local:update_code', function (InputInterface $input) {
             output()->writeln("<comment>Update code skipped.</comment>");
         }
     }
-})->desc('Updating code');
+})->desc('Updating code')
+    ->option('branch', 'b', 'Project branch');
 
 /**
  * Make writable dirs
@@ -171,7 +180,7 @@ task('local:shared', function () {
  * Vendors
  */
 task('local:vendors', function (InputInterface $input) {
-    if(!$input->getOption('skip-vendors')) {
+    if (!$input->getOption('skip-vendors')) {
         $releasePath = env()->getReleasePath();
 
         cd($releasePath);
@@ -251,8 +260,8 @@ task('local:end', function () {
  * Main task
  */
 task('local', [
-    'local:start',
     'local:set_env',
+    'local:start',
     'local:prepare',
     'local:update_code',
     'local:shared',
@@ -262,6 +271,6 @@ task('local', [
     'local:assetic:install',
     'local:database:migrate',
     'local:end'
-])->option('branch', 'b', 'Project branch', 'master')
+])->option('branch', 'b', 'Project branch')
     ->option('skip-vendors', null, 'Skip local:vendors task', false)
     ->desc('Update your local project');
