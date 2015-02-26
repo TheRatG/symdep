@@ -194,7 +194,8 @@ task('local:vendors', function (InputInterface $input) {
 
         run("SYMFONY_ENV=$prod php composer.phar install");
     }
-})->desc('Installing vendors');
+})->option('skip-vendors', null, 'Skip local:vendors task', false)
+    ->desc('Installing vendors');
 
 /**
  * Warm up cache
