@@ -198,7 +198,7 @@ task('local:vendors', function (InputInterface $input) {
 /**
  * Warm up cache
  */
-task('local:cache', function () {
+task('local:cache:warmup', function () {
     $releasePath = env()->getReleasePath();
     $cacheDir = env()->get('cache_dir', "$releasePath/app/cache");
 
@@ -267,7 +267,7 @@ task('local', [
     'local:shared',
     'local:writable_dirs',
     'local:vendors',
-    'local:cache',
+    'local:cache:warmup',
     'local:assetic:install',
     'local:database:migrate',
     'local:end'
