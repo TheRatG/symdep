@@ -186,13 +186,15 @@ task('local:vendors', function (InputInterface $input) {
 
         cd($releasePath);
         $prod = get('env', 'dev');
-        $isComposer = run("if [ -e $releasePath/composer.phar ]; then echo 'true'; fi");
 
-        if ('true' !== $isComposer) {
-            run("curl -s http://getcomposer.org/installer | php");
+        if (commandExist('composer')) {
+            $composer = 'composer';
+        } else {
+            run("cd {release_path} && curl -s http://getcomposer.org/installer | php");
+            $composer = 'php composer.phar';
         }
 
-        run("SYMFONY_ENV=$prod php composer.phar install --no-progress --verbose");
+        run("SYMFONY_ENV=$prod $composer install --verbose");
     }
 })->option('skip-vendors', null, 'Skip local:vendors task', false)
     ->desc('Installing vendors');
