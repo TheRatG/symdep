@@ -11,7 +11,7 @@ function runConsoleCommand($command)
         throw new \RuntimeException('"--env" is now defined');
     }
 
-    return run("php $releasePath/app/console $command --env=$env --no-debug");
+    return run("$releasePath/app/console $command --env=$env --no-debug");
 }
 
 function getCurrentBranch(InputInterface $input = null)

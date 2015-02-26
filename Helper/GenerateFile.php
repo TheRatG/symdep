@@ -35,7 +35,7 @@ class GenerateFile
     {
         $srcDir = rtrim($srcDir, '/');
         $dstDir = rtrim($dstDir, '/');
-        $templateFiles = $this->globRecursive($srcDir);
+        $templateFiles = $this->globRecursive($srcDir . '/*');
         $result = [];
         foreach ($templateFiles as $src) {
             if (!is_file($src)) {
@@ -57,7 +57,7 @@ class GenerateFile
         $content = file_get_contents($src);
 
         $keys = array_keys($placeholders);
-        $keys = array_map($keys, [$this, 'cover']);
+        $keys = array_map([$this, 'cover'], $keys);
         $content = str_replace($keys, array_values($placeholders), $content);
         if (!$content) {
             throw new \InvalidArgumentException('Src file is empty');
