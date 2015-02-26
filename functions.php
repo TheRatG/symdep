@@ -14,19 +14,6 @@ function runConsoleCommand($command)
     return run("$releasePath/app/console $command --env=$env --no-debug");
 }
 
-function getCurrentBranch(InputInterface $input = null)
-{
-    $branch = get('branch', false);
-    if (!$branch) {
-        $branch = $input->getOption('branch');
-        if (!$branch) {
-            $branch = trim(run('git rev-parse --abbrev-ref HEAD'));
-        }
-        set('branch', $branch);
-    }
-    return $branch;
-}
-
 /**
  * Generate file from template and save
  * @param $src

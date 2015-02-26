@@ -24,6 +24,19 @@ if (!function_exists('commandExist')) {
     }
 }
 
+function getCurrentBranch(InputInterface $input = null)
+{
+    $branch = get('branch', false);
+    if (!$branch) {
+        $branch = $input->getOption('branch');
+        if (!$branch) {
+            $branch = trim(runLocally('git rev-parse --abbrev-ref HEAD'));
+        }
+        set('branch', $branch);
+    }
+    return $branch;
+}
+
 /**
  * All commands runLocally
  * @param $command
