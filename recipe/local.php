@@ -62,7 +62,7 @@ task('local:set_env', function () {
     set('shared_dirs', ['app/logs', 'app/sessions', 'web/uploads']);
 
     // Symfony shared files
-    set('shared_files', ['app/config/parameters.yml']);
+    set('shared_files', []);
 
     // Symfony writable dirs
     set('writable_dirs', ['app/cache', 'app/logs']);
@@ -242,12 +242,12 @@ task('local:cache:warmup', function () {
 
 
     if (get('doctrine_clear_cache', false)) {
-        run("php $releasePath/app/console doctrine:cache:clear-metadata --env=$prod --no-debug");
-        run("php $releasePath/app/console doctrine:cache:clear-query --env=$prod --no-debug");
-        run("php $releasePath/app/console doctrine:cache:clear-result --env=$prod --no-debug");
+        run("$releasePath/app/console doctrine:cache:clear-metadata --env=$prod --no-debug");
+        run("$releasePath/app/console doctrine:cache:clear-query --env=$prod --no-debug");
+        run("$releasePath/app/console doctrine:cache:clear-result --env=$prod --no-debug");
     }
 
-    run("php $releasePath/app/console cache:warmup  --env=$prod --no-debug");
+    run("$releasePath/app/console cache:warmup  --env=$prod --no-debug");
 
     run("chmod -R g+w $cacheDir");
 })->desc('Clear and warming up cache');
@@ -259,7 +259,7 @@ task('local:assetic:install', function () {
     $releasePath = env()->getReleasePath();
     $prod = get('env', 'dev');
 
-    run("php $releasePath/app/console assets:install --env=$prod --symlink --no-debug");
+    run("$releasePath/app/console assets:install --env=$prod --symlink --no-debug");
 
 })->desc('Dumping assets');
 
@@ -278,7 +278,7 @@ task('local:database:migrate', function () {
     }
 
     if ($run) {
-        run("php $releasePath/app/console doctrine:migrations:migrate --env=$prod --no-interaction --no-debug");
+        run("$releasePath/app/console doctrine:migrations:migrate --env=$prod --no-interaction --no-debug");
     }
 
 })->desc('Migrating database');
