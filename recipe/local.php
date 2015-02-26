@@ -192,7 +192,7 @@ task('local:vendors', function (InputInterface $input) {
             run("curl -s http://getcomposer.org/installer | php");
         }
 
-        run("SYMFONY_ENV=$prod php composer.phar install");
+        run("SYMFONY_ENV=$prod php composer.phar install --no-progress --verbose");
     }
 })->option('skip-vendors', null, 'Skip local:vendors task', false)
     ->desc('Installing vendors');
