@@ -105,6 +105,7 @@ task('local:writable_dirs', function () {
     // User specified writable dirs
     $dirs = (array)get('writable_dirs', []);
 
+    $commands = [];
     switch ($permissionMethod) {
         case 'acl':
             $run = run("if which setfacl; then echo \"ok\"; fi");
