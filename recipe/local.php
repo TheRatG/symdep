@@ -239,16 +239,16 @@ task('local:cache:warmup', function () {
 
     $prod = get('env', 'dev');
 
-    run("php $releasePath/app/console cache:clear --no-warmup --env=$prod --no-debug");
+    run("php $releasePath/app/console cache:clear --no-warmup --env=$prod");
 
 
     if (get('doctrine_clear_cache', false)) {
-        run("$releasePath/app/console doctrine:cache:clear-metadata --env=$prod --no-debug");
-        run("$releasePath/app/console doctrine:cache:clear-query --env=$prod --no-debug");
-        run("$releasePath/app/console doctrine:cache:clear-result --env=$prod --no-debug");
+        run("$releasePath/app/console doctrine:cache:clear-metadata --env=$prod");
+        run("$releasePath/app/console doctrine:cache:clear-query --env=$prod");
+        run("$releasePath/app/console doctrine:cache:clear-result --env=$prod");
     }
 
-    run("$releasePath/app/console cache:warmup  --env=$prod --no-debug");
+    run("$releasePath/app/console cache:warmup --env=$prod");
 
     run("chmod -R g+w $cacheDir");
 })->desc('Clear and warming up cache');
@@ -260,7 +260,7 @@ task('local:assetic:install', function () {
     $releasePath = env()->getReleasePath();
     $prod = get('env', 'dev');
 
-    run("$releasePath/app/console assets:install --env=$prod --symlink --no-debug");
+    run("$releasePath/app/console assets:install --env=$prod --symlink");
 
 })->desc('Dumping assets');
 
@@ -279,7 +279,7 @@ task('local:database:migrate', function () {
     }
 
     if ($run) {
-        run("$releasePath/app/console doctrine:migrations:migrate --env=$prod --no-interaction --no-debug");
+        run("$releasePath/app/console doctrine:migrations:migrate --env=$prod --no-interaction");
     }
 
 })->desc('Migrating database');

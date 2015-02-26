@@ -23,7 +23,7 @@ function runConsoleCommandLocally($command)
         throw new \RuntimeException('"--env" is now defined');
     }
 
-    return runLocally("$releasePath/app/console $command --env=$env --no-debug");
+    return runLocally("$releasePath/app/console $command --env=$env");
 }
 
 /**
