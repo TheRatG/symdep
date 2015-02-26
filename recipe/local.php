@@ -56,18 +56,6 @@ function run($command, $raw = false)
     return runLocally($command);
 }
 
-function runConsoleCommandLocally($command)
-{
-    $releasePath = env()->getReleasePath();
-    $env = get('env', false);
-
-    if (!$env) {
-        throw new \RuntimeException('"--env" is now defined');
-    }
-
-    return run("$releasePath/app/console $command --env=$env --no-debug");
-}
-
 task('local:set_env', function () {
     set('env', 'dev');
 

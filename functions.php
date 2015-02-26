@@ -11,7 +11,19 @@ function runConsoleCommand($command)
         throw new \RuntimeException('"--env" is now defined');
     }
 
-    return run("$releasePath/app/console $command --env=$env --no-debug");
+    return run("$releasePath/app/console $command --env=$env");
+}
+
+function runConsoleCommandLocally($command)
+{
+    $releasePath = env()->getReleasePath();
+    $env = get('env', false);
+
+    if (!$env) {
+        throw new \RuntimeException('"--env" is now defined');
+    }
+
+    return runLocally("$releasePath/app/console $command --env=$env --no-debug");
 }
 
 /**
