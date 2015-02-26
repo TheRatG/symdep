@@ -89,7 +89,7 @@ task('local:update_code', function (InputInterface $input) {
         }
     }
 })->desc('Updating code')
-    ->option('branch', 'b', 'Project branch');
+    ->option('branch', 'b', 'Project branch', false);
 
 /**
  * Make writable dirs
@@ -272,6 +272,6 @@ task('local', [
     'local:assetic:install',
     'local:database:migrate',
     'local:end'
-])->option('branch', 'b', 'Project branch')
+])->option('branch', 'b', 'Project branch', false)
     ->option('skip-vendors', null, 'Skip local:vendors task', false)
     ->desc('Update your local project');
