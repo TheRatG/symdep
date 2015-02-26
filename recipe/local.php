@@ -1,5 +1,5 @@
 <?php
-namespace SymDep\Recipe;
+namespace TheRat\SymDep\Recipe;
 
 use Symfony\Component\Console\Input\InputInterface;
 

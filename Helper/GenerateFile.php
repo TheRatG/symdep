@@ -1,5 +1,5 @@
 <?php
-namespace SymDep\Helper;
+namespace TheRat\SymDep\Helper;
 
 /**
  * Class GenerateFile
@@ -18,7 +18,7 @@ class GenerateFile
         $files = glob($pattern, $flags);
 
         foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
-            $tmp = globRecursive($dir . '/' . basename($pattern), $flags);
+            $tmp = $this->globRecursive($dir . '/' . basename($pattern), $flags);
             $files = array_merge($files, $tmp);
         }
 

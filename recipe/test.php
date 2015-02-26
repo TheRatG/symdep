@@ -1,5 +1,5 @@
 <?php
-namespace SymDep\Recipe;
+namespace TheRat\SymDep\Recipe;
 
 $basePath = realpath(__DIR__ . '/../../../');
 require_once $basePath . '/therat/symdep/functions.php';

@@ -1,5 +1,7 @@
 <?php
-use SymDep\Helper\GenerateFile;
+namespace TheRat\SymDep;
+
+use TheRat\SymDep\Helper\GenerateFile;
 use Symfony\Component\Console\Input\InputInterface;
 
 function runConsoleCommand($command)
