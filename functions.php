@@ -1,6 +1,4 @@
 <?php
-namespace TheRat\SymDep;
-
 use TheRat\SymDep\Helper\GenerateFile;
 use Symfony\Component\Console\Input\InputInterface;
 
