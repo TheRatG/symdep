@@ -6,6 +6,24 @@ use Symfony\Component\Console\Input\InputInterface;
 $basePath = realpath(__DIR__ . '/../../../');
 require_once $basePath . '/therat/symdep/functions.php';
 
+if (!function_exists('commandExist')) {
+    /**
+     * Check if command exist in bash.
+     *
+     * @param string $command
+     * @return bool
+     */
+    function commandExist($command)
+    {
+        $res = run("if hash $command 2>/dev/null; then echo 'true'; fi");
+        if ('true' === trim($res)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
 /**
  * All commands runLocally
  * @param $command
@@ -190,7 +208,7 @@ task('local:vendors', function (InputInterface $input) {
         if (commandExist('composer')) {
             $composer = 'composer';
         } else {
-            run("cd {release_path} && curl -s http://getcomposer.org/installer | php");
+            run("curl -s http://getcomposer.org/installer | php");
             $composer = 'php composer.phar';
         }
 

@@ -2,24 +2,6 @@
 use Symfony\Component\Console\Input\InputInterface;
 use TheRat\SymDep\Helper\GenerateFile;
 
-if (!function_exists('commandExist')) {
-    /**
-     * Check if command exist in bash.
-     *
-     * @param string $command
-     * @return bool
-     */
-    function commandExist($command)
-    {
-        $res = run("if hash $command 2>/dev/null; then echo 'true'; fi");
-        if ('true' === $res) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
-
 function runConsoleCommand($command)
 {
     $releasePath = env()->getReleasePath();
