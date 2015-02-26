@@ -17,6 +17,6 @@
         }
     },
     "autoload": {
-        "psr-4": { "SymDep": "" }
+        "psr-4": { "SymDep\\": "" }
     }
 }
