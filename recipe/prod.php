@@ -1,9 +1,8 @@
 <?php
-namespace TheRat\SymDep\Recipe;
+use TheRat\SymDep\Helper\RunHelper;
 
-$basePath = realpath(__DIR__ . '/../../../');
-require_once $basePath . '/therat/symdep/functions.php';
-require_once $basePath . '/deployer/deployer/recipe/symfony.php';
+require_once __DIR__ . '/../src/functions.php';
+require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
 
 task('prod:set_env', function () {
     set('env', 'prod');
@@ -20,6 +19,8 @@ task('prod:set_env', function () {
     //Doctrine
     set('doctrine_auto_migrate', true);
     set('doctrine_clear_cache', true);
+
+    RunHelper::setRemote(true);
 
 })->desc('Preparing deploy parameters');
 

@@ -1,5 +1,5 @@
 <?php
-namespace symdep\DependencyInjection\Compiler;
+namespace TheRat\SymDep\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
