@@ -6,7 +6,12 @@ require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
 
 task('test:set_env', function () {
+    $branch = get('branch', 'master');
+
     set('env', 'test');
+    if ('master' == $branch) {
+        set('env', 'prod');
+    }
 
     // Symfony shared dirs
     set('shared_dirs', ['web/uploads']);
