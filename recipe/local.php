@@ -60,12 +60,12 @@ task('local:update_code', function (InputInterface $input) {
         if ($res) {
             RunHelper::exec("git pull origin $branch --quiet");
         } else {
-            if (output()->isVerbose()) {
+            if (output()->isDebug()) {
                 output()->writeln("<comment>Found local git branch. Pulling skipped.</comment>");
             }
         }
     } else {
-        if (output()->isVerbose()) {
+        if (output()->isDebug()) {
             output()->writeln("<comment>Update code skipped.</comment>");
         }
     }
