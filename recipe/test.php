@@ -75,7 +75,7 @@ task('test:vendors', function (InputInterface $input) {
             $composer = 'php composer.phar';
         }
 
-        run("SYMFONY_ENV=$prod $composer install --verbose --prefer-dist --optimize-autoloader");
+        run("SYMFONY_ENV=$prod $composer install --prefer-dist --optimize-autoloader --quiet");
     }
 })->option('skip-vendors', null, 'Skip local:vendors task', false)
     ->desc('Installing vendors');

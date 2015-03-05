@@ -175,7 +175,7 @@ task('local:vendors', function (InputInterface $input) {
             $composer = 'php composer.phar';
         }
 
-        RunHelper::exec("SYMFONY_ENV=$prod $composer install --verbose");
+        RunHelper::exec("SYMFONY_ENV=$prod $composer install --quiet");
     }
 })->option('skip-vendors', null, 'Skip local:vendors task', false)
     ->desc('Installing vendors');

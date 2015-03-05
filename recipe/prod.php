@@ -42,7 +42,7 @@ task('prod:vendors', function (InputInterface $input) {
             $composer = 'php composer.phar';
         }
 
-        $options = get('composer_install_options', '--no-dev --verbose --prefer-dist --optimize-autoloader -q');
+        $options = get('composer_install_options', '--no-dev --prefer-dist --optimize-autoloader --quiet');
         run("SYMFONY_ENV=$prod $composer install $options");
     }
 })->option('skip-vendors', null, 'Skip local:vendors task', false)
