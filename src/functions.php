@@ -85,3 +85,14 @@ function generateFiles($srcDir, $dstDir, array $placeholders = [], $remote = fal
     }
     return $result;
 }
+
+/**
+ * Update user crontab from file
+ * @param string $filename Absolute path of new crontab
+ * @return string|void
+ */
+function updateCrontab($filename)
+{
+    $helper = new \TheRat\SymDep\Helper\Crontab();
+    return $helper->update($filename);
+}

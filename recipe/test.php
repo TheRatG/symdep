@@ -11,6 +11,7 @@ task('test:set_env', function () {
     set('env', 'test');
     if ('master' == $branch) {
         set('env', 'prod');
+        set('envReal', 'test');
     }
 
     // Symfony shared dirs
@@ -66,7 +67,7 @@ task('test:vendors', function (InputInterface $input) {
         $releasePath = env()->getReleasePath();
 
         cd($releasePath);
-        $prod = get('env', 'dev');
+        $prod = get('env', 'test');
 
         if (programExist('composer')) {
             $composer = 'composer';

@@ -97,6 +97,10 @@ class GenerateFile
 
     protected function filePutContent($filename, $content)
     {
+        $dir = dirname(($filename));
+        $command = "if [ ! -d $(echo $dir) ]; then mkdir -p $dir; fi;";
+        $this->run($command);
+
         $command = <<<DOCHERE
 cat > "$filename" <<'_EOF'
 $content
