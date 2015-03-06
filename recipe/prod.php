@@ -18,7 +18,7 @@ task('prod:set_env', function () {
     set('writable_dirs', ['app/cache', 'app/logs']);
 
     //Doctrine
-    set('doctrine_auto_migrate', true);
+    set('auto_migrate', false);
     set('doctrine_clear_cache', true);
 
     RunHelper::setRemote(true);

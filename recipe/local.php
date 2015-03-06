@@ -17,7 +17,7 @@ task('local:set_env', function () {
     set('writable_dirs', ['app/cache', 'app/logs']);
 
     //Doctrine
-    set('doctrine_auto_migrate', true);
+    set('auto_migrate', true);
     set('doctrine_clear_cache', false);
 
     //use in local:writable_dirs
@@ -222,7 +222,7 @@ task('local:database:migrate', function () {
     $prod = get('env', 'dev');
     $serverName = config()->getName();
 
-    $run = get('doctrine_auto_migrate', false);
+    $run = get('auto_migrate', false);
 
     if (output()->isVerbose()) {
         $run = askConfirmation("Run migrations on $serverName server?", $run);

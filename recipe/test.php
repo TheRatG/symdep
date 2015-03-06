@@ -23,7 +23,7 @@ task('test:set_env', function () {
     set('writable_dirs', ['app/cache', 'app/logs']);
 
     //Doctrine
-    set('doctrine_auto_migrate', true);
+    set('auto_migrate', true);
     set('doctrine_clear_cache', true);
 
     RunHelper::setRemote(true);
@@ -84,8 +84,8 @@ task('test:vendors', function (InputInterface $input) {
  * Main task
  */
 task('test', [
-    'test:set_env',
     'deploy:start',
+    'test:set_env',
     'deploy:prepare',
     'test:update_code',
     'deploy:shared',
