@@ -49,6 +49,28 @@ task('prod:vendors', function (InputInterface $input) {
     ->desc('Installing vendors');
 
 /**
+ * Warm up cache
+ */
+task('prod:cache:warmup', function () {
+    $releasePath = env()->getReleasePath();
+    $cacheDir = env()->get('cache_dir', "$releasePath/app/cache");
+
+    $prod = get('env', 'dev');
+
+    RunHelper::exec("php $releasePath/app/console cache:clear --no-warmup --env=$prod");
+
+    if (get('doctrine_clear_cache', false)) {
+        RunHelper::exec("$releasePath/app/console doctrine:cache:clear-metadata --env=$prod");
+        RunHelper::exec("$releasePath/app/console doctrine:cache:clear-query --env=$prod");
+        RunHelper::exec("$releasePath/app/console doctrine:cache:clear-result --env=$prod");
+    }
+
+    RunHelper::exec("$releasePath/app/console cache:warmup --env=$prod");
+
+    RunHelper::exec("chmod -R g+w $cacheDir");
+})->desc('Clear and warming up cache');
+
+/**
  * Main task
  */
 task('deploy', [
@@ -60,7 +82,7 @@ task('deploy', [
     'deploy:writable_dirs',
     'deploy:assets',
     'prod:vendors',
-    'deploy:cache:warmup',
+    'prod:cache:warmup',
     'deploy:assetic:dump',
     'database:migrate',
     'deploy:symlink',
