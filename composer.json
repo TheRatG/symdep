@@ -15,5 +15,8 @@
         "branch-alias": {
             "dev-master": "3.0-dev"
         }
+    },
+    "autoload": {
+        "psr-4": { "TheRat\\SymDep\\": "src/" }
     }
 }

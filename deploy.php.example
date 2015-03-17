@@ -1,5 +1,5 @@
 <?php
-require 'vendor/therat/symdep/recipe/local.php';
+require 'vendor/therat/symdep/recipe/all.php';
 
 // Just stub, use dep local fro update your symfony project
 server('local', 'localhost', 22)
