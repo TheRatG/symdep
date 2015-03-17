@@ -1,4 +1,5 @@
 <?php
+use Deployer\Deployer;
 use Symfony\Component\Console\Input\InputInterface;
 use TheRat\SymDep\Helper\GenerateFile;
 use TheRat\SymDep\Helper\RunHelper;
@@ -16,7 +17,7 @@ function getCurrentBranch(InputInterface $input = null)
     return $branch;
 }
 
-function runConsoleCommand($command)
+function console($command)
 {
     $releasePath = env()->getReleasePath();
     $env = get('env', false);
@@ -95,4 +96,15 @@ function updateCrontab($filename)
 {
     $helper = new \TheRat\SymDep\Helper\Crontab();
     return $helper->update($filename);
+}
+
+/**
+ * @param $name
+ * @param $originalName
+ * @return \Deployer\Task\TaskInterface
+ */
+function aliasTask($name, $originalName)
+{
+    $task = Deployer::get()->getTask($originalName);
+    return Deployer::get()->addTask($name, $task);
 }
