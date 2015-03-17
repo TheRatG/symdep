@@ -2,7 +2,7 @@
     "name": "therat/symdep",
     "description": "Additional tool for symfony deploy",
     "require": {
-        "deployer/deployer": "2.*@dev"
+        "deployer/deployer": "2.0.*@dev"
     },
     "license": "MIT",
     "authors": [
@@ -13,7 +13,7 @@
     ],
     "extra": {
         "branch-alias": {
-            "dev-master": "2.1.x-dev"
+            "dev-master": "2.0.x-dev"
         }
     },
     "autoload": {
