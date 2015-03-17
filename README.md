@@ -1,5 +1,7 @@
 # SymDep
 
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/38683099-7e9e-4323-8b41-b0be255e7dc9/big.png)](https://insight.sensiolabs.com/projects/38683099-7e9e-4323-8b41-b0be255e7dc9)
+
 Often I execute a lot of  similar commands for update my local project, thats why this project was created.
 
 ## Requirements
