@@ -2,6 +2,7 @@
     "name": "therat/symdep",
     "description": "Additional tool for symfony deploy",
     "require": {
+        "ext-libssh2" : "*",
         "deployer/deployer": "2.0.*@dev"
     },
     "license": "MIT",
