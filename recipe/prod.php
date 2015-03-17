@@ -40,7 +40,7 @@ task('prod:vendors', function () {
         $composer = 'php composer.phar';
     }
     $options = get('composer_install_options', '--no-dev --prefer-dist --optimize-autoloader --quiet');
-    run("SYMFONY_ENV=$prod $composer install $options");
+    RunHelper::exec("SYMFONY_ENV=$prod $composer install $options");
 })->desc('Installing vendors');
 task('prod:cache', function () {
     $releasePath = env()->getReleasePath();
@@ -56,11 +56,11 @@ task('prod:cache', function () {
     }
     console("cache:warmup");
 })->desc('Clear and warming up cache');
-task('deploy:assetic', function () {
+task('prod:assetic', function () {
     $prod = get('env', 'prod');
     console("assetic:dump --no-debug --env=$prod");
     console("assets:install --symlink --env=$prod");
-})->desc('Dumping assets');
+})->desc('Dumping assetic and install assets');
 aliasTask('prod:migrate', 'database:migrate');
 aliasTask('prod:symlink', 'deploy:symlink');
 aliasTask('prod:cleanup', 'cleanup');

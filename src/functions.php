@@ -108,3 +108,15 @@ function aliasTask($name, $originalName)
     $task = Deployer::get()->getTask($originalName);
     return Deployer::get()->addTask($name, $task);
 }
+
+function directoryExists($dir)
+{
+    $result = ('true' == RunHelper::exec("if [ -d \"$dir\" ]; then printf 'true'; fi"));
+    return $result;
+}
+
+function shMkdir($dir, $raw = true)
+{
+    $command = "if [ ! -d $(echo $dir) ]; then mkdir -p $dir; echo 'true'; else echo 'false'; fi";
+    return ('true' == RunHelper::exec($command, $raw));
+}

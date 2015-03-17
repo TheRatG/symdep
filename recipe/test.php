@@ -5,7 +5,8 @@ use TheRat\SymDep\Helper\RunHelper;
 require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
 
-task('test:set_env', function () {
+aliasTask('test:start', 'deploy:start');
+task('test:parameters', function () {
     $branch = get('branch', 'master');
 
     set('env', 'test');
@@ -18,10 +19,10 @@ task('test:set_env', function () {
     set('shared_dirs', ['web/uploads']);
 
     // Symfony shared files
-    set('shared_files', ['app/config/parameters.yml']);
+    set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
 
     // Symfony writable dirs
-    set('writable_dirs', ['app/cache', 'app/logs']);
+    set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
 
     //Doctrine
     set('auto_migrate', true);
@@ -30,10 +31,7 @@ task('test:set_env', function () {
     RunHelper::setRemote(true);
 
 })->desc('Preparing deploy parameters');
-
-/**
- * Update project code
- */
+aliasTask('test:prepare', 'deploy:prepare');
 task('test:update_code', function (InputInterface $input) {
     $basePath = config()->getPath();
     $repository = get('repository', false);
@@ -41,84 +39,78 @@ task('test:update_code', function (InputInterface $input) {
     if (false === $repository) {
         throw new \RuntimeException('You have to specify repository.');
     }
-    $branch = get('branch', 'master');
+    $branch = $input->getOption('branch', get('branch', 'master'));
     $releasePath = "$basePath/releases/$branch";
 
     env()->setReleasePath($releasePath);
     env()->set('is_new_release', false);
 
     cd($basePath);
-
-    $branchExists = ('true' == RunHelper::exec("if [ -d \"$releasePath\" ]; then printf 'true'; fi"));
-    if ($branchExists) {
+    if (directoryExists($releasePath)) {
         RunHelper::exec("cd $releasePath && git pull origin $branch --quiet");
     } else {
-        RunHelper::exec("git clone --recursive -q $repository --branch $branch $releasePath");
+        RunHelper::exec("cd $releasePath && git clone --recursive -q $repository --branch $branch $releasePath");
     }
-
 })->desc('Updating code')
     ->option('branch', 'b', 'Project branch', false);
-
-/**
- * Vendors
- */
-task('test:vendors', function (InputInterface $input) {
-    if (!$input->getOption('skip-vendors')) {
-        $releasePath = env()->getReleasePath();
-
-        cd($releasePath);
-        $prod = get('env', 'test');
-
-        if (programExist('composer')) {
-            $composer = 'composer';
-        } else {
-            run("curl -s http://getcomposer.org/installer | php");
-            $composer = 'php composer.phar';
-        }
-
-        run("SYMFONY_ENV=$prod $composer install --prefer-dist --optimize-autoloader --quiet");
+aliasTask('test:shared', 'deploy:shared');
+aliasTask('test:writable_dirs', 'deploy:writable_dirs');
+aliasTask('test:assets', 'deploy:assets');
+task('test:vendors', function () {
+    $releasePath = env()->getReleasePath();
+    cd($releasePath);
+    $prod = get('env', 'prod');
+    if (programExist('composer')) {
+        $composer = 'composer';
+    } else {
+        RunHelper::exec("php -r \"readfile('https://getcomposer.org/installer');\" | php");
+        $composer = 'php composer.phar';
     }
-})->option('skip-vendors', null, 'Skip local:vendors task', false)
-    ->desc('Installing vendors');
-
-/**
- * Warm up cache
- */
-task('test:cache:warmup', function () {
+    $options = get('composer_install_options', '--prefer-dist --optimize-autoloader --quiet');
+    RunHelper::exec("SYMFONY_ENV=$prod $composer install $options");
+})->desc('Installing vendors');
+task('test:cache', function () {
     $releasePath = env()->getReleasePath();
     $cacheDir = env()->get('cache_dir', "$releasePath/app/cache");
-
-    $prod = get('env', 'dev');
-
-    RunHelper::exec("php $releasePath/app/console cache:clear --no-warmup --env=$prod");
-
-    if (get('doctrine_clear_cache', false)) {
-        RunHelper::exec("$releasePath/app/console doctrine:cache:clear-metadata --env=$prod");
-        RunHelper::exec("$releasePath/app/console doctrine:cache:clear-query --env=$prod");
-        RunHelper::exec("$releasePath/app/console doctrine:cache:clear-result --env=$prod");
-    }
-
-    RunHelper::exec("$releasePath/app/console cache:warmup --env=$prod");
-
     RunHelper::exec("chmod -R g+w $cacheDir");
+
+    $prod = get('env', 'prod');
+    console("cache:clear --no-warmup --env=$prod");
+    if (get('doctrine_clear_cache', false)) {
+        console("doctrine:cache:clear-metadata --env=$prod");
+        console("doctrine:cache:clear-query --env=$prod");
+        console("doctrine:cache:clear-result --env=$prod");
+    }
+    console("cache:warmup");
 })->desc('Clear and warming up cache');
+task('test:assetic', function () {
+    $prod = get('env', 'prod');
+    console("assetic:dump --no-debug --env=$prod");
+    console("assets:install --symlink --env=$prod");
+})->desc('Dumping assetic and install assets');
+aliasTask('test:migrate', 'database:migrate');
+aliasTask('test:symlink', 'deploy:symlink');
+aliasTask('test:cleanup', 'cleanup');
+aliasTask('test:end', 'deploy:end');
 
 /**
  * Main task
  */
 task('test', [
-    'deploy:start',
-    'test:set_env',
-    'deploy:prepare',
+    'test:start',
+    'test:parameters',
+    'test:prepare',
     'test:update_code',
-    'deploy:shared',
-    'deploy:writable_dirs',
-    'deploy:assets',
+    'test:shared',
+    'test:writable_dirs',
+    'test:assets',
     'test:vendors',
-    'test:cache:warmup',
-    'deploy:assetic:dump',
-    'database:migrate',
-    'deploy:end'
-])->option('branch', 'b', 'Project branch', false)
-    ->option('skip-vendors', null, 'Skip local:vendors task', false)
-    ->desc('Deploy your project on test platform');
+    'test:cache',
+    'test:assetic',
+    'test:migrate',
+    'test:symlink',
+    'test:cleanup',
+    'test:end',
+])
+    ->option('branch', 'b', 'Project branch', false)
+    ->desc('Deploy your test project');
