@@ -2,7 +2,7 @@
     "name": "therat/symdep",
     "description": "Additional tool for symfony deploy",
     "require": {
-        "deployer/deployer": "2.*"
+        "deployer/deployer": "2.*@dev"
     },
     "license": "MIT",
     "authors": [
@@ -11,7 +11,12 @@
             "email": "the_rat_spam@mail.ru"
         }
     ],
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.1.x-dev"
+        }
+    },
     "autoload": {
-        "psr-4": { "TheRat\\SymDep\\": "src/" }
+        "psr-4": {"TheRat\\SymDep\\": "src/"}
     }
 }
