@@ -1,5 +1,6 @@
 <?php
 use Symfony\Component\Console\Input\InputInterface;
+use TheRat\SymDep\Helper\Shell;
 use TheRat\SymDep\Helper\ShellExec;
 use TheRat\SymDep\SymDep;
 
@@ -27,8 +28,7 @@ task('local:parameters', function () {
 })->desc('Preparing deploy parameters');
 task('local:prepare', function () {
     $basePath = config()->getPath();
-    shMkdir($basePath);
-    shMkdir('shared');
+    Shell::mkdir($basePath . DIRECTORY_SEPARATOR . 'shared');
 })->desc('Preparing server for deploy');
 task('local:update_code', function (InputInterface $input) {
     $repository = get('repository', false);
