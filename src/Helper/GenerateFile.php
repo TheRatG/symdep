@@ -6,7 +6,6 @@ namespace TheRat\SymDep\Helper;
  *
  * Create file from templates
  *
- * @package symdep\Helper
  */
 class GenerateFile
 {
@@ -51,7 +50,7 @@ class GenerateFile
     public function findFiles($srcDir)
     {
         $command = "find $srcDir -type f";
-        $result = $this->run($command);
+        $result = ShellExec::run($command, true);
         $result = explode("\n", trim($result));
         return $result;
     }
@@ -73,9 +72,16 @@ class GenerateFile
         return $result;
     }
 
+    /**
+     * @param $src
+     * @param $dst
+     * @param array $placeholders
+     * @param null $mode
+     * @return string
+     */
     public function generateFile($src, $dst, array $placeholders = [], $mode = null)
     {
-        $content = $this->fileGetContent($src);
+        $content = Shell::fileGetContent($src);
         $keys = array_keys($placeholders);
         $keys = array_map([$this, 'cover'], $keys);
         $content = str_replace($keys, array_values($placeholders), $content);
@@ -83,50 +89,13 @@ class GenerateFile
             throw new \InvalidArgumentException('Src file is empty');
         }
 
-        $result = $this->filePutContent($dst, $content);
-
-        $this->chmod($dst, $mode, $src);
-
+        $result = Shell::filePutContent($dst, $content);
+        Shell::chmod($dst, $mode, $src);
         return $result;
     }
 
     protected function cover($item)
     {
         return self::$openBracket . $item . self::$closeBracket;
-    }
-
-    protected function filePutContent($filename, $content)
-    {
-        $dir = dirname(($filename));
-        $command = "if [ ! -d $(echo $dir) ]; then mkdir -p $dir; fi;";
-        $this->run($command);
-
-        $command = <<<DOCHERE
-cat > "$filename" <<'_EOF'
-$content
-_EOF
-DOCHERE;
-        $this->run($command);
-    }
-
-    protected function fileGetContent($filename)
-    {
-        $command = "cat $filename";
-        $result = $this->run($command);
-        return $result;
-    }
-
-    protected function run($command, $raw = true)
-    {
-        return RunHelper::exec($command, $raw);
-    }
-
-    protected function chmod($dst, $mode, $src)
-    {
-        $command = "chmod $mode $dst";
-        if (!$mode) {
-            $command = "chmod --reference $src $dst";
-        }
-        $this->run($command);
     }
 }

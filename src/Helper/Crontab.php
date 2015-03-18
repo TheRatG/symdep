@@ -21,6 +21,6 @@ else
     rm "$crontabFileBak";
 fi
 BASH;
-        return RunHelper::exec($command, true);
+        return ShellExec::run($command, true);
     }
 }

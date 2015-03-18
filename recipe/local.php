@@ -1,10 +1,8 @@
 <?php
 use Symfony\Component\Console\Input\InputInterface;
-use TheRat\SymDep\Helper\RunHelper;
+use TheRat\SymDep\Helper\ShellExec;
 
-require_once __DIR__ . '/../src/functions.php';
-
-aliasTask('local:start', 'deploy:start');
+SymDep::aliasTask('local:start', 'deploy:start');
 task('local:parameters', function () {
     set('env', 'dev');
 
@@ -22,7 +20,7 @@ task('local:parameters', function () {
     set('doctrine_clear_cache', true);
 
     env()->setReleasePath(config()->getPath());
-    RunHelper::setRemote(false);
+    ShellExec::setRemote(false);
 })->desc('Preparing deploy parameters');
 task('local:prepare', function () {
     $basePath = config()->getPath();
@@ -39,9 +37,9 @@ task('local:update_code', function (InputInterface $input) {
     $isGit = is_dir($basePath . '/.git');
     if ($isGit) {
         $branch = getCurrentBranch($input);
-        $res = RunHelper::exec("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)");
+        $res = ShellExec::run("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)");
         if ($res) {
-            RunHelper::exec("git pull origin $branch --quiet");
+            ShellExec::run("git pull origin $branch --quiet");
         } elseif (output()->isDebug()) {
             output()->writeln("<comment>Found local git branch. Pulling skipped.</comment>");
         }
@@ -59,7 +57,7 @@ task('local:writable_dirs', function () {
     foreach ($dirs as $dir) {
         // Create shared dir if does not exist
         shMkdir($dir);
-        RunHelper::exec("chmod -R a+w $releasePath/$dir");
+        ShellExec::run("chmod -R a+w $releasePath/$dir");
     }
 })->desc('Make writable dirs');
 task('local:shared', function () {
@@ -72,13 +70,13 @@ task('local:shared', function () {
 
     foreach ($sharedDirs as $dir) {
         // Remove dir from source
-        RunHelper::exec("if [ -d $(echo $releasePath/$dir) ]; then rm -rf $releasePath/$dir; fi");
+        ShellExec::run("if [ -d $(echo $releasePath/$dir) ]; then rm -rf $releasePath/$dir; fi");
 
         // Create shared dir if does not exist
-        RunHelper::exec("mkdir -p $sharedPath/$dir");
+        ShellExec::run("mkdir -p $sharedPath/$dir");
 
         // Symlink shared dir to release dir
-        RunHelper::exec("ln -nfs $sharedPath/$dir $releasePath/$dir");
+        ShellExec::run("ln -nfs $sharedPath/$dir $releasePath/$dir");
     }
 
     // User specified shared files
@@ -86,13 +84,13 @@ task('local:shared', function () {
 
     foreach ($sharedFiles as $file) {
         // Create dir of shared file
-        RunHelper::exec("mkdir -p $sharedPath/" . dirname($file));
+        ShellExec::run("mkdir -p $sharedPath/" . dirname($file));
 
         // Touch shared file
-        RunHelper::exec("touch $sharedPath/$file");
+        ShellExec::run("touch $sharedPath/$file");
 
         // Symlink shared file to release file
-        RunHelper::exec("ln -nfs $sharedPath/$file $releasePath/$file");
+        ShellExec::run("ln -nfs $sharedPath/$file $releasePath/$file");
     }
 })->desc('Creating symlinks for shared files');
 task('local:vendors', function () {
@@ -102,30 +100,30 @@ task('local:vendors', function () {
     if (programExist('composer')) {
         $composer = 'composer';
     } else {
-        RunHelper::exec("php -r \"readfile('https://getcomposer.org/installer');\" | php");
+        ShellExec::run("php -r \"readfile('https://getcomposer.org/installer');\" | php");
         $composer = 'php composer.phar';
     }
     $options = get('composer_install_options', '--optimize-autoloader --quiet');
-    RunHelper::exec("SYMFONY_ENV=$prod $composer install $options");
+    ShellExec::run("SYMFONY_ENV=$prod $composer install $options");
 })->desc('Installing vendors');
 task('local:cache', function () {
     $releasePath = env()->getReleasePath();
     $cacheDir = env()->get('cache_dir', "$releasePath/app/cache");
-    RunHelper::exec("chmod -R g+w $cacheDir");
+    ShellExec::run("chmod -R g+w $cacheDir");
 
     $prod = get('env', 'prod');
-    console("cache:clear --no-warmup --env=$prod");
+    SymDep::console("cache:clear --no-warmup --env=$prod");
     if (get('doctrine_clear_cache', false)) {
-        console("doctrine:cache:clear-metadata --env=$prod");
-        console("doctrine:cache:clear-query --env=$prod");
-        console("doctrine:cache:clear-result --env=$prod");
+        SymDep::console("doctrine:cache:clear-metadata --env=$prod");
+        SymDep::console("doctrine:cache:clear-query --env=$prod");
+        SymDep::console("doctrine:cache:clear-result --env=$prod");
     }
-    console("cache:warmup");
+    SymDep::console("cache:warmup");
 })->desc('Clear and warming up cache');
 task('local:assetic', function () {
     $prod = get('env', 'prod');
-    console("assetic:dump --no-debug --env=$prod");
-    console("assets:install --symlink --env=$prod");
+    SymDep::console("assetic:dump --no-debug --env=$prod");
+    SymDep::console("assets:install --symlink --env=$prod");
 })->desc('Dumping assetic and install assets');
 task('local:migrate', function () {
     $releasePath = env()->getReleasePath();
@@ -136,7 +134,7 @@ task('local:migrate', function () {
         $run = askConfirmation("Run migrations on $serverName server?", $run);
     }
     if ($run) {
-        RunHelper::exec("$releasePath/app/console doctrine:migrations:migrate --env=$prod --no-interaction");
+        ShellExec::run("$releasePath/app/SymDep::console doctrine:migrations:migrate --env=$prod --no-interaction");
     }
 })->desc('Migrating database');
 

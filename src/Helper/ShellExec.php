@@ -1,7 +1,7 @@
 <?php
 namespace TheRat\SymDep\Helper;
 
-class RunHelper
+class ShellExec
 {
     /**
      * @var bool
@@ -24,17 +24,17 @@ class RunHelper
         self::$remote = $remote;
     }
 
-    public static function exec($command, $raw = true)
+    public static function run($command, $raw = true)
     {
         if (self::isRemote()) {
             $result = run($command, $raw);
         } else {
-            $result = self::execLocally($command, $raw);
+            $result = self::runLocally($command, $raw);
         }
         return $result;
     }
 
-    public static function execLocally($command, $raw = true)
+    public static function runLocally($command, $raw = true)
     {
         if (!$raw) {
             $workingPath = env()->getWorkingPath();

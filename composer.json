@@ -3,6 +3,7 @@
     "description": "Additional tool for symfony deploy",
     "require": {
         "ext-ssh2" : "*",
+        "phpseclib/phpseclib": "2.0.*@dev",
         "deployer/deployer": "2.0.*@dev"
     },
     "license": "MIT",
