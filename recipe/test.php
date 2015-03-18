@@ -1,7 +1,8 @@
 <?php
-use TheRat\SymDep\SymDep;
 use Symfony\Component\Console\Input\InputInterface;
+use TheRat\SymDep\Helper\Shell;
 use TheRat\SymDep\Helper\ShellExec;
+use TheRat\SymDep\SymDep;
 
 require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
 
@@ -40,13 +41,13 @@ task('test:update_code', function (InputInterface $input) {
         throw new \RuntimeException('You have to specify repository.');
     }
     $branch = $input->getOption('branch', get('branch', 'master'));
-    $releasePath = "$basePath/releases/$branch";
+    $releasePath = $basePath . DIRECTORY_SEPARATOR . "releases" . DIRECTORY_SEPARATOR . $branch;
 
     env()->setReleasePath($releasePath);
     env()->set('is_new_release', false);
 
     cd($basePath);
-    if (SymDep::directoryExists($releasePath)) {
+    if (SymDep::dirExists($releasePath)) {
         ShellExec::run("cd $releasePath && git pull origin $branch --quiet");
     } else {
         ShellExec::run("cd $releasePath && git clone --recursive -q $repository --branch $branch $releasePath");
@@ -60,7 +61,7 @@ task('test:vendors', function () {
     $releasePath = env()->getReleasePath();
     cd($releasePath);
     $prod = get('env', 'prod');
-    if (SymDep::programExist('composer')) {
+    if (SymDep::commandExist('composer')) {
         $composer = 'composer';
     } else {
         ShellExec::run("php -r \"readfile('https://getcomposer.org/installer');\" | php");
@@ -85,7 +86,6 @@ task('test:cache', function () {
     SymDep::console("cache:warmup");
 })->desc('Clear and warming up cache');
 task('test:assetic', function () {
-    $prod = get('env', 'prod');
     SymDep::console("assetic:dump --no-debug");
     SymDep::console("assets:install --symlink");
 })->desc('Dumping assetic and install assets');

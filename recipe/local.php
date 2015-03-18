@@ -39,7 +39,7 @@ task('local:update_code', function (InputInterface $input) {
     cd($basePath);
     $isGit = is_dir($basePath . '/.git');
     if ($isGit) {
-        $branch = getCurrentBranch($input);
+        $branch = SymDep::getCurrentBranch($input);
         $res = ShellExec::run("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)");
         if ($res) {
             ShellExec::run("git pull origin $branch --quiet");
@@ -59,7 +59,7 @@ task('local:writable_dirs', function () {
     $releasePath = env()->getReleasePath();
     foreach ($dirs as $dir) {
         // Create shared dir if does not exist
-        shMkdir($dir);
+        Shell::mkdir($dir);
         ShellExec::run("chmod -R a+w $releasePath/$dir");
     }
 })->desc('Make writable dirs');
@@ -101,7 +101,7 @@ task('local:vendors', function () {
     $releasePath = env()->getReleasePath();
     cd($releasePath);
     $prod = get('env', 'prod');
-    if (programExist('composer')) {
+    if (SymDep::commandExist('composer')) {
         $composer = 'composer';
     } else {
         ShellExec::run("php -r \"readfile('https://getcomposer.org/installer');\" | php");

@@ -34,7 +34,7 @@ task('prod:vendors', function () {
     $releasePath = env()->getReleasePath();
     cd($releasePath);
     $prod = get('env', 'prod');
-    if (SymDep::programExist('composer')) {
+    if (SymDep::commandExist('composer')) {
         $composer = 'composer';
     } else {
         ShellExec::run("php -r \"readfile('https://getcomposer.org/installer');\" | php");
@@ -59,7 +59,6 @@ task('prod:cache', function () {
     SymDep::console("cache:warmup");
 })->desc('Clear and warming up cache');
 task('prod:assetic', function () {
-    $prod = get('env', 'prod');
     SymDep::console("assetic:dump --no-debug");
     SymDep::console("assets:install --symlink");
 })->desc('Dumping assetic and install assets');
