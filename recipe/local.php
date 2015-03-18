@@ -108,7 +108,7 @@ task('local:vendors', function () {
         $composer = 'php composer.phar';
     }
     $options = get('composer_install_options', '--optimize-autoloader --quiet');
-    ShellExec::run("SYMFONY_ENV=$prod $composer install $options");
+    ShellExec::run("cd $releasePath; SYMFONY_ENV=$prod $composer install $options");
 })->desc('Installing vendors');
 task('local:cache', function () {
     $releasePath = env()->getReleasePath();

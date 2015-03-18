@@ -41,7 +41,7 @@ task('prod:vendors', function () {
         $composer = 'php composer.phar';
     }
     $options = get('composer_install_options', '--no-dev --prefer-dist --optimize-autoloader --quiet');
-    ShellExec::run("SYMFONY_ENV=$prod $composer install $options");
+    ShellExec::run("cd $releasePath; SYMFONY_ENV=$prod $composer install $options");
 })->desc('Installing vendors');
 task('prod:cache', function () {
     $releasePath = env()->getReleasePath();
