@@ -53,7 +53,7 @@ task('test:update_code', function (InputInterface $input) {
         ShellExec::run("cd $releasePath && git clone --recursive -q $repository --branch $branch $releasePath");
     }
 })->desc('Updating code')
-    ->option('branch', 'b', 'Project branch', false);
+    ->option('branch', 'b', 'Project branch', 'master');
 SymDep::aliasTask('test:shared', 'deploy:shared');
 SymDep::aliasTask('test:writable_dirs', 'deploy:writable_dirs');
 SymDep::aliasTask('test:assets', 'deploy:assets');
@@ -113,5 +113,5 @@ task('test', [
     'test:cleanup',
     'test:end',
 ])
-    ->option('branch', 'b', 'Project branch', false)
+    ->option('branch', 'b', 'Project branch', 'master')
     ->desc('Deploy your test project');

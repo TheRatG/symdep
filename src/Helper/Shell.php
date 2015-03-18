@@ -10,8 +10,8 @@ class Shell
      */
     public static function mkdir($dir)
     {
-        $command = "if [ ! -d $(echo $dir) ]; then mkdir -p $dir; echo 'true'; else echo 'false'; fi";
-        return ('true' == ShellExec::run($command, true));
+        $command = "if [ ! -d $(echo $dir) ]; then mkdir -p $dir && echo 'true'; else echo 'false'; fi";
+        return ('true' == trim(ShellExec::run($command, true)));
     }
 
     /**
@@ -20,7 +20,7 @@ class Shell
      */
     public static function dirExists($dir)
     {
-        $result = ('true' == ShellExec::run("if [ -d \"$dir\" ]; then echo 'true'; fi"));
+        $result = ('true' == trim(ShellExec::run("if [ -d \"$dir\" ]; then echo 'true'; fi")));
         return $result;
     }
 
@@ -30,7 +30,7 @@ class Shell
      */
     public static function fileExists($filename)
     {
-        $result = ('true' == ShellExec::run("if [ -f \"$filename\" ]; then echo 'true'; fi"));
+        $result = ('true' == trim(ShellExec::run("if [ -f \"$filename\" ]; then echo 'true'; fi")));
         return $result;
     }
 

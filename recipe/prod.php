@@ -86,5 +86,5 @@ task('prod', [
     'prod:cleanup',
     'prod:end',
 ])
-    ->option('branch', 'b', 'Project branch', false)
+    ->option('branch', 'b', 'Project branch', 'master')
     ->desc('Deploy your project');
