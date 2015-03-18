@@ -6,7 +6,8 @@ use TheRat\SymDep\SymDep;
 
 require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
 
-SymDep::aliasTask('local:start', 'deploy:start');
+task('local:start', function () {
+})->desc('Local start');
 task('local:parameters', function () {
     set('env', 'dev');
 
@@ -139,7 +140,8 @@ task('local:migrate', function () {
         SymDep::console("doctrine:migrations:migrate --no-interaction");
     }
 })->desc('Migrating database');
-SymDep::aliasTask('local:end', 'deploy:end');
+task('local:end', function () {
+})->desc('Local end');
 
 /**
  * Main task

@@ -6,7 +6,8 @@ use TheRat\SymDep\SymDep;
 
 require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
 
-SymDep::aliasTask('test:start', 'deploy:start');
+task('test:start', function () {
+})->desc('Test start');
 task('test:parameters', function () {
     $branch = get('branch', 'master');
 
@@ -92,7 +93,8 @@ task('test:assetic', function () {
 SymDep::aliasTask('test:migrate', 'database:migrate');
 SymDep::aliasTask('test:symlink', 'deploy:symlink');
 SymDep::aliasTask('test:cleanup', 'cleanup');
-SymDep::aliasTask('test:end', 'deploy:end');
+task('test:end', function () {
+})->desc('Test end');
 
 /**
  * Main task

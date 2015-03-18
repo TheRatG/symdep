@@ -5,7 +5,8 @@ use TheRat\SymDep\SymDep;
 
 require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
 
-SymDep::aliasTask('prod:start', 'deploy:start');
+task('prod:start', function () {
+})->desc('Prod start');
 task('prod:parameters', function () {
     set('env', 'prod');
 
@@ -65,7 +66,8 @@ task('prod:assetic', function () {
 SymDep::aliasTask('prod:migrate', 'database:migrate');
 SymDep::aliasTask('prod:symlink', 'deploy:symlink');
 SymDep::aliasTask('prod:cleanup', 'cleanup');
-SymDep::aliasTask('prod:end', 'deploy:end');
+task('prod:end', function () {
+})->desc('Prod end');
 
 /**
  * Main task
