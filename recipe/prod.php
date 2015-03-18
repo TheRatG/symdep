@@ -1,8 +1,10 @@
 <?php
+use TheRat\SymDep\Helper\Shell;
 use TheRat\SymDep\Helper\ShellExec;
 use TheRat\SymDep\SymDep;
 
 require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
+
 SymDep::aliasTask('prod:start', 'deploy:start');
 task('prod:parameters', function () {
     set('env', 'prod');
@@ -46,19 +48,20 @@ task('prod:cache', function () {
     $cacheDir = env()->get('cache_dir', "$releasePath/app/cache");
     ShellExec::run("chmod -R g+w $cacheDir");
 
-    $prod = get('env', 'prod');
-    SymDep::console("cache:clear --no-warmup --env=$prod");
+    Shell::touch("$releasePath/app/config/_secret.yml");
+
+    SymDep::console("cache:clear --no-warmup");
     if (get('doctrine_clear_cache', false)) {
-        SymDep::console("doctrine:cache:clear-metadata --env=$prod");
-        SymDep::console("doctrine:cache:clear-query --env=$prod");
-        SymDep::console("doctrine:cache:clear-result --env=$prod");
+        SymDep::console("doctrine:cache:clear-metadata");
+        SymDep::console("doctrine:cache:clear-query");
+        SymDep::console("doctrine:cache:clear-result");
     }
     SymDep::console("cache:warmup");
 })->desc('Clear and warming up cache');
 task('prod:assetic', function () {
     $prod = get('env', 'prod');
-    SymDep::console("assetic:dump --no-debug --env=$prod");
-    SymDep::console("assets:install --symlink --env=$prod");
+    SymDep::console("assetic:dump --no-debug");
+    SymDep::console("assets:install --symlink");
 })->desc('Dumping assetic and install assets');
 SymDep::aliasTask('prod:migrate', 'database:migrate');
 SymDep::aliasTask('prod:symlink', 'deploy:symlink');

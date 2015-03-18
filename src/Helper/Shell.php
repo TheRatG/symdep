@@ -85,4 +85,10 @@ DOCHERE;
         $result = ('true' == trim(ShellExec::run("if hash $command 2>/dev/null; then echo 'true'; fi", true)));
         return $result;
     }
+
+    public static function touch($filename)
+    {
+        $command = "if [ ! -f \"$filename\" ]; then touch \"$filename\"; fi";
+        return ShellExec::run($command, true);
+    }
 }

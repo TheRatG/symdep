@@ -1,6 +1,9 @@
 <?php
 use Symfony\Component\Console\Input\InputInterface;
 use TheRat\SymDep\Helper\ShellExec;
+use TheRat\SymDep\SymDep;
+
+require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
 
 SymDep::aliasTask('local:start', 'deploy:start');
 task('local:parameters', function () {
@@ -60,6 +63,7 @@ task('local:writable_dirs', function () {
         ShellExec::run("chmod -R a+w $releasePath/$dir");
     }
 })->desc('Make writable dirs');
+SymDep::aliasTask('local:assets', 'deploy:assets');
 task('local:shared', function () {
     $basePath = config()->getPath();
     $sharedPath = "$basePath/shared";
@@ -111,37 +115,36 @@ task('local:cache', function () {
     $cacheDir = env()->get('cache_dir', "$releasePath/app/cache");
     ShellExec::run("chmod -R g+w $cacheDir");
 
-    $prod = get('env', 'prod');
-    SymDep::console("cache:clear --no-warmup --env=$prod");
+    Shell::touch("$releasePath/app/config/_secret.yml");
+
+    SymDep::console("cache:clear --no-warmup");
     if (get('doctrine_clear_cache', false)) {
-        SymDep::console("doctrine:cache:clear-metadata --env=$prod");
-        SymDep::console("doctrine:cache:clear-query --env=$prod");
-        SymDep::console("doctrine:cache:clear-result --env=$prod");
+        SymDep::console("doctrine:cache:clear-metadata");
+        SymDep::console("doctrine:cache:clear-query");
+        SymDep::console("doctrine:cache:clear-result");
     }
     SymDep::console("cache:warmup");
 })->desc('Clear and warming up cache');
 task('local:assetic', function () {
-    $prod = get('env', 'prod');
-    SymDep::console("assetic:dump --no-debug --env=$prod");
-    SymDep::console("assets:install --symlink --env=$prod");
+    SymDep::console("assetic:dump --no-debug");
+    SymDep::console("assets:install --symlink");
 })->desc('Dumping assetic and install assets');
 task('local:migrate', function () {
-    $releasePath = env()->getReleasePath();
-    $prod = get('env', 'dev');
     $serverName = config()->getName();
     $run = get('auto_migrate', false);
     if (output()->isVerbose()) {
         $run = askConfirmation("Run migrations on $serverName server?", $run);
     }
     if ($run) {
-        ShellExec::run("$releasePath/app/SymDep::console doctrine:migrations:migrate --env=$prod --no-interaction");
+        SymDep::console("doctrine:migrations:migrate --no-interaction");
     }
 })->desc('Migrating database');
+SymDep::aliasTask('local:end', 'deploy:end');
 
 /**
  * Main task
  */
-task('prod', [
+task('local', [
     'local:start',
     'local:parameters',
     'local:prepare',
