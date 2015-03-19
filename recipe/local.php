@@ -4,8 +4,6 @@ use TheRat\SymDep\Helper\Shell;
 use TheRat\SymDep\Helper\ShellExec;
 use TheRat\SymDep\SymDep;
 
-require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
-
 task('local:start', function () {
 })->desc('Local start');
 task('local:parameters', function () {
@@ -64,7 +62,20 @@ task('local:writable_dirs', function () {
         ShellExec::run("chmod -R a+w $releasePath/$dir");
     }
 })->desc('Make writable dirs');
-SymDep::aliasTask('local:assets', 'deploy:assets');
+task('local:assets', function () {
+    $releasePath = env()->getReleasePath();
+
+    $assets = get('assets', ['web/css', 'web/images', 'web/js']);
+
+    $assets = array_map(function ($asset) use ($releasePath) {
+        return $releasePath . DIRECTORY_SEPARATOR . $asset;
+    }, $assets);
+    $assets = implode(' ', $assets);
+
+    $time = date('Ymdhi.s');
+
+    ShellExec::run("find $assets -exec touch -t $time {} ';' &> /dev/null || true");
+})->desc('Normalizing asset timestamps');
 task('local:shared', function () {
     $basePath = config()->getPath();
     $sharedPath = "$basePath/shared";
