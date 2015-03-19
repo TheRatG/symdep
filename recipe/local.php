@@ -62,20 +62,6 @@ task('local:writable_dirs', function () {
         ShellExec::run("chmod -R a+w $releasePath/$dir");
     }
 })->desc('Make writable dirs');
-task('local:assets', function () {
-    $releasePath = env()->getReleasePath();
-
-    $assets = get('assets', ['web/css', 'web/images', 'web/js']);
-
-    $assets = array_map(function ($asset) use ($releasePath) {
-        return $releasePath . DIRECTORY_SEPARATOR . $asset;
-    }, $assets);
-    $assets = implode(' ', $assets);
-
-    $time = date('Ymdhi.s');
-
-    ShellExec::run("find $assets -exec touch -t $time {} ';' &> /dev/null || true");
-})->desc('Normalizing asset timestamps');
 task('local:shared', function () {
     $basePath = config()->getPath();
     $sharedPath = "$basePath/shared";
@@ -164,7 +150,6 @@ task('local', [
     'local:update_code',
     'local:shared',
     'local:writable_dirs',
-    'local:assets',
     'local:vendors',
     'local:cache',
     'local:assetic',
