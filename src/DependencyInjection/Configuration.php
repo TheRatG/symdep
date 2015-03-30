@@ -27,6 +27,7 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->booleanNode('switch_db')->defaultFalse()->end()
+                ->booleanNode('copy_db_data')->defaultFalse()->end()
             ->end();
 
         $rootNode

@@ -1,0 +1,8 @@
+parameters:
+    therat_symdep.helper.database.class: TheRat\SymDep\Helper\Database
+
+services:
+    therat_symdep.helper.database:
+        class: %therat_symdep.helper.database.class%
+        calls:
+            - [ setContainer, [ @service_container ] ]

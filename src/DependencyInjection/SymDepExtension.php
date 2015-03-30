@@ -22,6 +22,7 @@ class SymDepExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $container->setParameter('symdep.switch_db', $config['switch_db']);
+        $container->setParameter('symdep.copy_db_data', $config['copy_db_data']);
         $container->setParameter('symdep.alter_increment_map', $config['alter_increment_map']);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
