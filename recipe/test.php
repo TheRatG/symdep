@@ -76,6 +76,11 @@ task('test:cache', function () {
     $cacheDir = env()->get('cache_dir', "$releasePath/app/cache");
     ShellExec::run("chmod -R g+w $cacheDir");
     Shell::touch("$releasePath/app/config/_secret.yml");
+    if (get('doctrine_clear_cache', false)) {
+        SymDep::console("doctrine:cache:clear-metadata");
+        SymDep::console("doctrine:cache:clear-query");
+        SymDep::console("doctrine:cache:clear-result");
+    }
     SymDep::console("cache:warmup");
 })->desc('Clear and warming up cache');
 task('test:assetic', function () {
@@ -86,11 +91,6 @@ SymDep::aliasTask('test:migrate', 'database:migrate');
 SymDep::aliasTask('test:symlink', 'deploy:symlink');
 SymDep::aliasTask('test:cleanup', 'cleanup');
 task('test:end', function () {
-    if (get('doctrine_clear_cache', false)) {
-        SymDep::console("doctrine:cache:clear-metadata");
-        SymDep::console("doctrine:cache:clear-query");
-        SymDep::console("doctrine:cache:clear-result");
-    }
 })->desc('Test end');
 
 /**

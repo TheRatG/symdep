@@ -113,6 +113,11 @@ task('local:cache', function () {
     $cacheDir = env()->get('cache_dir', "$releasePath/app/cache");
     ShellExec::run("chmod -R g+w $cacheDir");
     Shell::touch("$releasePath/app/config/_secret.yml");
+    if (get('doctrine_clear_cache', false)) {
+        SymDep::console("doctrine:cache:clear-metadata");
+        SymDep::console("doctrine:cache:clear-query");
+        SymDep::console("doctrine:cache:clear-result");
+    }
     SymDep::console("cache:warmup");
 })->desc('Clear and warming up cache');
 task('local:assetic', function () {
@@ -130,11 +135,6 @@ task('local:migrate', function () {
     }
 })->desc('Migrating database');
 task('local:end', function () {
-    if (get('doctrine_clear_cache', false)) {
-        SymDep::console("doctrine:cache:clear-metadata");
-        SymDep::console("doctrine:cache:clear-query");
-        SymDep::console("doctrine:cache:clear-result");
-    }
 })->desc('Local end');
 
 /**
