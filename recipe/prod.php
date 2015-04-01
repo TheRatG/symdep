@@ -54,7 +54,7 @@ task('prod:cache', function () {
         SymDep::console("doctrine:cache:clear-query");
         SymDep::console("doctrine:cache:clear-result");
     }
-    SymDep::console("cache:warmup");
+    SymDep::console("cache:clear");
 })->desc('Clear and warming up cache');
 task('prod:assetic', function () {
     SymDep::console("assetic:dump --no-debug");

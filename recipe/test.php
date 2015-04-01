@@ -76,13 +76,12 @@ task('test:cache', function () {
     $cacheDir = env()->get('cache_dir', "$releasePath/app/cache");
     ShellExec::run("chmod -R g+w $cacheDir");
     Shell::touch("$releasePath/app/config/_secret.yml");
-    SymDep::console("cache:clear --no-warmup");
     if (get('doctrine_clear_cache', false)) {
         SymDep::console("doctrine:cache:clear-metadata");
         SymDep::console("doctrine:cache:clear-query");
         SymDep::console("doctrine:cache:clear-result");
     }
-    SymDep::console("cache:warmup");
+    SymDep::console("cache:clear");
 })->desc('Clear and warming up cache');
 task('test:assetic', function () {
     SymDep::console("assetic:dump --no-debug");
