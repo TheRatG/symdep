@@ -16,6 +16,7 @@ class SwitchDbNameCompiler implements CompilerPassInterface
     {
         if (!$container->getParameter('symdep.switch_db')
             || false === strpos($container->getParameter('database_driver'), 'mysql')
+            || false == in_array($container->getParameter('kernel.environment'), ['dev', 'test'])
         ) {
             return;
         }
