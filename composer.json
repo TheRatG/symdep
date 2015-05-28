@@ -2,9 +2,7 @@
     "name": "therat/symdep",
     "description": "Additional tool for symfony deploy",
     "require": {
-        "ext-ssh2" : "*",
-        "phpseclib/phpseclib": "2.0.*@dev",
-        "deployer/deployer": "2.0.*@dev"
+        "ext-ssh2": "*",
     },
     "license": "MIT",
     "authors": [
@@ -15,7 +13,7 @@
     ],
     "extra": {
         "branch-alias": {
-            "dev-master": "2.0.x-dev"
+            "dev-master": "3.0.x-dev"
         }
     },
     "autoload": {
