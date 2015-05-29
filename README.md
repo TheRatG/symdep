@@ -18,8 +18,9 @@ PHP extension ssh2.
 ## Install
 
 ```bash
-composer require phpseclib/phpseclib 2.0.*@dev
-composer require therat/symdep 2.0.*@dev
+composer require therat/symdep ~3.0
+composer require deployer/deployer ~3.0
+composer require phpseclib/phpseclib dev-master
 ```
 
 Create deploy.php file into your project
