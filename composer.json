@@ -26,6 +26,9 @@
     "autoload": {
         "psr-4": {"TheRat\\SymDep\\": "src/"}
     },
+    "bin": [
+        "symdep"
+    ],
     "config": {
         "bin-dir": "bin"
     }
