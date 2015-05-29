@@ -27,5 +27,6 @@ $app->add(new TheRat\SymDep\Command\AboutCommand($appVersion));
 $app->add(new TheRat\SymDep\Command\LocalDeployCommand());
 $app->add(new TheRat\SymDep\Command\TestDeployCommand());
 $app->add(new TheRat\SymDep\Command\ProdDeployCommand());
+$app->add(new TheRat\SymDep\Command\InstallDeployerCommand());
 $app->setDefaultCommand('symdep:about');
 $app->run();
