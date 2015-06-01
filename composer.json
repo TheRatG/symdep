@@ -2,7 +2,6 @@
     "name": "therat/symdep",
     "description": "Additional tool for symfony deploy",
     "require": {
-        "ext-ssh2": "*",
         "symfony/finder": "2.6.*",
         "symfony/console": "2.6.*",
         "symfony/yaml": "2.6.*",
@@ -11,6 +10,9 @@
         "symfony/filesystem": "2.6.*",
         "symfony/framework-bundle": "2.6.*",
         "symfony/process": "2.6.*"
+    },
+    "suggest": {
+        "ext-ssh2": "Need for deployer"
     },
     "license": "MIT",
     "authors": [

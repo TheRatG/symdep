@@ -4,6 +4,8 @@
  */
 
 // Symfony shared dirs
+use Deployer\Deployer;
+
 set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
 
 // Symfony shared files
@@ -18,6 +20,9 @@ set('assets', ['web/css', 'web/images', 'web/js']);
 // Auto migrate
 set('auto_migrate', false);
 
+//Doctrine cache clear
+set('doctrine_cache_clear', true);
+
 // Environment vars
 env('env_vars', 'SYMFONY_ENV=dev');
 env('env', 'dev');
@@ -30,7 +35,9 @@ set('var_dir', 'app');
 /**
  * Default arguments and options.
  */
-argument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.');
+if (!Deployer::get()->getConsole()->getUserDefinition()->hasArgument('stage')) {
+    argument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.');
+}
 
 /**
  * Rollback to previous release.
@@ -50,7 +57,7 @@ task('success', function () {
 /**
  * Preparing server for deployment.
  */
-task('project-update:prepare', function () {
+task('local:prepare', function () {
     // Check if shell is POSIX-compliant
     try {
         cd(''); // To run command as raw.
@@ -76,10 +83,10 @@ task('project-update:prepare', function () {
 /**
  * Update project code
  */
-task('project-update:update_code', function () {
+task('local:update_code', function () {
     $branch = env('branch');
     if (false == $branch) {
-        $branch = runLocally('cd {{deploy_path}} && git rev-parse --abbrev-ref HEAD')->toString();
+        $branch = runLocally('cd {{release_path}} && git rev-parse --abbrev-ref HEAD')->toString();
     }
     $res = runLocally("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)");
     if ($res) {
@@ -92,7 +99,7 @@ task('project-update:update_code', function () {
 /**
  * Create cache dir
  */
-task('project-update:create_cache_dir', function () {
+task('local:create_cache_dir', function () {
     // Set cache dir
     env('cache_dir', trim(get('var_dir'), '/') . '/cache');
 
@@ -109,7 +116,7 @@ task('project-update:create_cache_dir', function () {
 /**
  * Create symlinks for shared directories and files.
  */
-task('project-update:shared', function () {
+task('local:shared', function () {
     $sharedPath = "{{deploy_path}}/shared";
 
     foreach (get('shared_dirs') as $dir) {
@@ -145,7 +152,7 @@ task('project-update:shared', function () {
 /**
  * Make writable dirs.
  */
-task('project-update:writable', function () {
+task('local:writable', function () {
     $dirs = join(' ', get('writable_dirs'));
 
     if (!empty($dirs)) {
@@ -157,7 +164,7 @@ task('project-update:writable', function () {
 /**
  * Normalize asset timestamps
  */
-task('project-update:assets', function () {
+task('local:assets', function () {
     $assets = array_map(function ($asset) {
         return "{{release_path}}/$asset";
     }, get('assets'));
@@ -174,7 +181,7 @@ task('project-update:assets', function () {
 /**
  * Installing vendors tasks.
  */
-task('project-update:vendors', function () {
+task('local:vendors', function () {
     if (runLocally("if hash composer 2>/dev/null; then echo 'true'; fi")->toBool()) {
         $composer = 'composer';
     } else {
@@ -189,7 +196,7 @@ task('project-update:vendors', function () {
 /**
  * Dump all assets to the filesystem
  */
-task('project-update:assetic:dump', function () {
+task('local:assetic:dump', function () {
 
     runLocally('{{symfony_console}} assetic:dump --env={{env}} --no-debug');
     runLocally('{{symfony_console}} assets:install --symlink --env={{env}} --no-debug');
@@ -199,7 +206,7 @@ task('project-update:assetic:dump', function () {
 /**
  * Warm up cache
  */
-task('project-update:cache:warmup', function () {
+task('local:cache:warmup', function () {
 
     runLocally('{{symfony_console}} cache:warmup  --env={{env}} --no-debug');
 
@@ -208,26 +215,38 @@ task('project-update:cache:warmup', function () {
 /**
  * Migrate database
  */
-task('project-update:database:migrate', function () {
+task('local:database:migrate', function () {
     if (get('auto_migrate')) {
         runLocally('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction');
     }
 })->desc('Migrate database');
 
 /**
+ * Doctrine cache clear database
+ */
+task('local:database:cache-clear', function () {
+    if (get('doctrine_cache_clear')) {
+        runLocally('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug');
+        runLocally('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug');
+        runLocally('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug');
+    }
+})->desc('Doctrine cache clear');
+
+/**
  * Main task
  */
 task('project-update', [
-    'project-update:prepare',
-    'project-update:update_code',
-    'project-update:create_cache_dir',
-    'project-update:shared',
-    'project-update:writable',
-    'project-update:assets',
-    'project-update:vendors',
-    'project-update:assetic:dump',
-    'project-update:cache:warmup',
-    'project-update:database:migrate',
-])->desc('Deploy your project');
+    'local:prepare',
+    'local:update_code',
+    'local:create_cache_dir',
+    'local:shared',
+    'local:writable',
+    'local:assets',
+    'local:vendors',
+    'local:assetic:dump',
+    'local:cache:warmup',
+    'local:database:migrate',
+    'local:database:cache-clear',
+])->desc('Local project update');
 
 after('project-update', 'success');

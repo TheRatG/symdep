@@ -1,116 +1,183 @@
 <?php
-use Symfony\Component\Console\Input\InputInterface;
-use TheRat\SymDep\Helper\Shell;
-use TheRat\SymDep\Helper\ShellExec;
-use TheRat\SymDep\SymDep;
+use Deployer\Deployer;
 
-require_once __DIR__ . '/../../../deployer/deployer/recipe/symfony.php';
+require_once 'recipe/common.php';
 
-task('test:start', function () {
-})->desc('Test start');
-task('test:parameters', function () {
-    $branch = get('branch', 'master');
+// Symfony shared dirs
+set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
 
-    set('env', 'test');
-    if ('master' == $branch) {
-        set('env', 'prod');
-        set('envReal', 'test');
+// Symfony shared files
+set('shared_files', ['app/config/parameters.yml']);
+
+// Symfony writable dirs
+set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
+
+// Assets
+set('assets', ['web/css', 'web/images', 'web/js']);
+
+// Auto migrate
+set('auto_migrate', true);
+
+//Doctrine cache clear
+set('doctrine_cache_clear', true);
+
+set('writable_use_sudo', false);
+
+// Environment vars
+env('env_vars', 'SYMFONY_ENV=test');
+env('env', 'test');
+
+// Adding support for the Symfony3 directory structure
+set('bin_dir', 'app');
+set('var_dir', 'app');
+
+/**
+ * Default arguments and options.
+ */
+if (!Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
+    argument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch', 'master');
+}
+
+/**
+ * Rollback to previous release.
+ */
+task('rollback', function () {
+})->desc('Rollback to previous release');
+
+/**
+ * Preparing server for deployment.
+ */
+task('deploy-on-test:prepare', function () {
+
+    // Check if shell is POSIX-compliant
+    try {
+        cd(''); // To run command as raw.
+        run('echo $0');
+    } catch (\RuntimeException $e) {
+        $formatter = \Deployer\Deployer::get()->getHelper('formatter');
+
+        $errorMessage = [
+            "Shell on your server is not POSIX-compliant. Please change to sh, bash or similar.",
+            "Usually, you can change your shell to bash by running: chsh -s /bin/bash",
+        ];
+        write($formatter->formatBlock($errorMessage, 'error', true));
+
+        throw $e;
     }
 
-    // Symfony shared dirs
-    set('shared_dirs', ['web/uploads']);
+    runLocally('if [ ! -d {{deploy_path}} ]; then echo ""; fi');
 
-    // Symfony shared files
-    set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
+    $branch = input()->getArgument('branch');
+    env('branch', $branch);
+    env('release_path', env()->parse('{{deploy_path}}') . "/releases/$branch");
+    env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
 
-    // Symfony writable dirs
-    set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
+})->desc('Preparing server for deploy');
 
-    //Doctrine
-    set('auto_migrate', true);
-    set('doctrine_clear_cache', true);
+task('deploy-on-test:update_code', function () {
+    $releasePath = env('release_path');
+    $repository = get('repository');
+    $branch = env('branch');
 
-    ShellExec::setRemote(true);
-
-})->desc('Preparing deploy parameters');
-SymDep::aliasTask('test:prepare', 'deploy:prepare');
-task('test:update_code', function (InputInterface $input) {
-    $basePath = config()->getPath();
-    $repository = get('repository', false);
-
-    if (false === $repository) {
-        throw new \RuntimeException('You have to specify repository.');
-    }
-    $branch = $input->getOption('branch', get('branch', 'master'));
-    $releasePath = $basePath . DIRECTORY_SEPARATOR . "releases" . DIRECTORY_SEPARATOR . $branch;
-
-    env()->setReleasePath($releasePath);
-    env()->set('is_new_release', false);
-
-    cd($basePath);
-    if (SymDep::dirExists($releasePath)) {
-        ShellExec::run("cd $releasePath && git pull origin $branch --quiet");
+    if (\TheRat\SymDep\dirExists($releasePath)) {
+        run("cd $releasePath && git pull origin $branch --quiet");
     } else {
-        ShellExec::run("cd $releasePath && git clone --recursive -q $repository --branch $branch $releasePath");
+        run("mkdir -p $releasePath");
+        run("cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath");
     }
-})->desc('Updating code')
-    ->option('branch', 'b', 'Project branch', 'master');
-SymDep::aliasTask('test:shared', 'deploy:shared');
-SymDep::aliasTask('test:writable_dirs', 'deploy:writable_dirs');
-SymDep::aliasTask('test:assets', 'deploy:assets');
-task('test:vendors', function () {
-    $releasePath = env()->getReleasePath();
-    cd($releasePath);
-    $prod = get('env', 'prod');
-    if (SymDep::commandExist('composer')) {
-        $composer = 'composer';
-    } else {
-        ShellExec::run("php -r \"readfile('https://getcomposer.org/installer');\" | php");
-        $composer = 'php composer.phar';
+})->desc('Updating code');
+
+/**
+ * Create cache dir
+ */
+task('deploy:create_cache_dir', function () {
+    // Set cache dir
+    env('cache_dir', '{{release_path}}/' . trim(get('var_dir'), '/') . '/cache');
+
+    // Remove cache dir if it exist
+    run('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi');
+
+    // Create cache dir
+    run('mkdir -p {{cache_dir}}');
+
+    // Set rights
+    run("chmod -R g+w {{cache_dir}}");
+})->desc('Create cache dir');
+
+
+/**
+ * Normalize asset timestamps
+ */
+task('deploy-on-test:assets', function () {
+    $assets = array_map(function ($asset) {
+        return "{{release_path}}/$asset";
+    }, get('assets'));
+
+    $time = date('Ymdhi.s');
+
+    foreach ($assets as $dir) {
+        if (\TheRat\SymDep\dirExists($dir)) {
+            run("find $dir -exec touch -t $time {} ';' &> /dev/null || true");
+        }
     }
-    $options = get('composer_install_options', '--prefer-dist --optimize-autoloader --quiet');
-    ShellExec::run("cd $releasePath; SYMFONY_ENV=$prod $composer install $options");
-})->desc('Installing vendors');
-task('test:cache', function () {
-    $releasePath = env()->getReleasePath();
-    $cacheDir = env()->get('cache_dir', "$releasePath/app/cache");
-    ShellExec::run("chmod -R g+w $cacheDir");
-    Shell::touch("$releasePath/app/config/_secret.yml");
-    if (get('doctrine_clear_cache', false)) {
-        SymDep::console("doctrine:cache:clear-metadata");
-        SymDep::console("doctrine:cache:clear-query");
-        SymDep::console("doctrine:cache:clear-result");
+})->desc('Normalize asset timestamps');
+
+
+/**
+ * Dump all assets to the filesystem
+ */
+task('deploy-on-test:assetic:dump', function () {
+
+    run('{{symfony_console}} assetic:dump --env={{env}} --no-debug');
+
+})->desc('Dump assets');
+
+
+/**
+ * Warm up cache
+ */
+task('deploy-on-test:cache:warmup', function () {
+
+    run('{{symfony_console}} cache:warmup  --env={{env}} --no-debug');
+    run('{{symfony_console}} assets:install --env={{env}} --no-debug');
+
+})->desc('Warm up cache');
+
+/**
+ * Migrate database
+ */
+task('deploy-on-test:database:migrate', function () {
+    if (get('auto_migrate')) {
+        run('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction');
     }
-    SymDep::console("cache:clear");
-})->desc('Clear and warming up cache');
-task('test:assetic', function () {
-    SymDep::console("assetic:dump --no-debug");
-    SymDep::console("assets:install --symlink");
-})->desc('Dumping assetic and install assets');
-SymDep::aliasTask('test:migrate', 'database:migrate');
-SymDep::aliasTask('test:symlink', 'deploy:symlink');
-SymDep::aliasTask('test:cleanup', 'cleanup');
-task('test:end', function () {
-})->desc('Test end');
+})->desc('Migrate database');
+
+/**
+ * Doctrine cache clear database
+ */
+task('deploy-on-test:database:cache-clear', function () {
+    if (get('doctrine_cache_clear')) {
+        run('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug');
+        run('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug');
+        run('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug');
+    }
+})->desc('Doctrine cache clear');
 
 /**
  * Main task
  */
-task('test', [
-    'test:start',
-    'test:parameters',
-    'test:prepare',
-    'test:update_code',
-    'test:shared',
-    'test:writable_dirs',
-    'test:assets',
-    'test:vendors',
-    'test:cache',
-    'test:assetic',
-    'test:migrate',
-    'test:symlink',
-    'test:cleanup',
-    'test:end',
-])
-    ->option('branch', 'b', 'Project branch', 'master')
-    ->desc('Deploy your test project');
+task('deploy-on-test', [
+    'deploy-on-test:prepare',
+    'deploy-on-test:update_code',
+    'deploy:create_cache_dir',
+    'deploy:shared',
+    'deploy:writable',
+    'deploy-on-test:assets',
+    'deploy:vendors',
+    'deploy-on-test:assetic:dump',
+    'deploy-on-test:cache:warmup',
+    'deploy-on-test:database:migrate',
+    'deploy-on-test:database:cache-clear',
+])->desc('Deploy your project on "test"');
+
+after('deploy-on-test', 'success');

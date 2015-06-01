@@ -69,3 +69,13 @@ function runCommand($command, $locally = false)
         return run($command);
     }
 }
+
+function dirExists($dir, $locally = false)
+{
+    return runCommand("if [ -d \"$dir\" ]; then echo true; fi", $locally)->toBool();
+}
+
+function fileExists($filename, $locally = false)
+{
+    return runCommand("if [ -f \"$filename\" ]; then echo true; fi", $locally)->toBool();
+}
