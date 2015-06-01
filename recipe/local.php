@@ -193,8 +193,8 @@ task('local:vendors', function () {
  */
 task('local:assetic:dump', function () {
 
-    runLocally('{{symfony_console}} assetic:dump --env={{env}} --no-debug');
-    runLocally('{{symfony_console}} assets:install --symlink --env={{env}} --no-debug');
+    runLocally('{{symfony_console}} assetic:dump --env={{env}}');
+    runLocally('{{symfony_console}} assets:install --symlink --env={{env}}');
 
 })->desc('Dump assets');
 
@@ -203,7 +203,7 @@ task('local:assetic:dump', function () {
  */
 task('local:cache:warmup', function () {
 
-    runLocally('{{symfony_console}} cache:warmup  --env={{env}} --no-debug');
+    runLocally('{{symfony_console}} cache:warmup  --env={{env}}');
 
 })->desc('Warm up cache');
 
@@ -212,7 +212,7 @@ task('local:cache:warmup', function () {
  */
 task('local:database:migrate', function () {
     if (get('auto_migrate')) {
-        runLocally('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction');
+        runLocally('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-interaction');
     }
 })->desc('Migrate database');
 
@@ -221,9 +221,9 @@ task('local:database:migrate', function () {
  */
 task('local:database:cache-clear', function () {
     if (get('doctrine_cache_clear')) {
-        runLocally('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug');
-        runLocally('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug');
-        runLocally('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug');
+        runLocally('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}}');
+        runLocally('{{symfony_console}} doctrine:cache:clear-query --env={{env}}');
+        runLocally('{{symfony_console}} doctrine:cache:clear-result --env={{env}}');
     }
 })->desc('Doctrine cache clear');
 

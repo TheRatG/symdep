@@ -21,7 +21,7 @@
     ],
     "compression": "GZ",
     "git-version": "package_version",
-    "main": "bin/symdep",
+    "main": "symdep",
     "output": "symdep.phar",
     "stub": true,
     "chmod": "0755"
