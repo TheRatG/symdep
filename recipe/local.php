@@ -80,7 +80,7 @@ task('local:prepare', function () {
  */
 task('local:update_code', function () {
     $branch = env('branch');
-    if (false == $branch) {
+    if (false === $branch) {
         $branch = runLocally('cd {{release_path}} && git rev-parse --abbrev-ref HEAD')->toString();
     }
     $res = runLocally("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)");
