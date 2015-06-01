@@ -1,41 +1,8 @@
 <?php
 /**
- * Symfony Configuration
- */
-
-// Symfony shared dirs
-use Deployer\Deployer;
-
-set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
-
-// Symfony shared files
-set('shared_files', ['app/config/parameters.yml']);
-
-// Symfony writable dirs
-set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
-
-// Assets
-set('assets', ['web/css', 'web/images', 'web/js']);
-
-// Auto migrate
-set('auto_migrate', false);
-
-//Doctrine cache clear
-set('doctrine_cache_clear', true);
-
-// Environment vars
-env('env_vars', 'SYMFONY_ENV=dev');
-env('env', 'dev');
-env('branch', false);
-
-// Adding support for the Symfony3 directory structure
-set('bin_dir', 'app');
-set('var_dir', 'app');
-
-/**
  * Default arguments and options.
  */
-if (!Deployer::get()->getConsole()->getUserDefinition()->hasArgument('stage')) {
+if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('stage')) {
     argument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.');
 }
 
@@ -73,6 +40,34 @@ task('local:prepare', function () {
 
         throw $e;
     }
+
+    // Symfony shared dirs
+    set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
+
+    // Symfony shared files
+    set('shared_files', ['app/config/parameters.yml']);
+
+    // Symfony writable dirs
+    set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
+
+    // Assets
+    set('assets', ['web/css', 'web/images', 'web/js']);
+
+    // Auto migrate
+    set('auto_migrate', false);
+
+    //Doctrine cache clear
+    set('doctrine_cache_clear', true);
+
+    // Environment vars
+    env('env_vars', 'SYMFONY_ENV=dev');
+    env('env', 'dev');
+    env('branch', false);
+
+    // Adding support for the Symfony3 directory structure
+    set('bin_dir', 'app');
+    set('var_dir', 'app');
+
 
     runLocally('if [ ! -d {{deploy_path}} ]; then echo ""; fi');
 

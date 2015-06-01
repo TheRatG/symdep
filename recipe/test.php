@@ -1,40 +1,10 @@
 <?php
-use Deployer\Deployer;
-
 require_once 'recipe/common.php';
-
-// Symfony shared dirs
-set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
-
-// Symfony shared files
-set('shared_files', ['app/config/parameters.yml']);
-
-// Symfony writable dirs
-set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
-
-// Assets
-set('assets', ['web/css', 'web/images', 'web/js']);
-
-// Auto migrate
-set('auto_migrate', true);
-
-//Doctrine cache clear
-set('doctrine_cache_clear', true);
-
-set('writable_use_sudo', false);
-
-// Environment vars
-env('env_vars', 'SYMFONY_ENV=test');
-env('env', 'test');
-
-// Adding support for the Symfony3 directory structure
-set('bin_dir', 'app');
-set('var_dir', 'app');
 
 /**
  * Default arguments and options.
  */
-if (!Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
+if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
     argument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch', 'master');
 }
 
@@ -66,6 +36,34 @@ task('deploy-on-test:prepare', function () {
     }
 
     runLocally('if [ ! -d {{deploy_path}} ]; then echo ""; fi');
+
+    // Symfony shared dirs
+    set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
+
+    // Symfony shared files
+    set('shared_files', ['app/config/parameters.yml']);
+
+    // Symfony writable dirs
+    set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
+
+    // Assets
+    set('assets', ['web/css', 'web/images', 'web/js']);
+
+    // Auto migrate
+    set('auto_migrate', true);
+
+    //Doctrine cache clear
+    set('doctrine_cache_clear', true);
+
+    set('writable_use_sudo', false);
+
+    // Environment vars
+    env('env_vars', 'SYMFONY_ENV=test');
+    env('env', 'test');
+
+    // Adding support for the Symfony3 directory structure
+    set('bin_dir', 'app');
+    set('var_dir', 'app');
 
     $branch = input()->getArgument('branch');
     env('branch', $branch);

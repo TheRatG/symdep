@@ -36,7 +36,7 @@ DOCHERE;
     return $dstFilename;
 }
 
-function generateFiles($srcDir, $dstDir, $locally)
+function generateFiles($srcDir, $dstDir, $locally = false)
 {
     $srcDir = rtrim($srcDir, '/');
     $dstDir = rtrim($dstDir, '/');

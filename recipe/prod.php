@@ -3,33 +3,7 @@ use Deployer\Deployer;
 
 require_once 'recipe/common.php';
 
-// Symfony shared dirs
-set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
 
-// Symfony shared files
-set('shared_files', ['app/config/parameters.yml']);
-
-// Symfony writable dirs
-set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
-
-// Assets
-set('assets', ['web/css', 'web/images', 'web/js']);
-
-// Auto migrate
-set('auto_migrate', true);
-
-//Doctrine cache clear
-set('doctrine_cache_clear', true);
-
-set('writable_use_sudo', false);
-
-// Environment vars
-env('env_vars', 'SYMFONY_ENV=prod');
-env('env', 'prod');
-
-// Adding support for the Symfony3 directory structure
-set('bin_dir', 'app');
-set('var_dir', 'app');
 
 /**
  * Default arguments and options.
@@ -42,6 +16,34 @@ if (!Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) 
  * Preparing server for deployment.
  */
 task('deploy-on-prod:prepare:env', function () {
+
+    // Symfony shared dirs
+    set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
+
+    // Symfony shared files
+    set('shared_files', ['app/config/parameters.yml']);
+
+    // Symfony writable dirs
+    set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
+
+    // Assets
+    set('assets', ['web/css', 'web/images', 'web/js']);
+
+    // Auto migrate
+    set('auto_migrate', true);
+
+    //Doctrine cache clear
+    set('doctrine_cache_clear', true);
+
+    set('writable_use_sudo', false);
+
+    // Environment vars
+    env('env_vars', 'SYMFONY_ENV=prod');
+    env('env', 'prod');
+
+    // Adding support for the Symfony3 directory structure
+    set('bin_dir', 'app');
+    set('var_dir', 'app');
 
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
 
