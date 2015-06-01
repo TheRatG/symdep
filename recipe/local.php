@@ -4,7 +4,7 @@
  */
 
 // Symfony shared dirs
-set('shared_dirs', []);
+set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
 
 // Symfony shared files
 set('shared_files', ['app/config/parameters.yml']);
@@ -26,11 +26,6 @@ env('branch', false);
 // Adding support for the Symfony3 directory structure
 set('bin_dir', 'app');
 set('var_dir', 'app');
-
-/**
- * Return release path.
- */
-env('release_path', env('deploy_path'));
 
 env('console_path', function () {
     return 'php {{symfony_console}}/' . trim(get('bin_dir'), '/') . '/console';
@@ -77,6 +72,8 @@ task('project-update:prepare', function () {
     }
 
     runLocally('if [ ! -d {{deploy_path}} ]; then echo ""; fi');
+
+    env('release_path', env('deploy_path'));
 })->desc('Preparing server for deploy');
 
 /**
@@ -164,27 +161,31 @@ task('project-update:writable', function () {
  * Normalize asset timestamps
  */
 task('project-update:assets', function () {
-    $assets = implode(' ', array_map(function ($asset) {
+    $assets = array_map(function ($asset) {
         return "{{release_path}}/$asset";
-    }, get('assets')));
+    }, get('assets'));
 
     $time = date('Ymdhi.s');
 
-    runLocally("find $assets -exec touch -t $time {} ';' &> /dev/null || true");
+    foreach ($assets as $dir) {
+        if (runLocally("if [ -d $(echo $dir) ]; then echo 1; fi")->toBool()) {
+            runLocally("find $dir -exec touch -t $time {} ';' &> /dev/null || true");
+        }
+    }
 })->desc('Normalize asset timestamps');
 
 /**
  * Installing vendors tasks.
  */
 task('project-update:vendors', function () {
-    if (commandExist('composer')) {
+    if (runLocally("if hash composer 2>/dev/null; then echo 'true'; fi")->toBool()) {
         $composer = 'composer';
     } else {
         runLocally("cd {{release_path}} && curl -sS https://getcomposer.org/installer | php");
         $composer = 'php composer.phar';
     }
 
-    runLocally("cd {{release_path}} && {{env_vars}} $composer install --no-dev --verbose --prefer-dist --optimize-autoloader --no-progress --no-interaction");
+    runLocally("cd {{release_path}} && {{env_vars}} $composer install --verbose --prefer-dist --optimize-autoloader --no-progress --no-interaction");
 
 })->desc('Installing vendors');
 
