@@ -2,14 +2,15 @@
     "name": "therat/symdep",
     "description": "Additional tool for symfony deploy",
     "require": {
+        "php": ">=5.4.0",
+
         "symfony/finder": "2.6.*",
         "symfony/console": "2.6.*",
         "symfony/yaml": "2.6.*",
         "symfony/process": "2.6.*",
-        "symfony/dependency-injection": "2.6.*",
-        "symfony/filesystem": "2.6.*",
-        "symfony/framework-bundle": "2.6.*",
-        "symfony/process": "2.6.*"
+
+        "deployer/deployer": "~3.0",
+        "phpseclib/phpseclib": "dev-master"
     },
     "suggest": {
         "ext-ssh2": "Need for deployer"
