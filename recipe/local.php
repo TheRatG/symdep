@@ -27,10 +27,6 @@ env('branch', false);
 set('bin_dir', 'app');
 set('var_dir', 'app');
 
-env('console_path', function () {
-    return 'php {{symfony_console}}/' . trim(get('bin_dir'), '/') . '/console';
-});
-
 /**
  * Default arguments and options.
  */
@@ -74,6 +70,7 @@ task('project-update:prepare', function () {
     runLocally('if [ ! -d {{deploy_path}} ]; then echo ""; fi');
 
     env('release_path', env('deploy_path'));
+    env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
 })->desc('Preparing server for deploy');
 
 /**

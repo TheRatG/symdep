@@ -12,13 +12,13 @@ function generateFile($srcFilename, $dstFilename, $mode = null, $locally = false
     $mode = !is_null($mode) ? (string)$mode : null;
 
     $dstDir = dirname($dstFilename);
-    if (!runLocally("if [ -f $(echo $srcFilename) ]; then echo true; fi")->toBool()) {
+    if (!runCommand("if [ -f $(echo $srcFilename) ]; then echo true; fi", $locally)->toBool()) {
         throw new \RuntimeException("Src file '$srcFilename' does not exists");
     }
     $command = "if [ -d \"$dstDir\" ]; then mkdir -p \"$dstDir\"; fi";
     runCommand($command, $locally);
 
-    $content = runLocally("cat \"$srcFilename\"");
+    $content = runCommand("cat \"$srcFilename\"", $locally);
     $content = env()->parse($content);
     $command = <<<DOCHERE
 cat > "$dstFilename" <<'_EOF'
@@ -32,8 +32,35 @@ DOCHERE;
         $command = "chmod --reference $srcFilename $dstFilename";
     }
     runCommand($command, $locally);
+
+    return $dstFilename;
 }
 
+function generateFiles($srcDir, $dstDir, $locally)
+{
+    $srcDir = rtrim($srcDir, '/');
+    $dstDir = rtrim($dstDir, '/');
+
+    $command = "find $srcDir -type f";
+    $templateFiles = runCommand($command, $locally)->toArray();
+
+    $result = [];
+    foreach ($templateFiles as $src) {
+        $name = str_replace($srcDir, '', $src);
+        $dst = sprintf('%s%s', $dstDir, $name);
+        $res = generateFile($src, $dst, null, $locally);
+        if ($res) {
+            $result[] = $dst;
+        }
+    }
+    return $result;
+}
+
+/**
+ * @param $command
+ * @param bool $locally
+ * @return \Deployer\Type\Result|void
+ */
 function runCommand($command, $locally = false)
 {
     if ($locally) {

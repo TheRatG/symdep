@@ -28,8 +28,7 @@
         "psr-4": {"TheRat\\SymDep\\": "src/"}
     },
     "bin": [
-        "symdep",
-        "deployer.phar"
+        "bin/symdep"
     ],
     "config": {
         "bin-dir": "bin"
