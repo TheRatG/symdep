@@ -1,9 +1,12 @@
 <?php
-/**
- * Default arguments and options.
- */
 if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('stage')) {
     argument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.');
+}
+if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
+    argument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch', 'master');
+}
+if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasOption('env')) {
+    option('env', null, \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'Symfony env');
 }
 
 /**
@@ -60,14 +63,14 @@ task('local:prepare', function () {
     set('doctrine_cache_clear', true);
 
     // Environment vars
-    env('env_vars', 'SYMFONY_ENV=dev');
-    env('env', 'dev');
+    $env = input()->getOption('env') ? input()->getOption('env') : 'dev';
+    env('env_vars', "SYMFONY_ENV=$env");
+    env('env', $env);
     env('branch', false);
 
     // Adding support for the Symfony3 directory structure
     set('bin_dir', 'app');
     set('var_dir', 'app');
-
 
     runLocally('if [ ! -d {{deploy_path}} ]; then echo ""; fi');
 
