@@ -3,12 +3,10 @@
     "description": "Additional tool for symfony deploy",
     "require": {
         "php": ">=5.4.0",
-
         "symfony/finder": "2.6.*",
         "symfony/console": "2.6.*",
         "symfony/yaml": "2.6.*",
         "symfony/process": "2.6.*",
-
         "deployer/deployer": "~3.0",
         "phpseclib/phpseclib": "dev-master#62fdd160e3ae2bb265a7e1f7c9426d552f55df47"
     },
@@ -28,10 +26,12 @@
         }
     },
     "autoload": {
-        "psr-4": {"TheRat\\SymDep\\": "src/"}
+        "psr-4": {"TheRat\\SymDep\\": "src/"},
+        "files": ["src/functions.php"]
     },
+    "include-path": ["recipe/"],
     "bin": [
-        "symdep"
+        "bin/symdep"
     ],
     "config": {
         "bin-dir": "bin"

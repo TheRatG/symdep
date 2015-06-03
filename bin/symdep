@@ -7,12 +7,11 @@
  */
 
 $loaded = false;
-$deployerDir = null;
-foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
+$deployerDir = dirname(__DIR__) . '/vendor/deployer/deployer';
+foreach ([__DIR__ . '/../../../autoload.php', dirname(__DIR__) . '/vendor/autoload.php'] as $file) {
     if (file_exists($file)) {
         require $file;
         $loaded = true;
-        $deployerDir = dirname(realpath($file)) . '/deployer/deployer';
         break;
     }
 }
@@ -25,20 +24,12 @@ if (!$loaded) {
     );
     die(1);
 }
-if (is_null($deployerDir) || !file_exists($deployerDir)) {
-    fwrite(STDERR,
-        'Vendor "deployer/deployer" not found'
-    );
-    die(1);
-}
 
 // Recipe include path
-set_include_path(__DIR__ . PATH_SEPARATOR . get_include_path());
 set_include_path($deployerDir . PATH_SEPARATOR . get_include_path());
 
 // Include function declarations
 require_once $deployerDir . '/src/functions.php';
-require_once __DIR__ . '/src/functions.php';
 
 // Init Deployer
 $console = new \Deployer\Console\Application('Deployer', 'master');

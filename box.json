@@ -2,7 +2,11 @@
     "directories": ["src/"],
     "finder": [
         {
-            "name": "*.php",
+            "name": [
+                "*.php",
+                "*.json",
+                "*.exe"
+            ],
             "exclude": [
                 ".gitignore",
                 ".md",
@@ -21,7 +25,7 @@
     ],
     "compression": "GZ",
     "git-version": "package_version",
-    "main": "symdep",
+    "main": "bin/symdep",
     "output": "symdep.phar",
     "stub": true,
     "chmod": "0755"

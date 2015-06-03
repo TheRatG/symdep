@@ -72,8 +72,6 @@ task('local:prepare', function () {
     set('bin_dir', 'app');
     set('var_dir', 'app');
 
-    runLocally('if [ ! -d {{deploy_path}} ]; then echo ""; fi');
-
     env('release_path', env('deploy_path'));
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
 })->desc('Preparing server for deploy');
