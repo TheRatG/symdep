@@ -12,8 +12,8 @@ function generateFile($srcFilename, $dstFilename, $mode = null, $locally = false
     $mode = !is_null($mode) ? (string)$mode : null;
 
     $dstDir = dirname($dstFilename);
-    if (!runCommand("if [ -f $(echo $srcFilename) ]; then echo true; fi", $locally)->toBool()) {
-        throw new \RuntimeException("Src file '$srcFilename' does not exists");
+    if (!fileExists($srcFilename, $locally)) {
+        throw new \RuntimeException(env()->parse("Src file '$srcFilename' does not exists"));
     }
     $command = "if [ -d \"$dstDir\" ]; then mkdir -p \"$dstDir\"; fi";
     runCommand($command, $locally);

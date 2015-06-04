@@ -35,10 +35,10 @@ task('symdep:shared', function () {
 
     foreach (get('shared_files') as $file) {
         // Remove from source
-        \TheRat\SymDep\runCommand("if [ -d $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi", get('locally'));;
+        \TheRat\SymDep\runCommand("if [ -f $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi", get('locally'));;
 
         // Create dir of shared file
-        runLocally("mkdir -p $sharedPath/" . dirname($file));
+        \TheRat\SymDep\runCommand("mkdir -p $sharedPath/" . dirname($file), get('locally'));
 
         // Touch shared
         \TheRat\SymDep\runCommand("touch $sharedPath/$file", get('locally'));;
@@ -72,7 +72,7 @@ task('symdep:writable', function () {
     $dirs = join(' ', get('writable_dirs'));
 
     if (!empty($dirs)) {
-        \TheRat\SymDep\runCommand("chmod 777 $dirs", get('locally'));;
+        \TheRat\SymDep\runCommand("cd {{release_path}} && chmod 777 $dirs", get('locally'));;
     }
 
 })->desc('Make writable dirs');
