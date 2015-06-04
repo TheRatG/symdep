@@ -4,7 +4,7 @@
  * Return list of releases on server.
  */
 env('releases_list', function () {
-    $list = run('ls {{deploy_path}}/releases')->toArray();
+    $list = \TheRat\SymDep\runCommand('ls {{deploy_path}}/releases', get('locally'))->toArray();
 
     rsort($list);
 
@@ -15,7 +15,7 @@ env('releases_list', function () {
  * Return current release path.
  */
 env('current', function () {
-    return run("readlink {{deploy_path}}/current")->toString();
+    return \TheRat\SymDep\runCommand("readlink {{deploy_path}}/current", get('locally'))->toString();
 });
 
 /**
@@ -157,7 +157,7 @@ task('deploy:create_cache_dir', function () {
     \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}', get('locally'));
 
     // Set rights
-    run("chmod -R g+w {{cache_dir}}");
+    \TheRat\SymDep\runCommand("chmod -R g+w {{cache_dir}}", get('locally'));
 })->desc('Create cache dir');
 
 
@@ -173,11 +173,10 @@ task('deploy-on-prod:assets', function () {
 
     foreach ($assets as $dir) {
         if (\TheRat\SymDep\dirExists($dir)) {
-            run("find $dir -exec touch -t $time {} ';' &> /dev/null || true");
+            \TheRat\SymDep\runCommand("find $dir -exec touch -t $time {} ';' &> /dev/null || true", get('locally'));
         }
     }
 })->desc('Normalize asset timestamps');
-
 
 /**
  * Dump all assets to the filesystem

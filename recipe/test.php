@@ -85,10 +85,13 @@ task('deploy-on-test:update_code', function () {
     $branch = env('branch');
 
     if (\TheRat\SymDep\dirExists($releasePath)) {
-        run("cd $releasePath && git pull origin $branch --quiet");
+        \TheRat\SymDep\runCommand("cd $releasePath && git pull origin $branch --quiet", get('locally'));
     } else {
-        run("mkdir -p $releasePath");
-        run("cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath");
+        \TheRat\SymDep\runCommand("mkdir -p $releasePath", get('locally'));
+        \TheRat\SymDep\runCommand(
+            "cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath",
+            get('locally')
+        );
     }
 })->desc('Updating code');
 
@@ -104,7 +107,7 @@ task('deploy-on-test:assets', function () {
 
     foreach ($assets as $dir) {
         if (\TheRat\SymDep\dirExists($dir)) {
-            run("find $dir -exec touch -t $time {} ';' &> /dev/null || true");
+            \TheRat\SymDep\runCommand("find $dir -exec touch -t $time {} ';' &> /dev/null || true", get('locally'));
         }
     }
 })->desc('Normalize asset timestamps');
