@@ -16,7 +16,7 @@
                 "tests",
                 "yaml"
             ],
-            "in": "vendor"
+            "in": ""
         }
     ],
     "compactors": [

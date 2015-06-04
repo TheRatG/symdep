@@ -1,6 +1,4 @@
 <?php
-require 'vendor/therat/symdep/recipe/symdep.php';
-
 set('repository', '<project_repository_url>');
 
 // Just stub, use `symdep project-update dev`
@@ -14,12 +12,11 @@ server('test', '<test_host>', 22)
     ->stage('test')
     ->env('deploy_path', '</your/project/path>');
 
-server('prod', , '<test_host>', 22)
+server('prod', '<test_host>', 22)
     ->user('crm')
     ->forwardAgent()
     ->stage('prod')
     ->env('deploy_path', '</your/project/path>');
-
 
 // ----- local ------
 task('local:prepare:env', function () {
@@ -40,9 +37,7 @@ task('local:generate-files', function () {
     );
 });
 task('local:configure-after', function () {
-    runLocally('{{symfony_console}}  r12n:provider:dump-config --path={{release_path}}/bin/makedump');
-    runLocally('{{symfony_console}} robo-acl:import-resources');
-    runLocally('{{symfony_console}} translation:db:update');
+    //runLocally('{{symfony_console}} my:command');
 });
 
 after('local:prepare', 'local:prepare:env');

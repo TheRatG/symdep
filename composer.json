@@ -26,10 +26,8 @@
         }
     },
     "autoload": {
-        "psr-4": {"TheRat\\SymDep\\": "src/"},
-        "files": ["src/functions.php"]
+        "psr-4": {"TheRat\\SymDep\\": "src/"}
     },
-    "include-path": ["recipe/"],
     "bin": [
         "bin/symdep"
     ],

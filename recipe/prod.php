@@ -3,8 +3,6 @@ use Deployer\Deployer;
 
 require_once 'recipe/common.php';
 
-
-
 /**
  * Default arguments and options.
  */
