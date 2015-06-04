@@ -4,7 +4,7 @@
  * Return list of releases on server.
  */
 env('releases_list', function () {
-    $list = \TheRat\SymDep\runCommand('ls {{deploy_path}}/releases', get('locally'))->toArray();
+    $list = \TheRat\SymDep\runCommand('ls {{deploy_path}}/releases')->toArray();
 
     rsort($list);
 
@@ -15,7 +15,7 @@ env('releases_list', function () {
  * Return current release path.
  */
 env('current', function () {
-    return \TheRat\SymDep\runCommand("readlink {{deploy_path}}/current", get('locally'))->toString();
+    return \TheRat\SymDep\runCommand("readlink {{deploy_path}}/current")->toString();
 });
 
 /**
@@ -35,10 +35,10 @@ task('rollback', function () {
         $releaseDir = "{{deploy_path}}/releases/{$releases[1]}";
 
         // Symlink to old release.
-        \TheRat\SymDep\runCommand("cd {{deploy_path}} && ln -nfs $releaseDir current", get('locally'));
+        \TheRat\SymDep\runCommand("cd {{deploy_path}} && ln -nfs $releaseDir current");
 
         // Remove release
-        \TheRat\SymDep\runCommand("rm -rf {{deploy_path}}/releases/{$releases[0]}", get('locally'));
+        \TheRat\SymDep\runCommand("rm -rf {{deploy_path}}/releases/{$releases[0]}");
 
         if (isVerbose()) {
             writeln("Rollback to `{$releases[1]}` release was successful.");
@@ -61,8 +61,8 @@ task('success', function () {
  * Preparing server for deployment.
  */
 task('deploy-on-prod:prepare', function () {
-    set('keep_releases', 3);
 
+    //run command remote or locally
     set('locally', input()->getOption('locally'));
 
     // Symfony shared dirs
@@ -102,7 +102,7 @@ task('deploy-on-prod:prepare', function () {
     // Check if shell is POSIX-compliant
     try {
         cd(''); // To run command as raw.
-        \TheRat\SymDep\runCommand('echo $0', get('locally'));
+        \TheRat\SymDep\runCommand('echo $0');
     } catch (\RuntimeException $e) {
         $formatter = \Deployer\Deployer::get()->getHelper('formatter');
 
@@ -115,13 +115,13 @@ task('deploy-on-prod:prepare', function () {
         throw $e;
     }
 
-    \TheRat\SymDep\runCommand('if [ ! -d {{deploy_path}} ]; then echo ""; fi', get('locally'));
+    \TheRat\SymDep\runCommand('if [ ! -d {{deploy_path}} ]; then echo ""; fi');
 
     // Create releases dir.
-    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ ! -d releases ]; then mkdir releases; fi", get('locally'));
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ ! -d releases ]; then mkdir releases; fi");
 
     // Create shared dir.
-    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ ! -d shared ]; then mkdir shared; fi", get('locally'));
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ ! -d shared ]; then mkdir shared; fi");
 })->desc('Preparing server for deploy');
 
 task('deploy-on-prod:update_code', function () {
@@ -135,7 +135,7 @@ task('deploy-on-prod:update_code', function () {
             get('locally')
         );
     } else {
-        \TheRat\SymDep\runCommand("mkdir -p $releasePath", get('locally'));
+        \TheRat\SymDep\runCommand("mkdir -p $releasePath");
         \TheRat\SymDep\runCommand(
             "cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath",
             get('locally')
@@ -151,13 +151,13 @@ task('deploy:create_cache_dir', function () {
     env('cache_dir', '{{release_path}}/' . trim(get('var_dir'), '/') . '/cache');
 
     // Remove cache dir if it exist
-    \TheRat\SymDep\runCommand('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi', get('locally'));
+    \TheRat\SymDep\runCommand('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi');
 
     // Create cache dir
-    \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}', get('locally'));
+    \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}');
 
     // Set rights
-    \TheRat\SymDep\runCommand("chmod -R g+w {{cache_dir}}", get('locally'));
+    \TheRat\SymDep\runCommand("chmod -R g+w {{cache_dir}}");
 })->desc('Create cache dir');
 
 
@@ -173,7 +173,7 @@ task('deploy-on-prod:assets', function () {
 
     foreach ($assets as $dir) {
         if (\TheRat\SymDep\dirExists($dir)) {
-            \TheRat\SymDep\runCommand("find $dir -exec touch -t $time {} ';' &> /dev/null || true", get('locally'));
+            \TheRat\SymDep\runCommand("find $dir -exec touch -t $time {} ';' &> /dev/null || true");
         }
     }
 })->desc('Normalize asset timestamps');
@@ -183,7 +183,7 @@ task('deploy-on-prod:assets', function () {
  */
 task('deploy-on-prod:assetic:dump', function () {
 
-    \TheRat\SymDep\runCommand('{{symfony_console}} assetic:dump --env={{env}} --no-debug', get('locally'));
+    \TheRat\SymDep\runCommand('{{symfony_console}} assetic:dump --env={{env}} --no-debug');
 
 })->desc('Dump assets');
 
@@ -193,8 +193,8 @@ task('deploy-on-prod:assetic:dump', function () {
  */
 task('deploy-on-prod:cache:warmup', function () {
 
-    \TheRat\SymDep\runCommand('{{symfony_console}} cache:warmup  --env={{env}} --no-debug', get('locally'));
-    \TheRat\SymDep\runCommand('{{symfony_console}} assets:install --env={{env}} --no-debug', get('locally'));
+    \TheRat\SymDep\runCommand('{{symfony_console}} cache:warmup  --env={{env}} --no-debug');
+    \TheRat\SymDep\runCommand('{{symfony_console}} assets:install --env={{env}} --no-debug');
 
 })->desc('Warm up cache');
 
@@ -203,7 +203,7 @@ task('deploy-on-prod:cache:warmup', function () {
  */
 task('deploy-on-prod:database:migrate', function () {
     if (get('auto_migrate')) {
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction', get('locally'));
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction');
     }
 })->desc('Migrate database');
 
@@ -211,8 +211,8 @@ task('deploy-on-prod:database:migrate', function () {
  * Create symlink to last release.
  */
 task('deploy-on-prod:symlink', function () {
-    \TheRat\SymDep\runCommand("cd {{deploy_path}} && ln -sfn {{release_path}} current", get('locally')); // Atomic override symlink.
-    \TheRat\SymDep\runCommand("cd {{deploy_path}} && rm release", get('locally')); // Remove release link.
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && ln -sfn {{release_path}} current"); // Atomic override symlink.
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && rm release"); // Remove release link.
 })->desc('Creating symlink to release');
 
 /**
@@ -220,9 +220,9 @@ task('deploy-on-prod:symlink', function () {
  */
 task('deploy-on-prod:database:cache-clear', function () {
     if (get('doctrine_cache_clear')) {
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug', get('locally'));
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug', get('locally'));
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug', get('locally'));
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug');
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug');
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug');
     }
 })->desc('Doctrine cache clear');
 
@@ -240,11 +240,11 @@ task('deploy-on-prod:cleanup', function () {
     }
 
     foreach ($releases as $release) {
-        \TheRat\SymDep\runCommand("rm -rf {{deploy_path}}/releases/$release", get('locally'));
+        \TheRat\SymDep\runCommand("rm -rf {{deploy_path}}/releases/$release");
     }
 
-    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ -e release ]; then rm release; fi", get('locally'));
-    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ -h release ]; then rm release; fi", get('locally'));
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ -e release ]; then rm release; fi");
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ -h release ]; then rm release; fi");
 
 })->desc('Cleaning up old releases');
 

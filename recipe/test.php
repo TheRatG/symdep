@@ -20,6 +20,7 @@ task('success', function () {
  */
 task('deploy-on-test:prepare', function () {
 
+    //run command remote or locally
     set('locally', input()->getOption('locally'));
 
     // Symfony shared dirs
@@ -63,7 +64,7 @@ task('deploy-on-test:prepare', function () {
     // Check if shell is POSIX-compliant
     try {
         cd(''); // To run command as raw.
-        \TheRat\SymDep\runCommand('echo $0', get('locally'));
+        \TheRat\SymDep\runCommand('echo $0');
     } catch (\RuntimeException $e) {
         $formatter = \Deployer\Deployer::get()->getHelper('formatter');
 
@@ -76,7 +77,7 @@ task('deploy-on-test:prepare', function () {
         throw $e;
     }
 
-    \TheRat\SymDep\runCommand('if [ ! -d {{deploy_path}} ]; then echo ""; fi', get('locally'));
+    \TheRat\SymDep\runCommand('if [ ! -d {{deploy_path}} ]; then echo ""; fi');
 })->desc('Preparing server for deploy');
 
 task('deploy-on-test:update_code', function () {
@@ -85,9 +86,9 @@ task('deploy-on-test:update_code', function () {
     $branch = env('branch');
 
     if (\TheRat\SymDep\dirExists($releasePath)) {
-        \TheRat\SymDep\runCommand("cd $releasePath && git pull origin $branch --quiet", get('locally'));
+        \TheRat\SymDep\runCommand("cd $releasePath && git pull origin $branch --quiet");
     } else {
-        \TheRat\SymDep\runCommand("mkdir -p $releasePath", get('locally'));
+        \TheRat\SymDep\runCommand("mkdir -p $releasePath");
         \TheRat\SymDep\runCommand(
             "cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath",
             get('locally')
@@ -107,7 +108,7 @@ task('deploy-on-test:assets', function () {
 
     foreach ($assets as $dir) {
         if (\TheRat\SymDep\dirExists($dir)) {
-            \TheRat\SymDep\runCommand("find $dir -exec touch -t $time {} ';' &> /dev/null || true", get('locally'));
+            \TheRat\SymDep\runCommand("find $dir -exec touch -t $time {} ';' &> /dev/null || true");
         }
     }
 })->desc('Normalize asset timestamps');
@@ -118,7 +119,7 @@ task('deploy-on-test:assets', function () {
  */
 task('deploy-on-test:assetic:dump', function () {
 
-    \TheRat\SymDep\runCommand('{{symfony_console}} assetic:dump --env={{env}} --no-debug', get('locally'));
+    \TheRat\SymDep\runCommand('{{symfony_console}} assetic:dump --env={{env}} --no-debug');
 
 })->desc('Dump assets');
 
@@ -128,8 +129,8 @@ task('deploy-on-test:assetic:dump', function () {
  */
 task('deploy-on-test:cache:warmup', function () {
 
-    \TheRat\SymDep\runCommand('{{symfony_console}} cache:warmup  --env={{env}} --no-debug', get('locally'));
-    \TheRat\SymDep\runCommand('{{symfony_console}} assets:install --env={{env}} --no-debug', get('locally'));
+    \TheRat\SymDep\runCommand('{{symfony_console}} cache:warmup  --env={{env}} --no-debug');
+    \TheRat\SymDep\runCommand('{{symfony_console}} assets:install --env={{env}} --no-debug');
 
 })->desc('Warm up cache');
 
@@ -138,7 +139,7 @@ task('deploy-on-test:cache:warmup', function () {
  */
 task('deploy-on-test:database:migrate', function () {
     if (get('auto_migrate')) {
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction', get('locally'));
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction');
     }
 })->desc('Migrate database');
 
@@ -147,9 +148,9 @@ task('deploy-on-test:database:migrate', function () {
  */
 task('deploy-on-test:database:cache-clear', function () {
     if (get('doctrine_cache_clear')) {
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug', get('locally'));
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug', get('locally'));
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug', get('locally'));
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug');
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug');
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug');
     }
 })->desc('Doctrine cache clear');
 

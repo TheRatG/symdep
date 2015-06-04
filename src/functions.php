@@ -5,55 +5,54 @@ namespace TheRat\SymDep;
  * @param $srcFilename
  * @param $dstFilename
  * @param string $mode Example +x, 0644
- * @param bool $locally
  */
-function generateFile($srcFilename, $dstFilename, $mode = null, $locally = false)
+function generateFile($srcFilename, $dstFilename, $mode = null)
 {
     $mode = !is_null($mode) ? (string)$mode : null;
 
     $dstDir = dirname($dstFilename);
-    if (!fileExists($srcFilename, $locally)) {
+    if (!fileExists($srcFilename)) {
         throw new \RuntimeException(env()->parse("Src file '$srcFilename' does not exists"));
     }
     $command = "if [ -d \"$dstDir\" ]; then mkdir -p \"$dstDir\"; fi";
-    runCommand($command, $locally);
+    runCommand($command);
 
     $dstDir = dirname($dstFilename);
-    if (!dirExists($dstDir, $locally)) {
-        runCommand("mkdir -p \"$dstDir\"", $locally);
+    if (!dirExists($dstDir)) {
+        runCommand("mkdir -p \"$dstDir\"");
     }
 
-    $content = runCommand("cat \"$srcFilename\"", $locally);
+    $content = runCommand("cat \"$srcFilename\"");
     $content = env()->parse($content);
     $command = <<<DOCHERE
 cat > "$dstFilename" <<'_EOF'
 $content
 _EOF
 DOCHERE;
-    runCommand($command, $locally);
+    runCommand($command);
 
     $command = "chmod $mode $dstFilename";
     if (is_null($mode)) {
         $command = "chmod --reference $srcFilename $dstFilename";
     }
-    runCommand($command, $locally);
+    runCommand($command);
 
     return $dstFilename;
 }
 
-function generateFiles($srcDir, $dstDir, $locally = false)
+function generateFiles($srcDir, $dstDir)
 {
     $srcDir = rtrim($srcDir, '/');
     $dstDir = rtrim($dstDir, '/');
 
     $command = "find $srcDir -type f";
-    $templateFiles = runCommand($command, $locally)->toArray();
+    $templateFiles = runCommand($command)->toArray();
 
     $result = [];
     foreach ($templateFiles as $src) {
         $name = str_replace($srcDir, '', $src);
         $dst = sprintf('%s%s', $dstDir, $name);
-        $res = generateFile($src, $dst, null, $locally);
+        $res = generateFile($src, $dst, null);
         if ($res) {
             $result[] = $dst;
         }
@@ -63,11 +62,11 @@ function generateFiles($srcDir, $dstDir, $locally = false)
 
 /**
  * @param $command
- * @param bool $locally
  * @return \Deployer\Type\Result|void
  */
-function runCommand($command, $locally = false)
+function runCommand($command)
 {
+    $locally = has('locally') ? get('locally') : false;
     if ($locally) {
         return runLocally($command);
     } else {
@@ -75,12 +74,12 @@ function runCommand($command, $locally = false)
     }
 }
 
-function dirExists($dir, $locally = false)
+function dirExists($dir)
 {
-    return runCommand("if [ -d \"$dir\" ]; then echo true; fi", $locally)->toBool();
+    return runCommand("if [ -d \"$dir\" ]; then echo true; fi")->toBool();
 }
 
-function fileExists($filename, $locally = false)
+function fileExists($filename)
 {
-    return runCommand("if [ -f \"$filename\" ]; then echo true; fi", $locally)->toBool();
+    return runCommand("if [ -f \"$filename\" ]; then echo true; fi")->toBool();
 }

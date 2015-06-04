@@ -12,6 +12,9 @@ if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasOption('lo
     option('locally', 'l', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Run command locally');
 }
 
+//number of releases
+set('keep_releases', 5);
+
 /**
  * Create symlinks for shared directories and files.
  */
