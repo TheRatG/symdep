@@ -3,7 +3,7 @@
  * Default arguments and options.
  */
 if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('stage')) {
-    argument('stage', \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Run tasks only on this server or group of servers.');
+    argument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.');
 }
 if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
     argument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch', 'master');
@@ -88,7 +88,7 @@ task('symdep:vendors', function () {
         $composer = 'php composer.phar';
     }
 
-    $require = env('env') == 'dev' ? '--no-dev' : '--dev';
+    $require = env('env') !== 'dev' ? '--no-dev' : '--dev';
     $options = "--verbose --prefer-dist --optimize-autoloader --no-progress --no-interaction $require";
 
     \TheRat\SymDep\runCommand(

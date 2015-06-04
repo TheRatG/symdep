@@ -18,16 +18,10 @@ server('prod', '<test_host>', 22)
     ->stage('prod')
     ->env('deploy_path', '</your/project/path>');
 
-// ----- local ------
-task('local:prepare:env', function () {
-    // Symfony shared files
-    set('shared_files', ['app/config/parameters.yml', 'app/config/secret.yml']);
-});
-
-task('local:generate-files', function () {
+task('tasks:generate-files', function () {
     $srcDir = env()->parse('{{release_path}}/deploy/templates');
     $dstDir = env()->parse('{{release_path}}');
-    \TheRat\SymDep\generateFiles($srcDir, $dstDir, true);
+    \TheRat\SymDep\generateFiles($srcDir, $dstDir, get('locally'));
 
     \TheRat\SymDep\generateFile(
         '{{release_path}}/deploy/templates_env/etc/crontab_{{env}}.conf',
@@ -36,10 +30,23 @@ task('local:generate-files', function () {
         true
     );
 });
-task('local:configure-after', function () {
-    //runLocally('{{symfony_console}} my:command');
+task('tasks:configure-after', function () {
+    //\TheRat\SymDep\runCommand('{{symfony_console}} <your_scripts>', get('locally'));
 });
 
-after('local:prepare', 'local:prepare:env');
-before('local:vendors', 'local:generate-files');
-after('local:cache:warmup', 'local:configure-after');
+//--- local ---
+task('tasks:env', function () {
+    // Symfony shared files
+    set('shared_files', ['app/config/parameters.yml', 'app/config/secret.yml']);
+});
+after('local:prepare', 'tasks:env');
+before('symdep:vendors', 'tasks:generate-files');
+after('local:cache:warmup', 'tasks:configure-after');
+
+after('deploy-on-test:prepare', 'tasks:env');
+after('deploy-on-prod:prepare', 'tasks:env');
+
+before('symdep:vendors', 'tasks:generate-files');
+
+after('deploy-on-test:cache:warmup', 'tasks:configure-after');
+after('deploy-on-prod:cache:warmup', 'tasks:configure-after');
