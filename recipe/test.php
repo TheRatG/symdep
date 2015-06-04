@@ -42,10 +42,6 @@ task('deploy-on-test:prepare', function () {
 
     set('writable_use_sudo', false);
 
-    // Environment vars
-    env('env_vars', 'SYMFONY_ENV=test');
-    env('env', 'test');
-
     // Adding support for the Symfony3 directory structure
     set('bin_dir', 'app');
     set('var_dir', 'app');
@@ -54,6 +50,15 @@ task('deploy-on-test:prepare', function () {
     env('branch', $branch);
     env('release_path', env()->parse('{{deploy_path}}') . "/releases/$branch");
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
+
+    // Environment vars
+    env('env_real', 'test');
+    $env = 'test';
+    if ('master' == $branch) {
+        $env = 'prod';
+    }
+    env('env_vars', "SYMFONY_ENV=$env");
+    env('env', $env);
 
     // Check if shell is POSIX-compliant
     try {
