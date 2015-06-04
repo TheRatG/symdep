@@ -18,6 +18,11 @@ function generateFile($srcFilename, $dstFilename, $mode = null, $locally = false
     $command = "if [ -d \"$dstDir\" ]; then mkdir -p \"$dstDir\"; fi";
     runCommand($command, $locally);
 
+    $dstDir = dirname($dstFilename);
+    if (!dirExists($dstDir, $locally)) {
+        runCommand("mkdir -p \"$dstDir\"", $locally);
+    }
+
     $content = runCommand("cat \"$srcFilename\"", $locally);
     $content = env()->parse($content);
     $command = <<<DOCHERE
