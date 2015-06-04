@@ -194,8 +194,8 @@ task('local:vendors', function () {
  */
 task('local:assetic:dump', function () {
 
-    runLocally('{{symfony_console}} assetic:dump --env={{env}}');
-    runLocally('{{symfony_console}} assets:install --symlink --env={{env}}');
+    runLocally('{{symfony_console}} assetic:dump --env={{env}} --quiet');
+    runLocally('{{symfony_console}} assets:install --symlink --env={{env}} --quiet');
 
 })->desc('Dump assets');
 
