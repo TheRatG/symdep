@@ -1,20 +1,68 @@
 <?php
-require_once 'recipe/common.php';
 
 /**
- * Default arguments and options.
+ * Return list of releases on server.
  */
-if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
-    argument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch', 'master');
-}
-if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasOption('locally')) {
-    option('locally', 'l', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Run command locally');
-}
+env('releases_list', function () {
+    $list = run('ls {{deploy_path}}/releases')->toArray();
+
+    rsort($list);
+
+    return $list;
+});
+
+/**
+ * Return current release path.
+ */
+env('current', function () {
+    return run("readlink {{deploy_path}}/current")->toString();
+});
+
+/**
+ * Show current release number.
+ */
+task('current', function () {
+    writeln('Current release: ' . basename(env('current')));
+})->desc('Show current release.');
+
+/**
+ * Rollback to previous release.
+ */
+task('rollback', function () {
+    $releases = env('releases_list');
+
+    if (isset($releases[1])) {
+        $releaseDir = "{{deploy_path}}/releases/{$releases[1]}";
+
+        // Symlink to old release.
+        \TheRat\SymDep\runCommand("cd {{deploy_path}} && ln -nfs $releaseDir current", get('locally'));
+
+        // Remove release
+        \TheRat\SymDep\runCommand("rm -rf {{deploy_path}}/releases/{$releases[0]}", get('locally'));
+
+        if (isVerbose()) {
+            writeln("Rollback to `{$releases[1]}` release was successful.");
+        }
+    } else {
+        writeln("<comment>No more releases you can revert to.</comment>");
+    }
+})->desc('Rollback to previous release');
+
+/**
+ * Success message
+ */
+task('success', function () {
+    writeln("<info>Successfully deployed!</info>");
+})
+    ->once()
+    ->setPrivate();
 
 /**
  * Preparing server for deployment.
  */
-task('deploy-on-prod:prepare:env', function () {
+task('deploy-on-prod:prepare', function () {
+    set('keep_releases', 3);
+
     set('locally', input()->getOption('locally'));
 
     // Symfony shared dirs
@@ -47,9 +95,34 @@ task('deploy-on-prod:prepare:env', function () {
 
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
 
-})->desc('Preparing server for deploy');
+    if (!get('locally')) {
+        \Deployer\Task\Context::get()->getServer()->connect();
+    }
 
-after('deploy:prepare', 'deploy-on-prod:prepare:env');
+    // Check if shell is POSIX-compliant
+    try {
+        cd(''); // To run command as raw.
+        \TheRat\SymDep\runCommand('echo $0', get('locally'));
+    } catch (\RuntimeException $e) {
+        $formatter = \Deployer\Deployer::get()->getHelper('formatter');
+
+        $errorMessage = [
+            "Shell on your server is not POSIX-compliant. Please change to sh, bash or similar.",
+            "Usually, you can change your shell to bash by running: chsh -s /bin/bash",
+        ];
+        write($formatter->formatBlock($errorMessage, 'error', true));
+
+        throw $e;
+    }
+
+    \TheRat\SymDep\runCommand('if [ ! -d {{deploy_path}} ]; then echo ""; fi', get('locally'));
+
+    // Create releases dir.
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ ! -d releases ]; then mkdir releases; fi", get('locally'));
+
+    // Create shared dir.
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ ! -d shared ]; then mkdir shared; fi", get('locally'));
+})->desc('Preparing server for deploy');
 
 task('deploy-on-prod:update_code', function () {
     $releasePath = env('release_path');
@@ -57,10 +130,16 @@ task('deploy-on-prod:update_code', function () {
     $branch = env('branch');
 
     if (\TheRat\SymDep\dirExists($releasePath)) {
-        run("cd $releasePath && git pull origin $branch --quiet");
+        \TheRat\SymDep\runCommand(
+            "cd $releasePath && git pull origin $branch --quiet",
+            get('locally')
+        );
     } else {
-        run("mkdir -p $releasePath");
-        run("cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath");
+        \TheRat\SymDep\runCommand("mkdir -p $releasePath", get('locally'));
+        \TheRat\SymDep\runCommand(
+            "cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath",
+            get('locally')
+        );
     }
 })->desc('Updating code');
 
@@ -130,6 +209,14 @@ task('deploy-on-prod:database:migrate', function () {
 })->desc('Migrate database');
 
 /**
+ * Create symlink to last release.
+ */
+task('deploy-on-prod:symlink', function () {
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && ln -sfn {{release_path}} current", get('locally')); // Atomic override symlink.
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && rm release", get('locally')); // Remove release link.
+})->desc('Creating symlink to release');
+
+/**
  * Doctrine cache clear database
  */
 task('deploy-on-prod:database:cache-clear', function () {
@@ -141,22 +228,44 @@ task('deploy-on-prod:database:cache-clear', function () {
 })->desc('Doctrine cache clear');
 
 /**
+ * Cleanup old releases.
+ */
+task('deploy-on-prod:cleanup', function () {
+    $releases = env('releases_list');
+
+    $keep = get('keep_releases');
+
+    while ($keep > 0) {
+        array_shift($releases);
+        --$keep;
+    }
+
+    foreach ($releases as $release) {
+        \TheRat\SymDep\runCommand("rm -rf {{deploy_path}}/releases/$release", get('locally'));
+    }
+
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ -e release ]; then rm release; fi", get('locally'));
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ -h release ]; then rm release; fi", get('locally'));
+
+})->desc('Cleaning up old releases');
+
+/**
  * Main task
  */
 task('deploy-on-prod', [
-    'deploy:prepare',
-    'deploy:update_code',
-    'deploy:create_cache_dir',
-    'deploy:shared',
-    'deploy:writable',
+    'deploy-on-prod:prepare',
+    'deploy-on-prod:update_code',
+    'symdep:create_cache_dir',
+    'symdep:shared',
+    'symdep:writable',
     'deploy-on-prod:assets',
-    'deploy:vendors',
+    'symdep:vendors',
     'deploy-on-prod:assetic:dump',
     'deploy-on-prod:cache:warmup',
     'deploy-on-prod:database:migrate',
-    'deploy:symlink',
+    'deploy-on-prod:symlink',
     'deploy-on-prod:database:cache-clear',
-    'cleanup',
+    'deploy-on-prod:cleanup',
 ])->desc('Deploy your project on "prod"');
 
 after('deploy-on-prod', 'success');

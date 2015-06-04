@@ -1,14 +1,4 @@
 <?php
-if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('stage')) {
-    argument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.');
-}
-if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
-    argument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch', 'master');
-}
-if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasOption('env')) {
-    option('env', null, \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'Symfony env');
-}
-
 /**
  * Rollback to previous release.
  */
@@ -65,7 +55,7 @@ task('local:prepare', function () {
     set('doctrine_cache_clear', true);
 
     // Environment vars
-    $env = input()->getOption('env') ? input()->getOption('env') : 'dev';
+    $env = 'dev';
     env('env_vars', "SYMFONY_ENV=$env");
     env('env', $env);
     env('branch', false);
@@ -103,62 +93,14 @@ task('local:create_cache_dir', function () {
     env('cache_dir', trim(get('var_dir'), '/') . '/cache');
 
     // Remove cache dir if it exist
-    \TheRat\SymDep\runCommand('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi', get('locally'));;
+    \TheRat\SymDep\runCommand('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi', get('locally'));
 
     // Create cache dir
-    \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}', get('locally'));;
+    \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}', get('locally'));
 
     // Set rights
-    \TheRat\SymDep\runCommand("chmod -R g+w {{cache_dir}}", get('locally'));;
+    \TheRat\SymDep\runCommand("chmod -R g+w {{cache_dir}}", get('locally'));
 })->desc('Create cache dir');
-
-/**
- * Create symlinks for shared directories and files.
- */
-task('local:shared', function () {
-    $sharedPath = "{{deploy_path}}/shared";
-
-    foreach (get('shared_dirs') as $dir) {
-        // Remove from source
-        \TheRat\SymDep\runCommand("if [ -d $(echo {{release_path}}/$dir) ]; then rm -rf {{release_path}}/$dir; fi", get('locally'));;
-
-        // Create shared dir if it does not exist
-        \TheRat\SymDep\runCommand("mkdir -p $sharedPath/$dir", get('locally'));;
-
-        // Create path to shared dir in release dir if it does not exist
-        // (symlink will not create the path and will fail otherwise)
-        \TheRat\SymDep\runCommand("mkdir -p `dirname {{release_path}}/$dir`", get('locally'));;
-
-        // Symlink shared dir to release dir
-        \TheRat\SymDep\runCommand("ln -nfs $sharedPath/$dir {{release_path}}/$dir", get('locally'));;
-    }
-
-    foreach (get('shared_files') as $file) {
-        // Remove from source
-        \TheRat\SymDep\runCommand("if [ -d $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi", get('locally'));;
-
-        // Create dir of shared file
-        runLocally("mkdir -p $sharedPath/" . dirname($file));
-
-        // Touch shared
-        \TheRat\SymDep\runCommand("touch $sharedPath/$file", get('locally'));;
-
-        // Symlink shared dir to release dir
-        \TheRat\SymDep\runCommand("ln -nfs $sharedPath/$file {{release_path}}/$file", get('locally'));;
-    }
-})->desc('Creating symlinks for shared files');
-
-/**
- * Make writable dirs.
- */
-task('local:writable', function () {
-    $dirs = join(' ', get('writable_dirs'));
-
-    if (!empty($dirs)) {
-        \TheRat\SymDep\runCommand("chmod 777 $dirs", get('locally'));;
-    }
-
-})->desc('Make writable dirs');
 
 /**
  * Normalize asset timestamps
@@ -178,27 +120,12 @@ task('local:assets', function () {
 })->desc('Normalize asset timestamps');
 
 /**
- * Installing vendors tasks.
- */
-task('local:vendors', function () {
-    if (\TheRat\SymDep\runCommand("if hash composer 2>/dev/null; then echo 'true'; fi", get('locally'))->toBool()) {
-        $composer = 'composer';
-    } else {
-        \TheRat\SymDep\runCommand("cd {{release_path}} && curl -sS https://getcomposer.org/installer | php", get('locally'));;
-        $composer = 'php composer.phar';
-    }
-
-    \TheRat\SymDep\runCommand("cd {{release_path}} && {{env_vars}} $composer install --verbose --prefer-dist --optimize-autoloader --no-progress --no-interaction", get('locally'));;
-
-})->desc('Installing vendors');
-
-/**
  * Dump all assets to the filesystem
  */
 task('local:assetic:dump', function () {
 
-    \TheRat\SymDep\runCommand('{{symfony_console}} assetic:dump --env={{env}} --quiet', get('locally'));;
-    \TheRat\SymDep\runCommand('{{symfony_console}} assets:install --symlink --env={{env}} --quiet', get('locally'));;
+    \TheRat\SymDep\runCommand('{{symfony_console}} assetic:dump --env={{env}} --quiet', get('locally'));
+    \TheRat\SymDep\runCommand('{{symfony_console}} assets:install --symlink --env={{env}} --quiet', get('locally'));
 
 })->desc('Dump assets');
 
@@ -207,7 +134,7 @@ task('local:assetic:dump', function () {
  */
 task('local:cache:warmup', function () {
 
-    \TheRat\SymDep\runCommand('{{symfony_console}} cache:warmup  --env={{env}}', get('locally'));;
+    \TheRat\SymDep\runCommand('{{symfony_console}} cache:warmup  --env={{env}}', get('locally'));
 
 })->desc('Warm up cache');
 
@@ -216,7 +143,7 @@ task('local:cache:warmup', function () {
  */
 task('local:database:migrate', function () {
     if (get('auto_migrate')) {
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-interaction', get('locally'));;
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-interaction', get('locally'));
     }
 })->desc('Migrate database');
 
@@ -225,9 +152,9 @@ task('local:database:migrate', function () {
  */
 task('local:database:cache-clear', function () {
     if (get('doctrine_cache_clear')) {
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}}', get('locally'));;
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-query --env={{env}}', get('locally'));;
-        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-result --env={{env}}', get('locally'));;
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}}', get('locally'));
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-query --env={{env}}', get('locally'));
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-result --env={{env}}', get('locally'));
     }
 })->desc('Doctrine cache clear');
 
@@ -238,10 +165,10 @@ task('project-update', [
     'local:prepare',
     'local:update_code',
     'local:create_cache_dir',
-    'local:shared',
-    'local:writable',
+    'symdep:shared',
+    'symdep:writable',
     'local:assets',
-    'local:vendors',
+    'symdep:vendors',
     'local:assetic:dump',
     'local:cache:warmup',
     'local:database:migrate',

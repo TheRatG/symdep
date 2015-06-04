@@ -1,21 +1,19 @@
 <?php
-require_once 'recipe/common.php';
-
-/**
- * Default arguments and options.
- */
-if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
-    argument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch', 'master');
-}
-if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasOption('locally')) {
-    option('locally', 'l', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Run command locally');
-}
-
 /**
  * Rollback to previous release.
  */
 task('rollback', function () {
 })->desc('Rollback to previous release');
+
+
+/**
+ * Success message
+ */
+task('success', function () {
+    writeln("<info>Successfully deployed!</info>");
+})
+    ->once()
+    ->setPrivate();
 
 /**
  * Preparing server for deployment.
@@ -23,24 +21,6 @@ task('rollback', function () {
 task('deploy-on-test:prepare', function () {
 
     set('locally', input()->getOption('locally'));
-
-    // Check if shell is POSIX-compliant
-    try {
-        cd(''); // To run command as raw.
-        \TheRat\SymDep\runCommand('echo $0', get('locally'));
-    } catch (\RuntimeException $e) {
-        $formatter = \Deployer\Deployer::get()->getHelper('formatter');
-
-        $errorMessage = [
-            "Shell on your server is not POSIX-compliant. Please change to sh, bash or similar.",
-            "Usually, you can change your shell to bash by running: chsh -s /bin/bash",
-        ];
-        write($formatter->formatBlock($errorMessage, 'error', true));
-
-        throw $e;
-    }
-
-    \TheRat\SymDep\runCommand('if [ ! -d {{deploy_path}} ]; then echo ""; fi', get('locally'));
 
     // Symfony shared dirs
     set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
@@ -75,6 +55,23 @@ task('deploy-on-test:prepare', function () {
     env('release_path', env()->parse('{{deploy_path}}') . "/releases/$branch");
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
 
+    // Check if shell is POSIX-compliant
+    try {
+        cd(''); // To run command as raw.
+        \TheRat\SymDep\runCommand('echo $0', get('locally'));
+    } catch (\RuntimeException $e) {
+        $formatter = \Deployer\Deployer::get()->getHelper('formatter');
+
+        $errorMessage = [
+            "Shell on your server is not POSIX-compliant. Please change to sh, bash or similar.",
+            "Usually, you can change your shell to bash by running: chsh -s /bin/bash",
+        ];
+        write($formatter->formatBlock($errorMessage, 'error', true));
+
+        throw $e;
+    }
+
+    \TheRat\SymDep\runCommand('if [ ! -d {{deploy_path}} ]; then echo ""; fi', get('locally'));
 })->desc('Preparing server for deploy');
 
 task('deploy-on-test:update_code', function () {
@@ -89,24 +86,6 @@ task('deploy-on-test:update_code', function () {
         run("cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath");
     }
 })->desc('Updating code');
-
-/**
- * Create cache dir
- */
-task('deploy:create_cache_dir', function () {
-    // Set cache dir
-    env('cache_dir', '{{release_path}}/' . trim(get('var_dir'), '/') . '/cache');
-
-    // Remove cache dir if it exist
-    \TheRat\SymDep\runCommand('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi', get('locally'));
-
-    // Create cache dir
-    \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}', get('locally'));
-
-    // Set rights
-    run("chmod -R g+w {{cache_dir}}");
-})->desc('Create cache dir');
-
 
 /**
  * Normalize asset timestamps
@@ -172,11 +151,11 @@ task('deploy-on-test:database:cache-clear', function () {
 task('deploy-on-test', [
     'deploy-on-test:prepare',
     'deploy-on-test:update_code',
-    'deploy:create_cache_dir',
-    'deploy:shared',
-    'deploy:writable',
+    'symdep:create_cache_dir',
+    'symdep:shared',
+    'symdep:writable',
     'deploy-on-test:assets',
-    'deploy:vendors',
+    'symdep:vendors',
     'deploy-on-test:assetic:dump',
     'deploy-on-test:cache:warmup',
     'deploy-on-test:database:migrate',

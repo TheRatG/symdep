@@ -26,10 +26,11 @@ if (!$loaded) {
 }
 
 // Recipe include path
-set_include_path($deployerDir . PATH_SEPARATOR . get_include_path());
+set_include_path(dirname(__DIR__) . '/vendor/deployer/deployer' . PATH_SEPARATOR . get_include_path());
+set_include_path(dirname(__DIR__) . '/../../deployer/deployer' . PATH_SEPARATOR . get_include_path());
 
 // Include function declarations
-require_once $deployerDir . '/src/functions.php';
+require_once  'src/functions.php';
 
 // Init Deployer
 $console = new \Deployer\Console\Application('Deployer', 'master');
