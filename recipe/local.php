@@ -28,10 +28,12 @@ task('success', function () {
  * Preparing server for deployment.
  */
 task('local:prepare', function () {
+    set('locally', true);
+
     // Check if shell is POSIX-compliant
     try {
         cd(''); // To run command as raw.
-        runLocally('echo $0');
+        \TheRat\SymDep\runCommand('echo $0', get('locally'));
     } catch (\RuntimeException $e) {
         $formatter = \Deployer\Deployer::get()->getHelper('formatter');
 
@@ -82,11 +84,12 @@ task('local:prepare', function () {
 task('local:update_code', function () {
     $branch = env('branch');
     if (false === $branch) {
-        $branch = runLocally('cd {{release_path}} && git rev-parse --abbrev-ref HEAD')->toString();
+        $branch = \TheRat\SymDep\runCommand('cd {{release_path}} && git rev-parse --abbrev-ref HEAD', get('locally'))
+            ->toString();
     }
-    $res = runLocally("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)");
+    $res = \TheRat\SymDep\runCommand("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)", get('locally'));
     if ($res) {
-        runLocally("git pull origin $branch 2>&1");
+        \TheRat\SymDep\runCommand("git pull origin $branch 2>&1", get('locally'));
     } else {
         writeln("<comment>Found local git branch. Pulling skipped.</comment>");
     }
@@ -100,13 +103,13 @@ task('local:create_cache_dir', function () {
     env('cache_dir', trim(get('var_dir'), '/') . '/cache');
 
     // Remove cache dir if it exist
-    runLocally('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi');
+    \TheRat\SymDep\runCommand('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi', get('locally'));;
 
     // Create cache dir
-    runLocally('mkdir -p {{cache_dir}}');
+    \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}', get('locally'));;
 
     // Set rights
-    runLocally("chmod -R g+w {{cache_dir}}");
+    \TheRat\SymDep\runCommand("chmod -R g+w {{cache_dir}}", get('locally'));;
 })->desc('Create cache dir');
 
 /**
@@ -117,31 +120,31 @@ task('local:shared', function () {
 
     foreach (get('shared_dirs') as $dir) {
         // Remove from source
-        runLocally("if [ -d $(echo {{release_path}}/$dir) ]; then rm -rf {{release_path}}/$dir; fi");
+        \TheRat\SymDep\runCommand("if [ -d $(echo {{release_path}}/$dir) ]; then rm -rf {{release_path}}/$dir; fi", get('locally'));;
 
         // Create shared dir if it does not exist
-        runLocally("mkdir -p $sharedPath/$dir");
+        \TheRat\SymDep\runCommand("mkdir -p $sharedPath/$dir", get('locally'));;
 
         // Create path to shared dir in release dir if it does not exist
         // (symlink will not create the path and will fail otherwise)
-        runLocally("mkdir -p `dirname {{release_path}}/$dir`");
+        \TheRat\SymDep\runCommand("mkdir -p `dirname {{release_path}}/$dir`", get('locally'));;
 
         // Symlink shared dir to release dir
-        runLocally("ln -nfs $sharedPath/$dir {{release_path}}/$dir");
+        \TheRat\SymDep\runCommand("ln -nfs $sharedPath/$dir {{release_path}}/$dir", get('locally'));;
     }
 
     foreach (get('shared_files') as $file) {
         // Remove from source
-        runLocally("if [ -d $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi");
+        \TheRat\SymDep\runCommand("if [ -d $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi", get('locally'));;
 
         // Create dir of shared file
         runLocally("mkdir -p $sharedPath/" . dirname($file));
 
         // Touch shared
-        runLocally("touch $sharedPath/$file");
+        \TheRat\SymDep\runCommand("touch $sharedPath/$file", get('locally'));;
 
         // Symlink shared dir to release dir
-        runLocally("ln -nfs $sharedPath/$file {{release_path}}/$file");
+        \TheRat\SymDep\runCommand("ln -nfs $sharedPath/$file {{release_path}}/$file", get('locally'));;
     }
 })->desc('Creating symlinks for shared files');
 
@@ -152,7 +155,7 @@ task('local:writable', function () {
     $dirs = join(' ', get('writable_dirs'));
 
     if (!empty($dirs)) {
-        runLocally("chmod 777 $dirs");
+        \TheRat\SymDep\runCommand("chmod 777 $dirs", get('locally'));;
     }
 
 })->desc('Make writable dirs');
@@ -168,8 +171,8 @@ task('local:assets', function () {
     $time = date('Ymdhi.s');
 
     foreach ($assets as $dir) {
-        if (runLocally("if [ -d $(echo $dir) ]; then echo 1; fi")->toBool()) {
-            runLocally("find $dir -exec touch -t $time {} ';' &> /dev/null || true");
+        if (\TheRat\SymDep\runCommand("if [ -d $(echo $dir) ]; then echo 1; fi", get('locally'))->toBool()) {
+            \TheRat\SymDep\runCommand("find $dir -exec touch -t $time {} ';' &> /dev/null || true", get('locally'));
         }
     }
 })->desc('Normalize asset timestamps');
@@ -178,14 +181,14 @@ task('local:assets', function () {
  * Installing vendors tasks.
  */
 task('local:vendors', function () {
-    if (runLocally("if hash composer 2>/dev/null; then echo 'true'; fi")->toBool()) {
+    if (\TheRat\SymDep\runCommand("if hash composer 2>/dev/null; then echo 'true'; fi", get('locally'))->toBool()) {
         $composer = 'composer';
     } else {
-        runLocally("cd {{release_path}} && curl -sS https://getcomposer.org/installer | php");
+        \TheRat\SymDep\runCommand("cd {{release_path}} && curl -sS https://getcomposer.org/installer | php", get('locally'));;
         $composer = 'php composer.phar';
     }
 
-    runLocally("cd {{release_path}} && {{env_vars}} $composer install --verbose --prefer-dist --optimize-autoloader --no-progress --no-interaction");
+    \TheRat\SymDep\runCommand("cd {{release_path}} && {{env_vars}} $composer install --verbose --prefer-dist --optimize-autoloader --no-progress --no-interaction", get('locally'));;
 
 })->desc('Installing vendors');
 
@@ -194,8 +197,8 @@ task('local:vendors', function () {
  */
 task('local:assetic:dump', function () {
 
-    runLocally('{{symfony_console}} assetic:dump --env={{env}} --quiet');
-    runLocally('{{symfony_console}} assets:install --symlink --env={{env}} --quiet');
+    \TheRat\SymDep\runCommand('{{symfony_console}} assetic:dump --env={{env}} --quiet', get('locally'));;
+    \TheRat\SymDep\runCommand('{{symfony_console}} assets:install --symlink --env={{env}} --quiet', get('locally'));;
 
 })->desc('Dump assets');
 
@@ -204,7 +207,7 @@ task('local:assetic:dump', function () {
  */
 task('local:cache:warmup', function () {
 
-    runLocally('{{symfony_console}} cache:warmup  --env={{env}}');
+    \TheRat\SymDep\runCommand('{{symfony_console}} cache:warmup  --env={{env}}', get('locally'));;
 
 })->desc('Warm up cache');
 
@@ -213,7 +216,7 @@ task('local:cache:warmup', function () {
  */
 task('local:database:migrate', function () {
     if (get('auto_migrate')) {
-        runLocally('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-interaction');
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-interaction', get('locally'));;
     }
 })->desc('Migrate database');
 
@@ -222,9 +225,9 @@ task('local:database:migrate', function () {
  */
 task('local:database:cache-clear', function () {
     if (get('doctrine_cache_clear')) {
-        runLocally('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}}');
-        runLocally('{{symfony_console}} doctrine:cache:clear-query --env={{env}}');
-        runLocally('{{symfony_console}} doctrine:cache:clear-result --env={{env}}');
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}}', get('locally'));;
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-query --env={{env}}', get('locally'));;
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-result --env={{env}}', get('locally'));;
     }
 })->desc('Doctrine cache clear');
 

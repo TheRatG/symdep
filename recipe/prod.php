@@ -1,19 +1,21 @@
 <?php
-use Deployer\Deployer;
-
 require_once 'recipe/common.php';
 
 /**
  * Default arguments and options.
  */
-if (!Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
+if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
     argument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch', 'master');
+}
+if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasOption('locally')) {
+    option('locally', 'l', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Run command locally');
 }
 
 /**
  * Preparing server for deployment.
  */
 task('deploy-on-prod:prepare:env', function () {
+    set('locally', input()->getOption('locally'));
 
     // Symfony shared dirs
     set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
@@ -70,10 +72,10 @@ task('deploy:create_cache_dir', function () {
     env('cache_dir', '{{release_path}}/' . trim(get('var_dir'), '/') . '/cache');
 
     // Remove cache dir if it exist
-    run('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi');
+    \TheRat\SymDep\runCommand('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi', get('locally'));
 
     // Create cache dir
-    run('mkdir -p {{cache_dir}}');
+    \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}', get('locally'));
 
     // Set rights
     run("chmod -R g+w {{cache_dir}}");
@@ -103,7 +105,7 @@ task('deploy-on-prod:assets', function () {
  */
 task('deploy-on-prod:assetic:dump', function () {
 
-    run('{{symfony_console}} assetic:dump --env={{env}} --no-debug');
+    \TheRat\SymDep\runCommand('{{symfony_console}} assetic:dump --env={{env}} --no-debug', get('locally'));
 
 })->desc('Dump assets');
 
@@ -113,8 +115,8 @@ task('deploy-on-prod:assetic:dump', function () {
  */
 task('deploy-on-prod:cache:warmup', function () {
 
-    run('{{symfony_console}} cache:warmup  --env={{env}} --no-debug');
-    run('{{symfony_console}} assets:install --env={{env}} --no-debug');
+    \TheRat\SymDep\runCommand('{{symfony_console}} cache:warmup  --env={{env}} --no-debug', get('locally'));
+    \TheRat\SymDep\runCommand('{{symfony_console}} assets:install --env={{env}} --no-debug', get('locally'));
 
 })->desc('Warm up cache');
 
@@ -123,7 +125,7 @@ task('deploy-on-prod:cache:warmup', function () {
  */
 task('deploy-on-prod:database:migrate', function () {
     if (get('auto_migrate')) {
-        run('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction');
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction', get('locally'));
     }
 })->desc('Migrate database');
 
@@ -132,9 +134,9 @@ task('deploy-on-prod:database:migrate', function () {
  */
 task('deploy-on-prod:database:cache-clear', function () {
     if (get('doctrine_cache_clear')) {
-        run('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug');
-        run('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug');
-        run('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug');
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug', get('locally'));
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug', get('locally'));
+        \TheRat\SymDep\runCommand('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug', get('locally'));
     }
 })->desc('Doctrine cache clear');
 
