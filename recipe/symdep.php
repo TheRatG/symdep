@@ -99,6 +99,8 @@ task('symdep:vendors', function () {
         get('locally')
     );
 
+    sleep(5);
+
 })->desc('Installing vendors');
 
 require_once 'local.php';

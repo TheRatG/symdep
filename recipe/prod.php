@@ -1,24 +1,6 @@
 <?php
 
 /**
- * Return list of releases on server.
- */
-env('releases_list', function () {
-    $list = \TheRat\SymDep\runCommand('ls {{deploy_path}}/releases')->toArray();
-
-    rsort($list);
-
-    return $list;
-});
-
-/**
- * Return current release path.
- */
-env('current', function () {
-    return \TheRat\SymDep\runCommand("readlink {{deploy_path}}/current")->toString();
-});
-
-/**
  * Show current release number.
  */
 task('current', function () {
@@ -93,6 +75,33 @@ task('deploy-on-prod:prepare', function () {
     set('bin_dir', 'app');
     set('var_dir', 'app');
 
+    $branch = input()->getArgument('branch');
+    env('branch', $branch);
+
+    $release = date('YmdHis');
+    /**
+     * Return release path.
+     */
+    env('release_path', "{{deploy_path}}/releases/$release");
+
+    /**
+     * Return list of releases on server.
+     */
+    env('releases_list', function () {
+        $list = \TheRat\SymDep\runCommand('ls {{deploy_path}}/releases')->toArray();
+
+        rsort($list);
+
+        return $list;
+    });
+
+    /**
+     * Return current release path.
+     */
+    env('current', function () {
+        return \TheRat\SymDep\runCommand("readlink {{deploy_path}}/current")->toString();
+    });
+
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
 
     if (!get('locally')) {
@@ -124,23 +133,39 @@ task('deploy-on-prod:prepare', function () {
     \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ ! -d shared ]; then mkdir shared; fi");
 })->desc('Preparing server for deploy');
 
-task('deploy-on-prod:update_code', function () {
+/**
+ * Release
+ */
+task('deploy-on-prod:release', function () {
     $releasePath = env('release_path');
+
+    $i = 0;
+    while (is_dir(env()->parse($releasePath)) && $i < 42) {
+        $releasePath .= '.' . ++$i;
+    }
+
+    \TheRat\SymDep\runCommand("mkdir $releasePath");
+
+    \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ -h release ]; then rm release; fi");
+
+    \TheRat\SymDep\runCommand("ln -s $releasePath {{deploy_path}}/release");
+})->desc('Prepare release');
+
+task('deploy-on-prod:update_code', function () {
     $repository = get('repository');
     $branch = env('branch');
-
-    if (\TheRat\SymDep\dirExists($releasePath)) {
-        \TheRat\SymDep\runCommand(
-            "cd $releasePath && git pull origin $branch --quiet",
-            get('locally')
-        );
-    } else {
-        \TheRat\SymDep\runCommand("mkdir -p $releasePath");
-        \TheRat\SymDep\runCommand(
-            "cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath",
-            get('locally')
-        );
+    if (input()->hasOption('tag')) {
+        $tag = input()->getOption('tag');
     }
+
+    $at = '';
+    if (!empty($tag)) {
+        $at = "-b $tag";
+    } else if (!empty($branch)) {
+        $at = "-b $branch";
+    }
+
+    \TheRat\SymDep\runCommand("git clone $at --depth 1 --recursive -q $repository {{release_path}} 2>&1");
 })->desc('Updating code');
 
 /**
@@ -253,14 +278,15 @@ task('deploy-on-prod:cleanup', function () {
  */
 task('deploy-on-prod', [
     'deploy-on-prod:prepare',
+    'deploy-on-prod:release',
     'deploy-on-prod:update_code',
     'symdep:create_cache_dir',
     'symdep:shared',
     'symdep:writable',
     'deploy-on-prod:assets',
     'symdep:vendors',
-    'deploy-on-prod:assetic:dump',
     'deploy-on-prod:cache:warmup',
+    'deploy-on-prod:assetic:dump',
     'deploy-on-prod:database:migrate',
     'deploy-on-prod:symlink',
     'deploy-on-prod:database:cache-clear',
