@@ -85,17 +85,6 @@ task('deploy-on-prod:prepare', function () {
     env('release_path', "{{deploy_path}}/releases/$release");
 
     /**
-     * Return list of releases on server.
-     */
-    env('releases_list', function () {
-        $list = \TheRat\SymDep\runCommand('ls {{deploy_path}}/releases')->toArray();
-
-        rsort($list);
-
-        return $list;
-    });
-
-    /**
      * Return current release path.
      */
     env('current', function () {
@@ -255,7 +244,8 @@ task('deploy-on-prod:database:cache-clear', function () {
  * Cleanup old releases.
  */
 task('deploy-on-prod:cleanup', function () {
-    $releases = env('releases_list');
+    $releases = \TheRat\SymDep\runCommand('ls {{deploy_path}}/releases')->toArray();
+    rsort($releases);
 
     $keep = get('keep_releases');
 
