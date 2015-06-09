@@ -65,7 +65,7 @@ task('symdep:create_cache_dir', function () {
     \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}', get('locally'));
 
     // Set rights
-    run("chmod -R g+w {{cache_dir}}");
+    \TheRat\SymDep\runCommand("chmod -R g+w {{cache_dir}}");
 })->desc('Create cache dir');
 
 /**
