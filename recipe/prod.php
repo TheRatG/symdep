@@ -48,7 +48,7 @@ task('deploy-on-prod:prepare', function () {
     set('locally', input()->getOption('locally'));
 
     // Symfony shared dirs
-    set('shared_dirs', ['app/cache', 'app/logs', 'web/uploads']);
+    set('shared_dirs', ['app/logs', 'web/uploads']);
 
     // Symfony shared files
     set('shared_files', ['app/config/parameters.yml']);
