@@ -7,7 +7,7 @@
         "symfony/console": "2.6.*",
         "symfony/yaml": "2.6.*",
         "symfony/process": "2.6.*",
-        "deployer/deployer": "~3.0",
+        "deployer/deployer": "dev-master",
         "phpseclib/phpseclib": "dev-master#62fdd160e3ae2bb265a7e1f7c9426d552f55df47"
     },
     "suggest": {
