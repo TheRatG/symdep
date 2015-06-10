@@ -42,7 +42,7 @@ task('deploy-on-test:prepare', function () {
 
     $branch = input()->getArgument('branch');
     env('branch', $branch);
-    env('release_path', env()->parse('{{deploy_path}}') . "/releases/$branch");
+    env('release_path', env()->parse('{{deploy_path}}') . "/releases/" . strtolower($branch));
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
 
     // Environment vars
