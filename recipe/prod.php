@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Show current release number.
  */
@@ -10,7 +9,7 @@ task('current', function () {
 /**
  * Rollback to previous release.
  */
-task('rollback', function () {
+task('deploy-on-prod:rollback', function () {
     $releases = env('releases_list');
 
     if (isset($releases[1])) {
@@ -120,6 +119,9 @@ task('deploy-on-prod:prepare', function () {
 
     // Create shared dir.
     \TheRat\SymDep\runCommand("cd {{deploy_path}} && if [ ! -d shared ]; then mkdir shared; fi");
+
+    after('rollback', 'deploy-on-prod:rollback');
+
 })->desc('Preparing server for deploy');
 
 /**

@@ -1,12 +1,5 @@
 <?php
 /**
- * Rollback to previous release.
- */
-task('rollback', function () {
-})->desc('Rollback to previous release');
-
-
-/**
  * Success message
  */
 task('success', function () {

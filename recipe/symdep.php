@@ -23,31 +23,31 @@ task('symdep:shared', function () {
 
     foreach (get('shared_dirs') as $dir) {
         // Remove from source
-        \TheRat\SymDep\runCommand("if [ -d $(echo {{release_path}}/$dir) ]; then rm -rf {{release_path}}/$dir; fi", get('locally'));;
+        \TheRat\SymDep\runCommand("if [ -d $(echo {{release_path}}/$dir) ]; then rm -rf {{release_path}}/$dir; fi");
 
         // Create shared dir if it does not exist
-        \TheRat\SymDep\runCommand("mkdir -p $sharedPath/$dir", get('locally'));;
+        \TheRat\SymDep\runCommand("mkdir -p $sharedPath/$dir");
 
         // Create path to shared dir in release dir if it does not exist
         // (symlink will not create the path and will fail otherwise)
-        \TheRat\SymDep\runCommand("mkdir -p `dirname {{release_path}}/$dir`", get('locally'));;
+        \TheRat\SymDep\runCommand("mkdir -p `dirname {{release_path}}/$dir`");
 
         // Symlink shared dir to release dir
-        \TheRat\SymDep\runCommand("ln -nfs $sharedPath/$dir {{release_path}}/$dir", get('locally'));;
+        \TheRat\SymDep\runCommand("ln -nfs $sharedPath/$dir {{release_path}}/$dir");
     }
 
     foreach (get('shared_files') as $file) {
         // Remove from source
-        \TheRat\SymDep\runCommand("if [ -f $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi", get('locally'));;
+        \TheRat\SymDep\runCommand("if [ -f $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi");
 
         // Create dir of shared file
-        \TheRat\SymDep\runCommand("mkdir -p $sharedPath/" . dirname($file), get('locally'));
+        \TheRat\SymDep\runCommand("mkdir -p $sharedPath/" . dirname($file));
 
         // Touch shared
-        \TheRat\SymDep\runCommand("touch $sharedPath/$file", get('locally'));;
+        \TheRat\SymDep\runCommand("touch $sharedPath/$file");
 
         // Symlink shared dir to release dir
-        \TheRat\SymDep\runCommand("ln -nfs $sharedPath/$file {{release_path}}/$file", get('locally'));;
+        \TheRat\SymDep\runCommand("ln -nfs $sharedPath/$file {{release_path}}/$file");
     }
 })->desc('Creating symlinks for shared files');
 
@@ -59,10 +59,10 @@ task('symdep:create_cache_dir', function () {
     env('cache_dir', '{{release_path}}/' . trim(get('var_dir'), '/') . '/cache');
 
     // Remove cache dir if it exist
-    \TheRat\SymDep\runCommand('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi', get('locally'));
+    \TheRat\SymDep\runCommand('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi');
 
     // Create cache dir
-    \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}', get('locally'));
+    \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}');
 
     // Set rights
     \TheRat\SymDep\runCommand("chmod -R g+w {{cache_dir}}");
@@ -75,7 +75,7 @@ task('symdep:writable', function () {
     $dirs = join(' ', get('writable_dirs'));
 
     if (!empty($dirs)) {
-        \TheRat\SymDep\runCommand("cd {{release_path}} && chmod 777 $dirs", get('locally'));;
+        \TheRat\SymDep\runCommand("cd {{release_path}} && chmod 777 $dirs");
     }
 
 })->desc('Make writable dirs');
@@ -84,10 +84,10 @@ task('symdep:writable', function () {
  * Installing vendors tasks.
  */
 task('symdep:vendors', function () {
-    if (\TheRat\SymDep\runCommand("if hash composer 2>/dev/null; then echo 'true'; fi", get('locally'))->toBool()) {
+    if (\TheRat\SymDep\runCommand("if hash composer 2>/dev/null; then echo 'true'; fi")->toBool()) {
         $composer = 'composer';
     } else {
-        \TheRat\SymDep\runCommand("cd {{release_path}} && curl -sS https://getcomposer.org/installer | php", get('locally'));
+        \TheRat\SymDep\runCommand("cd {{release_path}} && curl -sS https://getcomposer.org/installer | php");
         $composer = 'php composer.phar';
     }
 
@@ -102,6 +102,12 @@ task('symdep:vendors', function () {
     sleep(5);
 
 })->desc('Installing vendors');
+
+/**
+ * Rollback to previous release.
+ */
+task('rollback', function () {
+})->desc('Rollback to previous release');
 
 require_once 'local.php';
 require_once 'test.php';
