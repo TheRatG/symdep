@@ -92,7 +92,7 @@ task('symdep:vendors', function () {
     }
 
     $require = env('env') !== 'dev' ? '--no-dev' : '--dev';
-    $options = "--verbose --prefer-dist --optimize-autoloader --no-progress --no-interaction --quiet $require";
+    $options = "--prefer-dist --optimize-autoloader --no-progress --no-interaction --quiet $require";
 
     \TheRat\SymDep\runCommand(
         "cd {{release_path}} && {{env_vars}} $composer install $options",
