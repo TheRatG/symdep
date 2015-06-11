@@ -9,3 +9,5 @@
 
 /bin/*
 !bin/symdep
+
+/manifest.phar
