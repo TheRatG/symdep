@@ -1,6 +1,23 @@
 <?php
 namespace TheRat\SymDep;
 
+const BUILD_TYPE_DEV = 'dev';
+const BUILD_TYPE_TEST = 'test';
+const BUILD_TYPE_PROD = 'prod';
+
+function getBuildType()
+{
+    $data = input()->getOption('strategy');
+    $firstLetter = strtolower($data)[0];
+    $map = ['d' => BUILD_TYPE_DEV, 't' => BUILD_TYPE_TEST, 'p' => BUILD_TYPE_PROD];
+    if (in_array($firstLetter, $map)) {
+        $result = $map[$firstLetter];
+    } else {
+        throw new \RuntimeException('Invalid strategy value, must be D | T | P');
+    }
+    return $result;
+}
+
 /**
  * @param $srcFilename
  * @param $dstFilename
