@@ -7,9 +7,6 @@ task('properties', function () {
     // Symfony shared dirs
     set('shared_dirs', ['app/logs', 'web/uploads']);
 
-    // Symfony shared files
-    set('shared_files', ['app/config/parameters.yml']);
-
     // Symfony writable dirs
     set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
 
@@ -39,17 +36,41 @@ task('properties', function () {
 
 })->desc('1. Prepare environment properties');
 
+task('install-before', function () {
+
+})->desc('2. Before install');
+
 task('install', function () {
 
-})->desc('2. Deploy and prepare files');
+})->desc('3. Deploy and prepare files');
+
+task('install-after', function () {
+
+})->desc('4. After install');
+
+task('configure-before', function () {
+
+})->desc('5. Before configure');
 
 task('configure', function () {
 
-})->desc('3. Run necessary scripts for project');
+})->desc('6. Run necessary scripts for project');
+
+task('configure-after', function () {
+
+})->desc('7. After configure');
+
+task('link-before', function () {
+
+})->desc('8. Before link');
 
 task('link', function () {
 
-})->desc('4. Change symlinks');
+})->desc('9. Change symlinks');
+
+task('link-after', function () {
+
+})->desc('10. after link');
 
 task('rollback', function () {
 

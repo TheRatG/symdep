@@ -4,6 +4,9 @@
  */
 task('deploy-on-test:properties', function () {
 
+    // Symfony shared files
+    set('shared_files', ['app/config/parameters.yml']);
+
     // Environment vars
     env('env_real', 'test');
     $env = 'test';
