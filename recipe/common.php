@@ -1,15 +1,8 @@
 <?php
 task('properties', function () {
 
-    if (env()->has('properties_defined') && env('properties_defined')) {
-        return;
-    };
-
-    env('properties_defined', true);
-
-    env('composer_no_dev', input()->getOption('composer-no-dev'));
-
-    env('branch', input()->getOption('branch'));
+    // Composer install --no-dev
+    env('composer_no_dev', true);
 
     // Symfony shared dirs
     set('shared_dirs', ['app/logs', 'web/uploads']);
@@ -33,19 +26,34 @@ task('properties', function () {
 
     set('var_dir', 'app');
 
-});
+    //console
+    env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
+
+    // Deploy branch
+    $branch = input()->getArgument('branch');
+    if (!$branch) {
+        $branch = runLocally('git rev-parse --abbrev-ref HEAD')
+            ->toString();
+    }
+    env('branch', $branch);
+
+})->desc('1. Prepare environment properties');
 
 task('install', function () {
 
-});
+})->desc('2. Deploy and prepare files');
 
 task('configure', function () {
 
-});
+})->desc('3. Run necessary scripts for project');
 
 task('link', function () {
 
-});
+})->desc('4. Change symlinks');
+
+task('rollback', function () {
+
+})->desc('Delete deploy ');
 
 task('check_connection', function () {
     // Check if shell is POSIX-compliant
@@ -99,6 +107,10 @@ task('shared', function () {
 
         // Symlink shared dir to release dir
         run("ln -nfs $sharedPath/$file {{release_path}}/$file");
+    }
+
+    if (!\TheRat\SymDep\fileExists('{{release_path}}/app/config/_secret.yml')) {
+        run('touch {{release_path}}/app/config/_secret.yml');
     }
 })->desc('Creating symlinks for shared files');
 
@@ -162,11 +174,46 @@ task('vendors', function () {
     $require = env('composer_no_dev') ? '--no-dev' : '--dev';
     $options = "--prefer-dist --optimize-autoloader --no-progress --no-interaction --quiet $require";
 
-    run(
-        "cd {{release_path}} && {{env_vars}} $composer install $options",
-        get('locally')
-    );
-
-    sleep(5);
+    run("cd {{release_path}} && {{env_vars}} $composer install $options");
 
 })->desc('Installing vendors');
+
+/**
+ * Dump all assets to the filesystem
+ */
+task('assetic:dump', function () {
+
+    run('{{symfony_console}} assetic:dump --env={{env}} --quiet');
+    run('{{symfony_console}} assets:install --symlink --env={{env}} --quiet');
+
+})->desc('Dump assets');
+
+
+/**
+ * Warm up cache
+ */
+task('cache:warmup', function () {
+
+    run('{{symfony_console}} cache:warmup  --env={{env}}');
+
+})->desc('Warm up cache');
+
+/**
+ * Migrate database
+ */
+task('database:migrate', function () {
+    if (get('auto_migrate')) {
+        run('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction');
+    }
+})->desc('Migrate database');
+
+/**
+ * Doctrine cache clear database
+ */
+task('database:cache-clear', function () {
+    if (get('doctrine_cache_clear')) {
+        run('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug');
+        run('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug');
+        run('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug');
+    }
+})->desc('Doctrine cache clear');

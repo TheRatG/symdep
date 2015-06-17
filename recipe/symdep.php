@@ -1,114 +1,95 @@
 <?php
-/**
- * Default arguments and options.
- */
-if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('stage')) {
-    argument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.');
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+
+/** @var Symfony\Component\Console\Input\InputDefinition $input */
+$inputDefinition = \Deployer\Deployer::get()->getConsole()->getDefinition();
+if (!$inputDefinition->hasArgument('stage')) {
+    $inputDefinition->addArgument(new InputArgument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.', 'local'));
 }
-if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasArgument('branch')) {
-    argument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch', 'master');
+if (!$inputDefinition->hasArgument('branch')) {
+    $inputDefinition->addArgument(new InputArgument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch'));
 }
-if (!\Deployer\Deployer::get()->getConsole()->getUserDefinition()->hasOption('locally')) {
-    option('locally', 'l', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Run command locally');
+if (!$inputDefinition->hasOption('build-type')) {
+    $inputDefinition->addOption(new InputOption('build-type', 't', \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'Deploy strategy (build type), D|T|P', \TheRat\SymDep\BUILD_TYPE_DEV));
 }
+if (!$inputDefinition->hasOption('composer-no-dev')) {
+    $inputDefinition->addOption(new InputOption('composer-no-dev', 'C', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Composer --no-dev'));
+}
+$buildType = \TheRat\SymDep\getBuildType();
 
-//number of releases
-set('keep_releases', 5);
+require_once 'common.php';
 
-/**
- * Create symlinks for shared directories and files.
- */
-task('symdep:shared', function () {
-    $sharedPath = "{{deploy_path}}/shared";
+task('deploy', [
+    'install',
+    'configure',
+    'link',
+])
+    ->desc('Default command, depend on --build-type=<[d]ev|[t]est|[p]rod>');
 
-    foreach (get('shared_dirs') as $dir) {
-        // Remove from source
-        \TheRat\SymDep\runCommand("if [ -d $(echo {{release_path}}/$dir) ]; then rm -rf {{release_path}}/$dir; fi");
+before('properties', 'check_connection');
 
-        // Create shared dir if it does not exist
-        \TheRat\SymDep\runCommand("mkdir -p $sharedPath/$dir");
+//For run main command separately
+before('install', 'properties');
+before('configure', 'properties');
+before('link', 'properties');
 
-        // Create path to shared dir in release dir if it does not exist
-        // (symlink will not create the path and will fail otherwise)
-        \TheRat\SymDep\runCommand("mkdir -p `dirname {{release_path}}/$dir`");
+switch ($buildType) {
+    case \TheRat\SymDep\BUILD_TYPE_DEV:
+        require_once 'local.php';
 
-        // Symlink shared dir to release dir
-        \TheRat\SymDep\runCommand("ln -nfs $sharedPath/$dir {{release_path}}/$dir");
-    }
+        after('properties', 'project-update:properties');
+        after('install', 'project-update:update_code');
+        after('install', 'create_cache_dir');
+        after('install', 'shared');
+        after('install', 'writable');
+        after('install', 'assets');
+        after('install', 'vendors');
 
-    foreach (get('shared_files') as $file) {
-        // Remove from source
-        \TheRat\SymDep\runCommand("if [ -f $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi");
+        after('configure', 'assetic:dump');
+        after('configure', 'cache:warmup');
+        after('configure', 'database:migrate');
+        after('link', 'database:cache-clear');
 
-        // Create dir of shared file
-        \TheRat\SymDep\runCommand("mkdir -p $sharedPath/" . dirname($file));
+        break;
+    case \TheRat\SymDep\BUILD_TYPE_TEST:
+        require_once 'test.php';
 
-        // Touch shared
-        \TheRat\SymDep\runCommand("touch $sharedPath/$file");
+        after('properties', 'deploy-on-test:properties');
+        after('install', 'deploy-on-test:update_code');
+        after('install', 'create_cache_dir');
+        after('install', 'shared');
+        after('install', 'writable');
+        after('install', 'assets');
+        after('install', 'vendors');
 
-        // Symlink shared dir to release dir
-        \TheRat\SymDep\runCommand("ln -nfs $sharedPath/$file {{release_path}}/$file");
-    }
-})->desc('Creating symlinks for shared files');
+        after('configure', 'assetic:dump');
+        after('configure', 'cache:warmup');
+        after('configure', 'database:migrate');
+        after('link', 'database:cache-clear');
+        break;
+    case \TheRat\SymDep\BUILD_TYPE_PROD:
+        require_once 'prod.php';
 
-/**
- * Create cache dir
- */
-task('symdep:create_cache_dir', function () {
-    // Set cache dir
-    env('cache_dir', '{{release_path}}/' . trim(get('var_dir'), '/') . '/cache');
+        after('properties', 'deploy-on-prod:properties');
+        after('properties', 'deploy-on-prod:update_code');
 
-    // Remove cache dir if it exist
-    \TheRat\SymDep\runCommand('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi');
+        after('install', 'create_cache_dir');
+        after('install', 'shared');
+        after('install', 'writable');
+        after('install', 'assets');
+        after('install', 'vendors');
 
-    // Create cache dir
-    \TheRat\SymDep\runCommand('mkdir -p {{cache_dir}}');
+        after('configure', 'assetic:dump');
+        after('configure', 'cache:warmup');
+        after('configure', 'database:migrate');
 
-    // Set rights
-    \TheRat\SymDep\runCommand("chmod -R g+w {{cache_dir}}");
-})->desc('Create cache dir');
+        after('link', 'deploy-on-prod:symlink');
+        after('link', 'database:cache-clear');
+        after('link', 'deploy-on-prod:cleanup');
 
-/**
- * Make writable dirs.
- */
-task('symdep:writable', function () {
-    $dirs = join(' ', get('writable_dirs'));
-
-    if (!empty($dirs)) {
-        \TheRat\SymDep\runCommand("cd {{release_path}} && chmod 777 $dirs");
-    }
-
-})->desc('Make writable dirs');
-
-/**
- * Installing vendors tasks.
- */
-task('symdep:vendors', function () {
-    if (\TheRat\SymDep\runCommand("if hash composer 2>/dev/null; then echo 'true'; fi")->toBool()) {
-        $composer = 'composer';
-    } else {
-        \TheRat\SymDep\runCommand("cd {{release_path}} && curl -sS https://getcomposer.org/installer | php");
-        $composer = 'php composer.phar';
-    }
-
-    $require = env('env') !== 'dev' ? '--no-dev' : '--dev';
-    $options = "--prefer-dist --optimize-autoloader --no-progress --no-interaction --quiet $require";
-
-    \TheRat\SymDep\runCommand(
-        "cd {{release_path}} && {{env_vars}} $composer install $options",
-        get('locally')
-    );
-
-    sleep(5);
-
-})->desc('Installing vendors');
-
-/**
- * Rollback to previous release.
- */
-task('rollback', function () {
-})->desc('Rollback to previous release');
-
-require_once 'local.php';
-require_once 'test.php';
-require_once 'prod.php';
+        after('rollback', 'deploy-on-prod:rollback');
+        break;
+    default:
+        throw new \RuntimeException('Invalid strategy value, must be D | T | P');
+}
