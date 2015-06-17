@@ -111,7 +111,7 @@ switch ($buildType) {
 
         before('link', 'link-before');
         before('link', 'properties');
-        after('link', 'deploy-on-prod:symlink');
+        after('link', 'deploy-on-prod:link');
         after('link', 'deploy-on-prod:cleanup');
         after('link', 'link-after');
 

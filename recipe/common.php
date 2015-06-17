@@ -1,6 +1,9 @@
 <?php
 task('properties', function () {
 
+    // Keep releases
+    set('keep_releases', 5);
+    
     // Composer install --no-dev
     env('composer_no_dev', true);
 

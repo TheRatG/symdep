@@ -4,6 +4,13 @@
  */
 task('deploy-on-prod:properties', function () {
 
+    // Deploy branch
+    $branch = input()->getArgument('branch');
+    if (!$branch) {
+        $branch = 'master';
+    }
+    env('branch', $branch);
+
     // Environment vars
     $env = 'prod';
     env('env_vars', "SYMFONY_ENV=$env");
@@ -12,7 +19,7 @@ task('deploy-on-prod:properties', function () {
 
     // Symfony shared files
     set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
-    
+
     env('current', function () {
         return run("readlink {{deploy_path}}/current")->toString();
     });
