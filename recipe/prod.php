@@ -4,6 +4,12 @@
  */
 task('deploy-on-prod:properties', function () {
 
+    // Environment vars
+    $env = 'prod';
+    env('env_vars', "SYMFONY_ENV=$env");
+    env('env', $env);
+    env('env_real', $env);
+
     // Symfony shared files
     set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
     
@@ -16,14 +22,6 @@ task('deploy-on-prod:properties', function () {
      * Return release path.
      */
     env('release_path', "{{deploy_path}}/releases/$release");
-
-    // Deploy branch
-    $branch = input()->getArgument('branch');
-    if ('default' == $branch) {
-        $branch = run('cd {{release_path}} && git rev-parse --abbrev-ref HEAD')
-            ->toString();
-    }
-    env('branch', $branch);
 
 })->desc('Preparing server for deploy');
 

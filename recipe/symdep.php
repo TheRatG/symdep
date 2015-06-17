@@ -5,7 +5,7 @@ use Symfony\Component\Console\Input\InputOption;
 /** @var Symfony\Component\Console\Input\InputDefinition $input */
 $inputDefinition = \Deployer\Deployer::get()->getConsole()->getDefinition();
 if (!$inputDefinition->hasArgument('stage')) {
-    $inputDefinition->addArgument(new InputArgument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.', 'local'));
+    $inputDefinition->addArgument(new InputArgument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.'));
 }
 if (!$inputDefinition->hasArgument('branch')) {
     $inputDefinition->addArgument(new InputArgument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch'));

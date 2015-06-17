@@ -14,6 +14,7 @@ task('project-update:properties', function () {
     $env = 'dev';
     env('env_vars', "SYMFONY_ENV=$env");
     env('env', $env);
+    env('env_real', $env);
 
     env('release_path', env('deploy_path'));
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
