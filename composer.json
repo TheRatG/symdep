@@ -30,7 +30,10 @@
         "psr-4": {"TheRat\\SymDep\\": "src/"}
     },
     "bin": [
-        "bin/symdep"
+        "bin/symdep",
+        "bin/update",
+        "bin/deploy_on_test",
+        "bin/deploy_on_prod"
     ],
     "config": {
         "bin-dir": "bin"
