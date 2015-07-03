@@ -20,16 +20,18 @@ task('deploy-on-prod:properties', function () {
     // Symfony shared files
     set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
 
-    env('current', function () {
-        return run("readlink {{deploy_path}}/current")->toString();
-    });
+    if (!\Deployer\Task\Context::get()->getEnvironment()->has('current')) {
+        $current = run("readlink {{deploy_path}}/current")->toString();
+        env('current', $current);
+    }
 
-    $release = date('YmdHis');
-    /**
-     * Return release path.
-     */
-    env('release_path', "{{deploy_path}}/releases/$release");
-
+    if (!\Deployer\Task\Context::get()->getEnvironment()->has('release_path')) {
+        $release = run('date +%Y%m%d%H%M%S');
+        /**
+         * Return release path.
+         */
+        env('release_path', "{{deploy_path}}/releases/$release");
+    }
 })->desc('Preparing server for deploy');
 
 /**
