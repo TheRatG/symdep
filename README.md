@@ -13,14 +13,11 @@ Often I execute a lot of  similar commands for update my local project, thats wh
 ## Requirements
 
 Any **symfony** project.
-PHP extension ssh2.
 
 ## Install
 
 ```bash
 composer require therat/symdep ~3.0
-composer require deployer/deployer ~3.0
-composer require phpseclib/phpseclib dev-master
 ```
 
 Create deploy.php file into your project
@@ -29,14 +26,5 @@ Create deploy.php file into your project
 cp vendor/therat/symdep/deploy.php.example deploy.php
 ```
 
-### Configure Mac Os
+## Extend tasks
 
-Install or update Mac Port https://www.macports.org/install.php
-
-```bash
-#install libssh2
-sudo port install libssh2
-
-#install PHP extension ssh2.
-sudo pecl install channel://pecl.php.net/ssh2-0.12
-```

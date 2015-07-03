@@ -1,0 +1,21 @@
+<?php
+set('repository', '<your_repository>.git');
+
+localServer('local')
+    ->user('vpak')
+    ->stage('local')
+    ->env('deploy_path', __DIR__);
+
+server('prod', '<prod_host>', 22)
+    ->user('<prod_user>')
+    ->stage('production')
+    ->env('deploy_path', '<project_path>');
+
+/**
+ * modify properties
+ */
+task('env', function () {
+    set('auto_migrate', false);
+});
+
+after('properties', 'env');
