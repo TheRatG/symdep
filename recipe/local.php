@@ -18,7 +18,7 @@ task('project-update:properties', function () {
 
     env('release_path', env('deploy_path'));
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
-
+    cd('{{release_path}}');
 })->desc('Preparing server for deploy');
 
 /**

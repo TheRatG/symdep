@@ -8,7 +8,7 @@ task('properties', function () {
     env('composer_no_dev', true);
 
     // Symfony shared dirs
-    set('shared_dirs', ['app/logs', 'web/uploads']);
+    set('shared_dirs', ['app/logs', 'web/uploads', 'app/sessions']);
 
     // Symfony writable dirs
     set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
@@ -196,7 +196,7 @@ task('vendors', function () {
     }
 
     $require = env('composer_no_dev') ? '--no-dev' : '--dev';
-    $options = "--prefer-dist --optimize-autoloader --no-progress --no-interaction --quiet $require";
+    $options = "--prefer-dist --optimize-autoloader --no-progress --no-interaction $require";
 
     run("cd {{release_path}} && {{env_vars}} $composer install $options");
 
@@ -207,8 +207,8 @@ task('vendors', function () {
  */
 task('assetic:dump', function () {
 
-    run('{{symfony_console}} assetic:dump --env={{env}} --quiet');
-    run('{{symfony_console}} assets:install --symlink --env={{env}} --quiet');
+    run('cd {{release_path}} && {{symfony_console}} assetic:dump --env={{env}}');
+    run('cd {{release_path}} && {{symfony_console}} assets:install --symlink --env={{env}}');
 
 })->desc('Dump assets');
 

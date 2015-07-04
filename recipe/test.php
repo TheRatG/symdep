@@ -17,7 +17,7 @@ task('deploy-on-test:properties', function () {
     env('env', $env);
 
     env('release_path', env()->parse('{{deploy_path}}') . "/releases/" . strtolower(env('branch')));
-
+    cd('{{release_path}}');
 })->desc('Preparing server for deploy');
 
 task('deploy-on-test:update_code', function () {

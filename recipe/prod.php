@@ -32,6 +32,7 @@ task('deploy-on-prod:properties', function () {
          */
         env('release_path', "{{deploy_path}}/releases/$release");
     }
+    cd('{{release_path}}');
 })->desc('Preparing server for deploy');
 
 /**
