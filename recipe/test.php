@@ -16,7 +16,11 @@ task('deploy-on-test:properties', function () {
     env('env_vars', "SYMFONY_ENV=$env");
     env('env', $env);
 
-    env('release_path', env()->parse('{{deploy_path}}') . "/releases/" . strtolower(env('branch')));
+    $releasePath = env()->parse('{{deploy_path}}') . "/releases/" . strtolower(env('branch'));
+    if (in_array('local', env('stages'))) {
+        $releasePath = env()->parse('{{deploy_path}}');
+    }
+    env('release_path', $releasePath);
     cd('{{release_path}}');
 })->desc('Preparing server for deploy');
 

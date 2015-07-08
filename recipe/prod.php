@@ -27,10 +27,11 @@ task('deploy-on-prod:properties', function () {
 
     if (!\Deployer\Task\Context::get()->getEnvironment()->has('release_path')) {
         $release = run('date +%Y%m%d%H%M%S');
-        /**
-         * Return release path.
-         */
-        env('release_path', "{{deploy_path}}/releases/$release");
+        $releasePath = env()->parse('{{deploy_path}}') . "/releases/" . $release;
+        if (in_array('local', env('stages'))) {
+            $releasePath = env()->parse('{{deploy_path}}');
+        }
+        env('release_path', $releasePath);
     }
     cd('{{release_path}}');
 })->desc('Preparing server for deploy');
