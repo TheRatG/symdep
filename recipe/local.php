@@ -11,10 +11,13 @@ task('project-update:properties', function () {
     set('shared_files', []);
 
     // Environment vars
-    $env = 'dev';
+    $env = \TheRat\SymDep\getBuildType();
+    env('env_real', $env);
+    if ('test' == $env && 'master' == env('branch')) {
+        $env = 'prod';
+    }
     env('env_vars', "SYMFONY_ENV=$env");
     env('env', $env);
-    env('env_real', $env);
 
     env('release_path', env('deploy_path'));
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
