@@ -8,7 +8,7 @@ localServer('local')
 
 server('prod', '<prod_host>', 22)
     ->user('<prod_user>')
-    ->stage('production')
+    ->stage('prod')
     ->env('deploy_path', '<project_path>');
 
 /**
