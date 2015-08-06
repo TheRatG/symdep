@@ -2,7 +2,6 @@
 set('repository', '<your_repository>.git');
 
 localServer('local')
-    ->user('vagrant')
     ->stage('local')
     ->env('deploy_path', __DIR__);
 
