@@ -8,6 +8,7 @@ localServer('local')
 
 server('prod', '<prod_host>', 22)
     ->user('<prod_user>')
+    ->identityFile()
     ->stage('prod')
     ->env('deploy_path', '<project_path>');
 
