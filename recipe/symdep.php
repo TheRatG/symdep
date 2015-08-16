@@ -67,7 +67,7 @@ switch ($buildType) {
         before('install', 'properties');
         after('install', 'deploy-on-test:update_code');
         after('install', 'create_cache_dir');
-        after('install', 'shared');
+        after('install', 'deploy-on-test:shared');
         after('install', 'writable');
         after('install', 'assets');
         after('install', 'install-after');
