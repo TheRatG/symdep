@@ -16,11 +16,7 @@ task('deploy-on-test:properties', function () {
     env('env_vars', "SYMFONY_ENV=$env");
     env('env', $env);
 
-    $releasePath = env()->parse('{{deploy_path}}') . "/releases/" . strtolower(env('branch'));
-    if (in_array('local', env('stages'))) {
-        $releasePath = env()->parse('{{deploy_path}}');
-    }
-    env('release_path', $releasePath);
+    env('release_path', env()->parse('{{deploy_path}}') . "/releases/" . strtolower(env('branch')));
     cd('{{release_path}}');
 })->desc('Preparing server for deploy');
 
@@ -36,3 +32,52 @@ task('deploy-on-test:update_code', function () {
         run("cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath");
     }
 })->desc('Updating code');
+
+/**
+ * Create symlinks for shared directories and files.
+ */
+task('deploy-on-test:shared', function () {
+    $sharedPath = "{{release_path}}/shared";
+
+    foreach (get('shared_dirs') as $dir) {
+        // Remove from source
+        run("if [ -d $(echo {{release_path}}/$dir) ]; then rm -rf {{release_path}}/$dir; fi");
+
+        // Create shared dir if it does not exist
+        run("mkdir -p $sharedPath/$dir");
+
+        // Create path to shared dir in release dir if it does not exist
+        // (symlink will not create the path and will fail otherwise)
+        run("mkdir -p `dirname {{release_path}}/$dir`");
+
+        // Symlink shared dir to release dir
+        run("ln -nfs $sharedPath/$dir {{release_path}}/$dir");
+    }
+
+    $masterSharedPath = $sharedPath;
+    if ('master' != env('branch')) {
+        $masterSharedPath = env()->parse('{{deploy_path}}') . "/releases/master";
+    }
+
+    $sharedFiles = get('shared_files');
+    $sharedFiles[] = 'app/config/_secret.yml';
+    foreach ($sharedFiles as $file) {
+        // Remove from source
+        run("if [ -f $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi");
+
+        // Create dir of shared file
+        run("mkdir -p $sharedPath/" . dirname($file));
+
+        //Copy master shared file
+        if (!\TheRat\SymDep\fileExists("$sharedPath/$file")
+            && \TheRat\SymDep\fileExists("$masterSharedPath/$file")
+        ) {
+            run("cp $masterSharedPath/$file $sharedPath/$file");
+        }
+        // Touch shared
+        run("touch $sharedPath/$file");
+
+        // Symlink shared dir to release dir
+        run("ln -nfs $sharedPath/$file {{release_path}}/$file");
+    }
+})->desc('Creating symlinks for shared files');
