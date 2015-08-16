@@ -201,6 +201,7 @@ task('vendors', function () {
     $options = "--prefer-dist --optimize-autoloader --no-progress --no-interaction $require";
 
     run("cd {{release_path}} && {{env_vars}} $composer install $options");
+    run("cd {{release_path}} && {{env_vars}} $composer dump-autoload");
 
 })->desc('Installing vendors');
 
