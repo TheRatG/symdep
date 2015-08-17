@@ -28,3 +28,15 @@ cp vendor/therat/symdep/deploy.php.example deploy.php
 
 ## Extend tasks
 
+### Modify properties
+
+Example 
+
+```
+task('env', function () {
+    set('auto_migrate', false);
+});
+
+after('properties', 'env');
+```
+
