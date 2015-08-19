@@ -1,22 +1,22 @@
 <?php
 namespace TheRat\SymDep;
 
-use Symfony\Component\Console\Input\ArgvInput;
 const BUILD_TYPE_DEV = 'dev';
 const BUILD_TYPE_TEST = 'test';
 const BUILD_TYPE_PROD = 'prod';
 
 function getBuildType()
 {
-    /** @var \Symfony\Component\Console\Input\InputDefinition $input */
-    $inputDefinition = \Deployer\Deployer::get()->getConsole()->getDefinition();
-    $input = new ArgvInput(null, $inputDefinition);
-    $firstLetter = strtolower($input->getOption('build-type'))[0];
-    $map = ['d' => BUILD_TYPE_DEV, 't' => BUILD_TYPE_TEST, 'p' => BUILD_TYPE_PROD];
-    if (array_key_exists($firstLetter, $map)) {
-        $result = $map[$firstLetter];
-    } else {
-        throw new \RuntimeException('Invalid strategy value, must be D | T | P');
+    $options = getopt('::', ['build-type::']);
+    $result = BUILD_TYPE_DEV;
+    if (array_key_exists('build-type', $options)) {
+        $firstLetter = strtolower($options['build-type'])[0];
+        $map = ['d' => BUILD_TYPE_DEV, 't' => BUILD_TYPE_TEST, 'p' => BUILD_TYPE_PROD];
+        if (array_key_exists($firstLetter, $map)) {
+            $result = $map[$firstLetter];
+        } else {
+            throw new \RuntimeException('Invalid strategy value, must be D | T | P');
+        }
     }
     return $result;
 }

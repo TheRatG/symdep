@@ -5,10 +5,10 @@ use Symfony\Component\Console\Input\InputOption;
 /** @var Symfony\Component\Console\Input\InputDefinition $input */
 $inputDefinition = \Deployer\Deployer::get()->getConsole()->getDefinition();
 if (!$inputDefinition->hasArgument('stage')) {
-    $inputDefinition->addArgument(new InputArgument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.'));
+    $inputDefinition->addArgument(new InputArgument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.', 'dev'));
 }
 if (!$inputDefinition->hasArgument('branch')) {
-    $inputDefinition->addArgument(new InputArgument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch'));
+    $inputDefinition->addArgument(new InputArgument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch', 'master'));
 }
 if (!$inputDefinition->hasOption('build-type')) {
     $inputDefinition->addOption(new InputOption('build-type', 't', \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'Deploy strategy (build type), D|T|P', \TheRat\SymDep\BUILD_TYPE_DEV));
