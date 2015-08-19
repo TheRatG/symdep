@@ -30,7 +30,7 @@
         "Herrera\\Box\\Compactor\\Php"
     ],
     "compression": "GZ",
-    "git-version": "3.0.1",
+    "git-version": "3.0.6",
     "main": "bin/symdep",
     "output": "symdep.phar",
     "stub": true,
