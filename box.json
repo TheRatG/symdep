@@ -3,6 +3,7 @@
     "files": [
         "LICENSE",
         "README.md",
+        "version",
         "vendor/autoload.php",
         "vendor/herrera-io/phar-update/res/schema.json"
     ],
