@@ -20,11 +20,14 @@ task('deploy-on-test:properties', function () {
     $sub = "/releases/" . strtolower(env('branch'));
     if (0 === strpos(strrev($deployPath), strrev($sub))) {
          $releasePath = $deployPath;
+        $deployPath = dirname(dirname($releasePath));
     } else {
         $releasePath = $deployPath . $sub;
     }
+    env('deploy_path', $deployPath);
     env('release_path', $releasePath);
     cd('{{release_path}}');
+
 })->desc('Preparing server for deploy');
 
 task('deploy-on-test:update_code', function () {
@@ -63,6 +66,7 @@ task('deploy-on-test:shared', function () {
 
     $masterSharedPath = $sharedPath;
     if ('master' != env('branch')) {
+        var_dump(env()->parse('{{deploy_path}}'));
         $masterSharedPath = env()->parse('{{deploy_path}}') . "/releases/master";
     }
 
