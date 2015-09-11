@@ -20,7 +20,9 @@ task('deploy-on-prod:properties', function () {
     // Symfony shared files
     set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
 
-    if (!\Deployer\Task\Context::get()->getEnvironment()->has('current')) {
+    if (!\Deployer\Task\Context::get()->getEnvironment()->has('current')
+        && \TheRat\SymDep\fileExists('{{deploy_path}}/current')
+    ) {
         $current = run("readlink {{deploy_path}}/current")->toString();
         env('current', $current);
     }
@@ -46,7 +48,7 @@ task('deploy-on-prod:update_code', function () {
     while (is_dir(env()->parse($releasePath)) && $i < 42) {
         $releasePath .= '.' . ++$i;
     }
-    run("mkdir $releasePath");
+    run("mkdir -p $releasePath");
     run("cd {{deploy_path}} && if [ -h release ]; then rm release; fi");
     run("ln -s $releasePath {{deploy_path}}/release");
 
