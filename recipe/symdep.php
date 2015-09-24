@@ -39,7 +39,7 @@ switch ($buildType) {
         after('properties', 'project-update:properties');
 
         before('install', 'install-before');
-        before('install', 'lock');
+//        before('install', 'lock');
         before('install', 'properties');
         after('install', 'project-update:update_code');
         after('install', 'create_cache_dir');
@@ -60,7 +60,7 @@ switch ($buildType) {
         before('link', 'link-before');
         before('link', 'properties');
         after('link', 'link-after');
-        after('link', 'unlock');
+//        after('link', 'unlock');
 
         break;
     case \TheRat\SymDep\BUILD_TYPE_TEST:
