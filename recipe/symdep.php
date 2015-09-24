@@ -16,6 +16,10 @@ if (!$inputDefinition->hasOption('build-type')) {
 if (!$inputDefinition->hasOption('composer-no-dev')) {
     $inputDefinition->addOption(new InputOption('composer-no-dev', 'C', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Composer --no-dev'));
 }
+if (!$inputDefinition->hasOption('lock-wait')) {
+    $inputDefinition->addOption(new InputOption('lock-wait', 'w', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Force lock'));
+}
+
 $buildType = \TheRat\SymDep\getBuildType();
 
 require_once 'common.php';
@@ -35,6 +39,7 @@ switch ($buildType) {
         after('properties', 'project-update:properties');
 
         before('install', 'install-before');
+        before('install', 'lock');
         before('install', 'properties');
         after('install', 'project-update:update_code');
         after('install', 'create_cache_dir');
@@ -55,6 +60,7 @@ switch ($buildType) {
         before('link', 'link-before');
         before('link', 'properties');
         after('link', 'link-after');
+        after('link', 'unlock');
 
         break;
     case \TheRat\SymDep\BUILD_TYPE_TEST:
@@ -64,6 +70,7 @@ switch ($buildType) {
         after('properties', 'deploy-on-test:properties');
 
         before('install', 'install-before');
+        before('install', 'lock');
         before('install', 'properties');
         after('install', 'deploy-on-test:update_code');
         after('install', 'create_cache_dir');
@@ -84,6 +91,8 @@ switch ($buildType) {
         before('link', 'link-before');
         before('link', 'properties');
         after('link', 'link-after');
+        after('link', 'unlock');
+
         break;
     case \TheRat\SymDep\BUILD_TYPE_PROD:
         require_once 'prod.php';
@@ -92,6 +101,7 @@ switch ($buildType) {
         after('properties', 'deploy-on-prod:properties');
 
         before('install', 'install-before');
+        before('install', 'lock');
         before('install', 'properties');
         after('install', 'deploy-on-prod:update_code');
         after('install', 'create_cache_dir');
@@ -114,6 +124,7 @@ switch ($buildType) {
         after('link', 'deploy-on-prod:link');
         after('link', 'deploy-on-prod:cleanup');
         after('link', 'link-after');
+        after('link', 'unlock');
 
         after('rollback', 'deploy-on-prod:rollback');
         break;

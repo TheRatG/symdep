@@ -4,4 +4,4 @@ cd "`dirname "$0"`"
 cd '../vendor/therat/symdep/bin'
 BIN_TARGET="`pwd`/symdep"
 cd "$SRC_DIR"
-"$BIN_TARGET" --build-type="test" deploy test "$@"
+"$BIN_TARGET" --build-type="test" --lock-wait deploy test "$@"

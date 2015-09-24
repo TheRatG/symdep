@@ -3,7 +3,7 @@ task('properties', function () {
 
     // Keep releases
     set('keep_releases', 5);
-    
+
     // Composer install --no-dev
     env('composer_no_dev', true);
 
@@ -36,6 +36,10 @@ task('properties', function () {
             ->toString();
     }
     env('branch', $branch);
+
+    env('lock_keep', 15);
+    env('lock_dir', '');
+    env('lock_wait', input()->getOption('lock-wait'));
 
 })->desc('1. Prepare environment properties');
 
@@ -244,3 +248,40 @@ task('database:cache-clear', function () {
         run('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug');
     }
 })->desc('Doctrine cache clear');
+
+task('lock', function () {
+    $lockWait = env('lock_wait');
+    $filename = env('lock_dir') . '/symdep.lock';
+    $locker = new \TheRat\SymDep\Locker($filename, env('lock_keep'));
+    $needLock = true;
+
+    if ($locker->isLocked()) {
+        if ($lockWait) {
+            writeln($locker->__toString());
+            $needLock = askConfirmation('Force deploy');
+        } else {
+            $needLock = false;
+        }
+    }
+
+    if ($needLock) {
+        $locker->lock([
+            'date' => trim(run('date -u')->toString()),
+            'user' => trim(run('whoami')->toString()),
+            'server' => trim(run('uname -a')->toString()),
+        ]);
+        if (isVerbose()) {
+            writeln(sprintf('Create lock file "%s"', $filename));
+        }
+    } else {
+        writeln($locker->__toString());
+        writeln('<error>Deploy process locked</error>');
+        exit(0);
+    }
+});
+
+task('unlock', function () {
+    $filename = env('lock_dir') . '/symdep.lock';
+    $locker = new \TheRat\SymDep\Locker($filename, env('lock_keep'));
+    $locker->unlock();
+});
