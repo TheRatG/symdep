@@ -274,7 +274,6 @@ task('lock', function () {
             writeln(sprintf('Create lock file "%s"', $filename));
         }
     } else {
-        writeln($locker->__toString());
         writeln('<error>Deploy process locked</error>');
         exit(0);
     }
