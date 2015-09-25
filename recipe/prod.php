@@ -37,7 +37,7 @@ task('deploy-on-prod:properties', function () {
     }
     cd('{{release_path}}');
 
-    env('lock_dir', env('release_path') . '/app/logs');
+    env('lock_dir', env('release_path'));
 })->desc('Preparing server for deploy');
 
 /**

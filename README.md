@@ -26,6 +26,8 @@ Create deploy.php file into your project
 cp vendor/therat/symdep/deploy.php.example deploy.php
 ```
 
+Add file `symdep.lock` to your `.gitignore`
+
 ## Extend tasks
 
 ### Modify properties
@@ -40,3 +42,4 @@ task('env', function () {
 after('properties', 'env');
 ```
 
+manifest  publish:gh-pages TheRatG/symdep -vvv

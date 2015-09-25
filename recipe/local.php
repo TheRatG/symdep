@@ -23,7 +23,7 @@ task('project-update:properties', function () {
     env('symfony_console', '{{release_path}}/' . trim(get('bin_dir'), '/') . '/console');
     cd('{{release_path}}');
 
-    env('lock_dir', env('release_path') . '/app/logs');
+    env('lock_dir', env('release_path'));
 })->desc('Preparing server for deploy');
 
 /**
