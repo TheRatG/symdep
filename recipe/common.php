@@ -289,3 +289,15 @@ task('unlock', function () {
     $locker = new \TheRat\SymDep\Locker($filename, env('lock_keep'));
     $locker->unlock();
 });
+
+/**
+ * Delete useless branches, which no in remote repository
+ */
+task('drop-branches', function () {
+    if ('test' != env('env_real')) {
+        throw new \RuntimeException('This command only for "test" build type');
+    }
+
+    $path = env('deploy_path') . '/releases';
+    writeln($path);
+});

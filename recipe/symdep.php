@@ -31,6 +31,11 @@ task('deploy', [
 ])
     ->desc('Default command, depend on --build-type=<[d]ev|[t]est|[p]rod>');
 
+task('drop-branches-from-test', [
+    'properties',
+    'drop-branches',
+])->desc('Delete useless branches, which no in remote repository');
+
 switch ($buildType) {
     case \TheRat\SymDep\BUILD_TYPE_DEV:
         require_once 'local.php';
@@ -131,3 +136,5 @@ switch ($buildType) {
     default:
         throw new \RuntimeException('Invalid strategy value, must be D | T | P');
 }
+
+
