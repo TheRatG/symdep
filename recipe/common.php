@@ -299,5 +299,35 @@ task('drop-branches', function () {
     }
 
     $path = env('deploy_path') . '/releases';
-    writeln($path);
+    $localBranches = run("ls $path")->toArray();
+
+    $remoteBranches = run("cd $path/master && git branch -r")->toArray();
+    array_walk($remoteBranches, function (&$item) {
+        $item = trim($item);
+        $item = substr($item, strpos($item, '/') + 1);
+        $item = explode(' ', $item)[0];
+        $item = strtolower($item);
+    });
+    $diff = array_diff($localBranches, $remoteBranches);
+
+    if (isVerbose()) {
+        writeln(sprintf('<info>Local dir: %s</info>', implode(', ', $localBranches)));
+        writeln(sprintf('<info>Remote branches: %s</info>', implode(', ', $remoteBranches)));
+        writeln(sprintf(
+            '<comment>Dir for delete: %s</comment>',
+            !empty($diff) ? implode(', ', $diff) : 'none'
+        ));
+    }
+
+    foreach ($diff as $deleteDir) {
+        $full = "$path/$deleteDir";
+        if (\TheRat\SymDep\dirExists($full)) {
+            $cmd = sprintf('rm -rf %s', escapeshellarg($full));
+            if (isVerbose() && askConfirmation("Do you want delete: $full")) {
+                run($cmd);
+            } else {
+                run($cmd);
+            }
+        }
+    }
 });
