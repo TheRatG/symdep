@@ -84,20 +84,25 @@ task('rollback', function () {
 })->desc('Delete deploy ');
 
 task('check_connection', function () {
+    \Deployer\Task\Context::get()->getServer()->connect();
+
     // Check if shell is POSIX-compliant
     try {
         cd(''); // To run command as raw.
-        run('echo $0');
+        $result = run('echo $0')->toString();
+        if ($result == 'stdin: is not a tty') {
+            throw new RuntimeException(
+                "Looks like ssh inside another ssh.\n" .
+                "Help: http://goo.gl/gsdLt9"
+            );
+        }
     } catch (\RuntimeException $e) {
-        /** @var \Symfony\Component\Console\Helper\FormatterHelper $formatter */
         $formatter = \Deployer\Deployer::get()->getHelper('formatter');
-
         $errorMessage = [
             "Shell on your server is not POSIX-compliant. Please change to sh, bash or similar.",
             "Usually, you can change your shell to bash by running: chsh -s /bin/bash",
         ];
         write($formatter->formatBlock($errorMessage, 'error', true));
-
         throw $e;
     }
 });
