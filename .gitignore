@@ -12,5 +12,6 @@
 !bin/update
 !bin/deploy_on_test
 !bin/deploy_on_prod
+!bin/drop_branches_from_test
 
 /manifest.phar
