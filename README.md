@@ -43,3 +43,23 @@ after('properties', 'env');
 ```
 
 manifest  publish:gh-pages TheRatG/symdep -vvv
+
+### Delete useless branch folder from test
+
+```bash
+./bin/drop_branches_from_test
+```
+
+You can extend task for delete old branch db
+
+```
+#file deploy.php
+/**
+ * delete old db
+ */
+task('drop-old-db', function () {
+    $path = env('deploy_path') . '/releases/master/app/console';
+    run($path . ' octava:branching:drop-old');
+});
+after('drop-branches-from-test', 'drop-old-db');
+```
