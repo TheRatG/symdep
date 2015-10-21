@@ -32,6 +32,7 @@ task('deploy-on-test:properties', function () {
     cd('{{release_path}}');
 
     env('lock_dir', env('deploy_path'));
+    env('current_path', env('release_path'));
 })->desc('Preparing server for deploy');
 
 task('deploy-on-test:update_code', function () {

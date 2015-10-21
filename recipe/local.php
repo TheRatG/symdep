@@ -24,6 +24,7 @@ task('project-update:properties', function () {
     cd('{{release_path}}');
 
     env('lock_dir', env('deploy_path'));
+    env('current_path', env('release_path'));
 })->desc('Preparing server for deploy');
 
 /**

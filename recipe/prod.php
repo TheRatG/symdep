@@ -38,6 +38,7 @@ task('deploy-on-prod:properties', function () {
     cd('{{release_path}}');
 
     env('lock_dir', env('deploy_path'));
+    env('current_path', env('deploy_path') . '/current');
 })->desc('Preparing server for deploy');
 
 /**
