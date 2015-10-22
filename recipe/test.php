@@ -37,14 +37,15 @@ task('deploy-on-test:properties', function () {
 
 task('deploy-on-test:update_code', function () {
     $releasePath = env('release_path');
+    $releasesDir = dirname($releasePath);
     $repository = get('repository');
     $branch = env('branch');
 
-    if (\TheRat\SymDep\dirExists($releasePath)) {
-        run("cd $releasePath && git pull origin $branch --quiet");
+    if (\TheRat\SymDep\dirExists($releasesDir)) {
+        run("cd $releasesDir && git pull origin $branch --quiet");
     } else {
-        run("mkdir -p $releasePath");
-        run("cd $releasePath && git clone -b $branch --depth 1 --recursive -q $repository $releasePath");
+        run("mkdir -p $releasesDir");
+        run("cd $releasesDir && git clone -b $branch --depth 1 --recursive -q $repository $releasePath");
     }
 })->desc('Updating code');
 
