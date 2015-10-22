@@ -71,7 +71,6 @@ task('deploy-on-test:shared', function () {
 
     $masterSharedPath = $sharedPath;
     if ('master' != env('branch')) {
-        var_dump(env()->parse('{{deploy_path}}'));
         $masterSharedPath = env()->parse('{{deploy_path}}') . "/releases/master";
     }
 

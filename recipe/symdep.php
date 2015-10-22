@@ -37,6 +37,7 @@ task('drop-branches-from-test', [
 ])->desc('Delete useless branches, which no in remote repository');
 
 switch ($buildType) {
+    case \TheRat\SymDep\BUILD_TYPE_UNIT_TEST:
     case \TheRat\SymDep\BUILD_TYPE_DEV:
         require_once 'local.php';
 

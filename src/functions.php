@@ -4,6 +4,7 @@ namespace TheRat\SymDep;
 const BUILD_TYPE_DEV = 'dev';
 const BUILD_TYPE_TEST = 'test';
 const BUILD_TYPE_PROD = 'prod';
+const BUILD_TYPE_UNIT_TEST = 'unit_test';
 
 function getBuildType()
 {
@@ -11,7 +12,12 @@ function getBuildType()
     $result = BUILD_TYPE_DEV;
     if (array_key_exists('build-type', $options)) {
         $firstLetter = strtolower($options['build-type'])[0];
-        $map = ['d' => BUILD_TYPE_DEV, 't' => BUILD_TYPE_TEST, 'p' => BUILD_TYPE_PROD];
+        $map = [
+            'd' => BUILD_TYPE_DEV,
+            'u' => BUILD_TYPE_UNIT_TEST,
+            't' => BUILD_TYPE_TEST,
+            'p' => BUILD_TYPE_PROD
+        ];
         if (array_key_exists($firstLetter, $map)) {
             $result = $map[$firstLetter];
         } else {
