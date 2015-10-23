@@ -42,7 +42,7 @@ task('deploy-on-test:update_code', function () {
     $branch = env('branch');
 
     if (\TheRat\SymDep\dirExists($releasePath)) {
-        run("cd $releasesDir && git pull origin $branch --quiet");
+        run("cd $releasePath && git pull origin $branch --quiet");
     } else {
         run("mkdir -p $releasesDir");
         run("cd $releasesDir && git clone -b $branch --depth 1 --recursive -q $repository $releasePath");
