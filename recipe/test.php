@@ -41,7 +41,7 @@ task('deploy-on-test:update_code', function () {
     $repository = get('repository');
     $branch = env('branch');
 
-    if (\TheRat\SymDep\dirExists($releasesDir)) {
+    if (\TheRat\SymDep\dirExists($releasePath)) {
         run("cd $releasesDir && git pull origin $branch --quiet");
     } else {
         run("mkdir -p $releasesDir");
