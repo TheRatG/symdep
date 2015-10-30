@@ -17,7 +17,7 @@ task('deploy-on-test:properties', function () {
     env('env', $env);
 
     // Composer install --no-dev
-    env('composer_no_dev', 'prod' === $env);
+    env('composer_no_dev', true);
 
     $deployPath = env()->parse('{{deploy_path}}');
     $sub = "/releases/" . strtolower(env('branch'));
