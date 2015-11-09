@@ -36,7 +36,7 @@ task('project-update:update_code', function () {
         $branch = run('cd {{release_path}} && git rev-parse --abbrev-ref HEAD')
             ->toString();
     }
-    $res = run("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)");
+    $res = trim(run("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)")->toString());
     if ($res) {
         run("git pull origin $branch 2>&1");
     } else {

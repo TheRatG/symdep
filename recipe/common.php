@@ -230,7 +230,7 @@ task('assetic:dump', function () {
  */
 task('cache:warmup', function () {
 
-    run('{{symfony_console}} cache:warmup  --env={{env}}');
+    run('{{symfony_console}} cache:warmup --env={{env}}');
 
 })->desc('Warm up cache');
 
