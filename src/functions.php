@@ -58,9 +58,13 @@ DOCHERE;
     run($command);
 
     if (is_null($mode)) {
-        $command = "ls -l '$srcFilename' | awk "
-            . "'{k=0;for(i=0;i<=8;i++)k+=((substr($1,i+2,1)~/[rwx]/)*2^(8-i));if(k)printf(\" %0o \",k);}' | sed";
-        $mode = trim(run($command)->toString());
+        try {
+            $command = "stat -c \"%a\" $srcFilename";
+            $mode = trim(run($command)->toString());
+        } catch (\Symfony\Component\Process\Exception\ProcessFailedException $e) {
+            $command = "stat -f \"%A\" $srcFilename";
+            $mode = trim(run($command)->toString());
+        }
     }
 
     $command = "chmod $mode $dstFilename";
