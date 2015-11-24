@@ -62,6 +62,7 @@ switch ($buildType) {
         after('configure', 'cache:warmup');
         after('configure', 'database:cache-clear');
         after('configure', 'configure-after');
+        after('configure', 'cache:clear');
 
         before('link', 'link-before');
         before('link', 'properties');
@@ -93,6 +94,7 @@ switch ($buildType) {
         after('configure', 'cache:warmup');
         after('configure', 'database:cache-clear');
         after('configure', 'configure-after');
+        after('configure', 'cache:clear');
 
         before('link', 'link-before');
         before('link', 'properties');
@@ -124,6 +126,7 @@ switch ($buildType) {
         after('configure', 'cache:warmup');
         after('configure', 'database:cache-clear');
         after('configure', 'configure-after');
+        after('configure', 'cache:clear');
 
         before('link', 'link-before');
         before('link', 'properties');

@@ -13,8 +13,10 @@ task('project-update:properties', function () {
     // Environment vars
     $env = \TheRat\SymDep\getBuildType();
     env('env_real', $env);
+    env('no_debug', false);
     if ('test' == $env && 'master' == env('branch')) {
         $env = 'prod';
+        env('no_debug', true);
     }
     env('env_vars', "SYMFONY_ENV=$env");
     env('env', $env);

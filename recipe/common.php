@@ -40,6 +40,7 @@ task('properties', function () {
     env('lock_keep', 15);
     env('lock_dir', '');
     env('lock_wait', input()->getOption('lock-wait'));
+    env('no_debug', false); //symfony console option
 
 })->desc('1. Prepare environment properties');
 
@@ -230,16 +231,28 @@ task('assetic:dump', function () {
  */
 task('cache:warmup', function () {
 
-    run('{{symfony_console}} cache:warmup --env={{env}}');
+    $noDebug = env('no_debug') ? ' --no-debug' : '';
+    run('{{symfony_console}} cache:warmup --env={{env}}' . $noDebug);
 
 })->desc('Warm up cache');
+
+/**
+ * Warm up cache
+ */
+task('cache:clear', function () {
+
+    $noDebug = env('no_debug') ? ' --no-debug' : '';
+    run('{{symfony_console}} cache:clear --env={{env}}' . $noDebug);
+
+})->desc('Clear cache');
 
 /**
  * Migrate database
  */
 task('database:migrate', function () {
     if (get('auto_migrate')) {
-        run('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-debug --no-interaction');
+        $noDebug = env('no_debug') ? ' --no-debug' : '';
+        run('{{symfony_console}} doctrine:migrations:migrate --env={{env}} --no-interaction' . $noDebug);
     }
 })->desc('Migrate database');
 
@@ -248,9 +261,10 @@ task('database:migrate', function () {
  */
 task('database:cache-clear', function () {
     if (get('doctrine_cache_clear')) {
-        run('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}} --no-debug');
-        run('{{symfony_console}} doctrine:cache:clear-query --env={{env}} --no-debug');
-        run('{{symfony_console}} doctrine:cache:clear-result --env={{env}} --no-debug');
+        $noDebug = env('no_debug') ? ' --no-debug' : '';
+        run('{{symfony_console}} doctrine:cache:clear-metadata --env={{env}}' . $noDebug);
+        run('{{symfony_console}} doctrine:cache:clear-query --env={{env}}' . $noDebug);
+        run('{{symfony_console}} doctrine:cache:clear-result --env={{env}}' . $noDebug);
     }
 })->desc('Doctrine cache clear');
 
