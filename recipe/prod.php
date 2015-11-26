@@ -16,6 +16,7 @@ task('deploy-on-prod:properties', function () {
     env('env_vars', "SYMFONY_ENV=$env");
     env('env', $env);
     env('env_real', $env);
+    env('no_debug', true);
 
     // Symfony shared files
     set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);

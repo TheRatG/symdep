@@ -12,12 +12,14 @@ task('deploy-on-test:properties', function () {
     $env = 'test';
     if ('master' == env('branch')) {
         $env = 'prod';
+        env('composer_no_dev', true);
+        env('no_debug', true);
+    } else {
+        env('composer_no_dev', input()->getOption('composer-no-dev'));
+        env('no_debug', false);
     }
     env('env_vars', "SYMFONY_ENV=$env");
     env('env', $env);
-
-    // Composer install --no-dev
-    env('composer_no_dev', true);
 
     $deployPath = env()->parse('{{deploy_path}}');
     $sub = "/releases/" . strtolower(env('branch'));

@@ -13,8 +13,10 @@ task('project-update:properties', function () {
     // Environment vars
     $env = \TheRat\SymDep\getBuildType();
     env('env_real', $env);
+    env('no_debug', false);
     if ('test' == $env && 'master' == env('branch')) {
         $env = 'prod';
+        env('no_debug', true);
     }
     env('env_vars', "SYMFONY_ENV=$env");
     env('env', $env);
@@ -36,10 +38,11 @@ task('project-update:update_code', function () {
         $branch = run('cd {{release_path}} && git rev-parse --abbrev-ref HEAD')
             ->toString();
     }
-    $res = run("git for-each-ref --format='%(upstream:short)' $(git symbolic-ref HEAD)");
+    $repository = get('repository');
+    $res = trim(run("git ls-remote $repository $(git symbolic-ref HEAD)")->toString());
     if ($res) {
         run("git pull origin $branch 2>&1");
     } else {
-        writeln("<comment>Found local git branch. Pulling skipped.</comment>");
+        writeln("<comment>Remote $branch not found</comment>");
     }
 })->desc('Updating code');

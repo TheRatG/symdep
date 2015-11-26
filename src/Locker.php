@@ -81,7 +81,7 @@ class Locker
             self::INFO_STATUS_KEY => null,
         ];
         if (fileExists($this->filename)) {
-            $content = trim((string)\TheRat\SymDep\runCommand("cat '$this->filename'"));
+            $content = trim(run("cat '$this->filename'")->toString());
             $data = json_decode($content, true);
             if ($data) {
                 $result = $data;
@@ -108,6 +108,6 @@ cat > "$this->filename" <<'_EOF'
 $content
 _EOF
 DOCHERE;
-        \TheRat\SymDep\runCommand($command);
+        run($command);
     }
 }

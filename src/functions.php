@@ -41,27 +41,34 @@ function generateFile($srcFilename, $dstFilename, $mode = null)
         throw new \RuntimeException(env()->parse("Src file '$srcFilename' does not exists"));
     }
     $command = "if [ -d \"$dstDir\" ]; then mkdir -p \"$dstDir\"; fi";
-    runCommand($command);
+    run($command);
 
     $dstDir = dirname($dstFilename);
     if (!dirExists($dstDir)) {
-        runCommand("mkdir -p \"$dstDir\"");
+        run("mkdir -p \"$dstDir\"");
     }
 
-    $content = runCommand("cat \"$srcFilename\"");
+    $content = run("cat \"$srcFilename\"");
     $content = env()->parse($content);
     $command = <<<DOCHERE
 cat > "$dstFilename" <<'_EOF'
 $content
 _EOF
 DOCHERE;
-    runCommand($command);
+    run($command);
+
+    if (is_null($mode)) {
+        try {
+            $command = "stat -c \"%a\" $srcFilename";
+            $mode = trim(run($command)->toString());
+        } catch (\Symfony\Component\Process\Exception\ProcessFailedException $e) {
+            $command = "stat -f \"%A\" $srcFilename";
+            $mode = trim(run($command)->toString());
+        }
+    }
 
     $command = "chmod $mode $dstFilename";
-    if (is_null($mode)) {
-        $command = "chmod --reference $srcFilename $dstFilename";
-    }
-    runCommand($command);
+    run($command);
 
     return $dstFilename;
 }
@@ -72,7 +79,7 @@ function generateFiles($srcDir, $dstDir)
     $dstDir = rtrim($dstDir, '/');
 
     $command = "find $srcDir -type f";
-    $templateFiles = runCommand($command)->toArray();
+    $templateFiles = run($command)->toArray();
 
     $result = [];
     foreach ($templateFiles as $src) {
@@ -86,26 +93,12 @@ function generateFiles($srcDir, $dstDir)
     return $result;
 }
 
-/**
- * @param $command
- * @return \Deployer\Type\Result|void
- */
-function runCommand($command)
-{
-    $locally = has('locally') ? get('locally') : false;
-    if ($locally) {
-        return runLocally($command);
-    } else {
-        return run($command);
-    }
-}
-
 function dirExists($dir)
 {
-    return runCommand("if [ -d \"$dir\" ]; then echo true; fi")->toBool();
+    return run("if [ -d \"$dir\" ]; then echo true; fi")->toBool();
 }
 
 function fileExists($filename)
 {
-    return runCommand("if [ -f \"$filename\" ]; then echo true; fi")->toBool();
+    return run("if [ -f \"$filename\" ]; then echo true; fi")->toBool();
 }
