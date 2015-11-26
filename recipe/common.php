@@ -357,16 +357,15 @@ task(
             $locker->lock(
                 [
                     'date' => trim(run('date -u')->toString()),
-                    'user' => trim(run('whoami')->toString()),
-                    'server' => trim(run('uname -a')->toString()),
+                    'user' => trim(runLocally('whoami')->toString()),
+                    'server' => trim(runLocally('uname -a')->toString()),
                 ]
             );
             if (isVerbose()) {
                 writeln(sprintf('Create lock file "%s"', $filename));
             }
         } else {
-            writeln('<error>Deploy process locked</error>');
-            exit(0);
+            throw new \RuntimeException('Deploy process locked');
         }
     }
 );
