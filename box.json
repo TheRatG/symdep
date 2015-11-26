@@ -1,5 +1,7 @@
 {
-    "directories": ["src/"],
+    "directories": [
+        "src/"
+    ],
     "files": [
         "LICENSE",
         "README.md",

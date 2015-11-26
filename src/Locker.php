@@ -41,6 +41,7 @@ class Locker
                 $result = true;
             }
         }
+
         return $result;
     }
 
@@ -87,6 +88,7 @@ class Locker
                 $result = $data;
             }
         }
+
         return $result;
     }
 
@@ -95,8 +97,9 @@ class Locker
         $info = $this->info();
         $result = [];
         foreach ($info as $key => $item) {
-            $result[] = $key . ': "' . $item . '""';
+            $result[] = $key.': "'.$item.'""';
         }
+
         return implode("\n", $result);
     }
 

@@ -10,6 +10,7 @@ class Application extends BaseApplication
     {
         $commands = parent::getDefaultCommands();
         $commands[] = $this->selfUpdateCommand();
+
         return $commands;
     }
 
@@ -18,6 +19,7 @@ class Application extends BaseApplication
         $selfUpdate = new Command('self-update');
         $selfUpdate->setDescription('Updates symdep.phar to the latest version');
         $selfUpdate->setManifestUri('https://raw.githubusercontent.com/TheRatG/symdep/gh-pages/manifest.json');
+
         return $selfUpdate;
     }
 }

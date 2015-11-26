@@ -14,8 +14,11 @@ server('prod', '<prod_host>', 22)
 /**
  * modify properties
  */
-task('env', function () {
-    set('auto_migrate', false);
-});
+task(
+    'env',
+    function () {
+        set('auto_migrate', false);
+    }
+);
 
 after('properties', 'env');

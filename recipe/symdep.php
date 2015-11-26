@@ -5,36 +5,68 @@ use Symfony\Component\Console\Input\InputOption;
 /** @var Symfony\Component\Console\Input\InputDefinition $input */
 $inputDefinition = \Deployer\Deployer::get()->getConsole()->getDefinition();
 if (!$inputDefinition->hasArgument('stage')) {
-    $inputDefinition->addArgument(new InputArgument('stage', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Run tasks only on this server or group of servers.', 'dev'));
+    $inputDefinition->addArgument(
+        new InputArgument(
+            'stage',
+            \Symfony\Component\Console\Input\InputArgument::OPTIONAL,
+            'Run tasks only on this server or group of servers.',
+            'dev'
+        )
+    );
 }
 if (!$inputDefinition->hasArgument('branch')) {
-    $inputDefinition->addArgument(new InputArgument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch'));
+    $inputDefinition->addArgument(
+        new InputArgument('branch', \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Release branch')
+    );
 }
 if (!$inputDefinition->hasOption('build-type')) {
-    $inputDefinition->addOption(new InputOption('build-type', 't', \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'Deploy strategy (build type), D|T|P', \TheRat\SymDep\BUILD_TYPE_DEV));
+    $inputDefinition->addOption(
+        new InputOption(
+            'build-type',
+            't',
+            \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED,
+            'Deploy strategy (build type), D|T|P',
+            \TheRat\SymDep\BUILD_TYPE_DEV
+        )
+    );
 }
 if (!$inputDefinition->hasOption('composer-no-dev')) {
-    $inputDefinition->addOption(new InputOption('composer-no-dev', 'C', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Composer --no-dev'));
+    $inputDefinition->addOption(
+        new InputOption(
+            'composer-no-dev',
+            'C',
+            \Symfony\Component\Console\Input\InputOption::VALUE_NONE,
+            'Composer --no-dev'
+        )
+    );
 }
 if (!$inputDefinition->hasOption('lock-wait')) {
-    $inputDefinition->addOption(new InputOption('lock-wait', 'w', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Force lock'));
+    $inputDefinition->addOption(
+        new InputOption('lock-wait', 'w', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Force lock')
+    );
 }
 
 $buildType = \TheRat\SymDep\getBuildType();
 
 require_once 'common.php';
 
-task('deploy', [
-    'install',
-    'configure',
-    'link',
-])
+task(
+    'deploy',
+    [
+        'install',
+        'configure',
+        'link',
+    ]
+)
     ->desc('Default command, depend on --build-type=<[d]ev|[t]est|[p]rod>');
 
-task('drop-branches-from-test', [
-    'properties',
-    'drop-branches',
-])->desc('Delete useless branches, which no in remote repository');
+task(
+    'drop-branches-from-test',
+    [
+        'properties',
+        'drop-branches',
+    ]
+)->desc('Delete useless branches, which no in remote repository');
 
 switch ($buildType) {
     case \TheRat\SymDep\BUILD_TYPE_UNIT_TEST:

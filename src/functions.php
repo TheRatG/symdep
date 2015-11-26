@@ -16,7 +16,7 @@ function getBuildType()
             'd' => BUILD_TYPE_DEV,
             'u' => BUILD_TYPE_UNIT_TEST,
             't' => BUILD_TYPE_TEST,
-            'p' => BUILD_TYPE_PROD
+            'p' => BUILD_TYPE_PROD,
         ];
         if (array_key_exists($firstLetter, $map)) {
             $result = $map[$firstLetter];
@@ -24,6 +24,7 @@ function getBuildType()
             throw new \RuntimeException('Invalid strategy value, must be D | T | P');
         }
     }
+
     return $result;
 }
 
@@ -90,6 +91,7 @@ function generateFiles($srcDir, $dstDir)
             $result[] = $dst;
         }
     }
+
     return $result;
 }
 

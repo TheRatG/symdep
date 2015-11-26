@@ -7,8 +7,8 @@
  */
 
 $loaded = false;
-$deployerDir = dirname(__DIR__) . '/vendor/deployer/deployer';
-foreach ([__DIR__ . '/../../../autoload.php', dirname(__DIR__) . '/vendor/autoload.php'] as $file) {
+$deployerDir = dirname(__DIR__).'/vendor/deployer/deployer';
+foreach ([__DIR__.'/../../../autoload.php', dirname(__DIR__).'/vendor/autoload.php'] as $file) {
     if (file_exists($file)) {
         require $file;
         $loaded = true;
@@ -17,23 +17,24 @@ foreach ([__DIR__ . '/../../../autoload.php', dirname(__DIR__) . '/vendor/autolo
 }
 
 if (!$loaded) {
-    fwrite(STDERR,
-        'You need to set up the project dependencies using the following commands:' . PHP_EOL .
-        'wget http://getcomposer.org/composer.phar' . PHP_EOL .
-        'php composer.phar install' . PHP_EOL
+    fwrite(
+        STDERR,
+        'You need to set up the project dependencies using the following commands:'.PHP_EOL.
+        'wget http://getcomposer.org/composer.phar'.PHP_EOL.
+        'php composer.phar install'.PHP_EOL
     );
     die(1);
 }
 
 // Recipe include path
-set_include_path(dirname(__DIR__) . '/vendor/deployer/deployer' . PATH_SEPARATOR . get_include_path());
-set_include_path(dirname(__DIR__) . '/../../deployer/deployer' . PATH_SEPARATOR . get_include_path());
+set_include_path(dirname(__DIR__).'/vendor/deployer/deployer'.PATH_SEPARATOR.get_include_path());
+set_include_path(dirname(__DIR__).'/../../deployer/deployer'.PATH_SEPARATOR.get_include_path());
 
 // Include function declarations
 require_once 'src/functions.php';
 
 // Init Deployer
-$console = new \TheRat\SymDep\Console\Application('SymDep', trim(file_get_contents(__DIR__ . '/../version')));
+$console = new \TheRat\SymDep\Console\Application('SymDep', trim(file_get_contents(__DIR__.'/../version')));
 $input = new \Symfony\Component\Console\Input\ArgvInput();
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 $deployer = new \Deployer\Deployer($console, $input, $output);
@@ -44,18 +45,20 @@ $userSpecifiedFile = null;
 
 if (isset($options['f'])) {
     $userSpecifiedFile = $options['f'];
-} else if (isset($options['file'])) {
-    $userSpecifiedFile = $options['file'];
+} else {
+    if (isset($options['file'])) {
+        $userSpecifiedFile = $options['file'];
+    }
 }
 
 if (empty($userSpecifiedFile)) {
-    $deployFile = getcwd() . '/deploy.php';
+    $deployFile = getcwd().'/deploy.php';
 } else {
-    $deployFile = ($userSpecifiedFile[0] === '/' ? '' : getcwd() . '/') . $userSpecifiedFile;
+    $deployFile = ($userSpecifiedFile[0] === '/' ? '' : getcwd().'/').$userSpecifiedFile;
 }
 
-require_once dirname(__DIR__) . '/src/functions.php';
-require_once dirname(__DIR__) . '/recipe/symdep.php';
+require_once dirname(__DIR__).'/src/functions.php';
+require_once dirname(__DIR__).'/recipe/symdep.php';
 
 if (is_file($deployFile) && is_readable($deployFile)) {
     require $deployFile;
