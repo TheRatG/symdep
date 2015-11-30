@@ -428,3 +428,11 @@ task(
         }
     }
 );
+
+task(
+    'release-info',
+    function () {
+        $releaseInfo = new \TheRat\SymDep\ReleaseInfo();
+        $releaseInfo->run();
+    }
+)->desc('Release info');

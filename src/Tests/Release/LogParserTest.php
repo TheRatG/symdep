@@ -1,7 +1,7 @@
 <?php
 namespace TheRat\SymDep\Tests\Release;
 
-use TheRat\SymDep\Release\LogParser;
+use TheRat\SymDep\ReleaseInfo\LogParser;
 
 class LogParserTest extends \PHPUnit_Framework_TestCase
 {
@@ -41,6 +41,15 @@ class LogParserTest extends \PHPUnit_Framework_TestCase
                 'OPTION-1894',
                 'OPTION-1869',
                 'DEV-193',
+            ],
+        ];
+
+        $data[] = [
+            [
+                '04fb235201128a26e1e67ad5a040296353ca23c1 ROBOFX-465: fixed styles for mobile-terminals\' links',
+            ],
+            [
+                'ROBOFX-465',
             ],
         ];
 

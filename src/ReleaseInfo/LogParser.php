@@ -1,5 +1,5 @@
 <?php
-namespace TheRat\SymDep\Release;
+namespace TheRat\SymDep\ReleaseInfo;
 
 class LogParser
 {
