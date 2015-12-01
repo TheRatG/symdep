@@ -138,6 +138,7 @@ switch ($buildType) {
         before('properties', 'check_connection');
         after('properties', 'deploy-on-prod:properties');
 
+        before('install', 'release-info-before');
         before('install', 'install-before');
         before('install', 'lock');
         before('install', 'properties');
@@ -164,6 +165,7 @@ switch ($buildType) {
         after('link', 'deploy-on-prod:cleanup');
         after('link', 'link-after');
         after('link', 'unlock');
+        after('link', 'release-info-after');
 
         after('rollback', 'deploy-on-prod:rollback');
         break;

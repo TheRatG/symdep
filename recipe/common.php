@@ -430,7 +430,7 @@ task(
 );
 
 task(
-    'release-info',
+    'release-info-before',
     function () {
         $releaseInfo = new \TheRat\SymDep\ReleaseInfo();
         $releaseInfo->run();
@@ -438,9 +438,9 @@ task(
 )->desc('Release info');
 
 task(
-    'release-change-jira-status',
+    'release-info-after',
     function () {
         $releaseInfo = new \TheRat\SymDep\ReleaseInfo();
-        $releaseInfo->changeJiraStatus();
+        $releaseInfo->showIssues();
     }
-)->desc('Release change jira status');
+)->desc('Release info');

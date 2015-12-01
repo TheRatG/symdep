@@ -7,6 +7,7 @@ use TheRat\SymDep\ReleaseInfo\LogParser;
 
 class ReleaseInfo
 {
+    const PARAMETER_JIRA_ISSUES = 'jira-issues';
     /**
      * @var string
      */
@@ -27,14 +28,6 @@ class ReleaseInfo
      */
     protected $jira;
 
-    /**
-     * @return string
-     */
-    public function getLocalDeployPath()
-    {
-        return $this->localDeployPath;
-    }
-
     public function __construct()
     {
         $jiraUrl = null;
@@ -50,6 +43,14 @@ class ReleaseInfo
         $this->setCurrentLink(env()->parse('{{deploy_path}}/current'));
         $this->localDeployPath = dirname(dirname(dirname(dirname(__DIR__))));
         $this->logParser = new LogParser();
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocalDeployPath()
+    {
+        return $this->localDeployPath;
     }
 
     /**
@@ -115,12 +116,8 @@ class ReleaseInfo
             if ($countTask && $this->getJira()) {
                 $issues = $this->getJira()->generateIssues($taskNameList);
                 if ($issues) {
-                    set('jira-issues', $issues);
-                    writeln('Jira:');
-                    foreach ($issues as $issue) {
-                        /** @var Issue $issue */
-                        writeln(" * ".$issue->__toString());
-                    }
+                    set(self::PARAMETER_JIRA_ISSUES, $issues);
+                    $this->showIssues();
                 }
             }
 
@@ -136,14 +133,14 @@ class ReleaseInfo
         }
     }
 
-    public function changeJiraStatus()
+    public function showIssues()
     {
-        $releasedStatus = 'Released';
-        if ($this->getJira()) {
-            $issues = $this->getJira()->generateIssues(['DEV-152']);
-
+        if (has(self::PARAMETER_JIRA_ISSUES)) {
+            $issues = get(self::PARAMETER_JIRA_ISSUES);
+            writeln('Jira:');
             foreach ($issues as $issue) {
-                $this->getJira()->changeStatus($issue, $releasedStatus);
+                /** @var Issue $issue */
+                writeln(" * ".$issue->__toString());
             }
         }
     }

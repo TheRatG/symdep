@@ -19,7 +19,7 @@ class Jira
         $this->url = $url;
         $this->credentials = $credentials;
 
-        $this->client = new Client();
+        $this->client = new Client($this->credentials);
     }
 
     /**
@@ -53,18 +53,5 @@ class Jira
         }
 
         return $result;
-    }
-
-    public function changeStatus(Issue $issue, $releasedStatus)
-    {
-        $data = [
-            "transition" => ['id' => 731],
-        ];
-        $url = $this->url.'/issue/'.$issue->getName().'/transitions?expand=transitions.fields';
-        $request = $this->client->post($url);
-        $request->setHeader('Content-type', 'application/json');
-        $request->setBody(json_encode($data));
-        $response = $request->getBody()->getContents();
-        $response = json_decode($response, true);
     }
 }
