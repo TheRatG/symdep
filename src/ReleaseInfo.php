@@ -160,7 +160,6 @@ class ReleaseInfo
     {
         $cmd = sprintf('cd %s && git rev-parse --verify HEAD', $this->getCurrentLink());
         $remoteRevision = trim(run($cmd)->toString());
-        $remoteRevision = '686005e4';
 
         runLocally('git pull origin master');
         $cmd = sprintf('git log %s..HEAD --pretty=format:"[%%h]|(%%cE): %%s"', $remoteRevision);
