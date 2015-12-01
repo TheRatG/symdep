@@ -436,3 +436,11 @@ task(
         $releaseInfo->run();
     }
 )->desc('Release info');
+
+task(
+    'release-change-jira-status',
+    function () {
+        $releaseInfo = new \TheRat\SymDep\ReleaseInfo();
+        $releaseInfo->changeJiraStatus();
+    }
+)->desc('Release change jira status');

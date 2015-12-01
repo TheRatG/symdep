@@ -1,8 +1,8 @@
 <?php
 namespace TheRat\SymDep;
 
-use TheRat\SymDep\ReleaseInfo\Jira;
 use TheRat\SymDep\ReleaseInfo\Issue;
+use TheRat\SymDep\ReleaseInfo\Jira;
 use TheRat\SymDep\ReleaseInfo\LogParser;
 
 class ReleaseInfo
@@ -107,25 +107,44 @@ class ReleaseInfo
             );
             writeln($info);
 
+            writeln('Git log:');
+            foreach ($log as $item) {
+                writeln(" * ".$item);
+            }
+
             if ($countTask && $this->getJira()) {
                 $issues = $this->getJira()->generateIssues($taskNameList);
-                foreach ($issues as $issue) {
-                    /** @var Issue $issue */
-                    $message = sprintf(
-                        '[%s] %s (%s, %s)',
-                        $issue->getName(),
-                        $issue->getTitle(),
-                        $issue->getAssignee(),
-                        $issue->getStatus()
-                    );
-                    writeln(" * ".$message);
+                if ($issues) {
+                    set('jira-issues', $issues);
+                    writeln('Jira:');
+                    foreach ($issues as $issue) {
+                        /** @var Issue $issue */
+                        writeln(" * ".$issue->__toString());
+                    }
                 }
             }
 
-            askConfirmation('Would you like to continue deploy on prod');
+            writeln('');
+            if (askConfirmation('Would you like to continue deploy on prod')) {
+
+            } else {
+                throw new \RunTimeException('Deploy canceled');
+            }
         } else {
             $message = 'There are no changes between current directory and remote';
             throw new \RuntimeException($message);
+        }
+    }
+
+    public function changeJiraStatus()
+    {
+        $releasedStatus = 'Released';
+        if ($this->getJira()) {
+            $issues = $this->getJira()->generateIssues(['DEV-152']);
+
+            foreach ($issues as $issue) {
+                $this->getJira()->changeStatus($issue, $releasedStatus);
+            }
         }
     }
 
@@ -144,10 +163,10 @@ class ReleaseInfo
     {
         $cmd = sprintf('cd %s && git rev-parse --verify HEAD', $this->getCurrentLink());
         $remoteRevision = trim(run($cmd)->toString());
-//        $remoteRevision = '686005e4';
+        $remoteRevision = '686005e4';
 
         runLocally('git pull origin master');
-        $cmd = sprintf('git log %s..HEAD --pretty=oneline', $remoteRevision);
+        $cmd = sprintf('git log %s..HEAD --pretty=format:"[%%h]|(%%cE): %%s"', $remoteRevision);
         $log = runLocally($cmd)->toArray();
 
         return $log;

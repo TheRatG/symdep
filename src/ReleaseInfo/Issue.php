@@ -66,4 +66,15 @@ class Issue
     {
         return $this->title;
     }
+
+    public function __toString()
+    {
+        return sprintf(
+            '[%s] %s (%s, %s)',
+            $this->getName(),
+            $this->getTitle(),
+            $this->getAssignee(),
+            $this->getStatus()
+        );
+    }
 }
