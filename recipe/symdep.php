@@ -107,7 +107,6 @@ switch ($buildType) {
         after('properties', 'deploy-on-test:properties');
 
         before('install', 'install-before');
-        before('install', 'lock');
         before('install', 'properties');
         after('install', 'deploy-on-test:update_code');
         after('install', 'create_cache_dir');
@@ -129,7 +128,6 @@ switch ($buildType) {
         before('link', 'link-before');
         before('link', 'properties');
         after('link', 'link-after');
-        after('link', 'unlock');
 
         break;
     case \TheRat\SymDep\BUILD_TYPE_PROD:
