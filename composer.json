@@ -12,9 +12,6 @@
         "kherge/amend": "^3.0",
         "guzzlehttp/guzzle": "^6.0"
     },
-    "suggest": {
-        "ext-ssh2": "Need for deployer"
-    },
     "license": "MIT",
     "authors": [
         {
