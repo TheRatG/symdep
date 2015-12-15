@@ -432,15 +432,19 @@ task(
 task(
     'release-info-before',
     function () {
-        $releaseInfo = new \TheRat\SymDep\ReleaseInfo();
-        $releaseInfo->run();
+        if (\TheRat\SymDep\dirExists(env()->parse('{{deploy_path}}/current'))) {
+            $releaseInfo = new \TheRat\SymDep\ReleaseInfo();
+            $releaseInfo->run();
+        }
     }
 )->desc('Release info');
 
 task(
     'release-info-after',
     function () {
-        $releaseInfo = new \TheRat\SymDep\ReleaseInfo();
-        $releaseInfo->showIssues();
+        if (\TheRat\SymDep\dirExists(env()->parse('{{deploy_path}}/current'))) {
+            $releaseInfo = new \TheRat\SymDep\ReleaseInfo();
+            $releaseInfo->showIssues();
+        }
     }
 )->desc('Release info');
