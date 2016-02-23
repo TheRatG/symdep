@@ -259,7 +259,7 @@ task(
             $composer = 'php composer.phar';
         }
 
-        $require = env('composer_no_dev') ? '--no-dev' : '--dev';
+        $require = env('composer_no_dev') ? '--no-dev' : '';
         $options = "--prefer-dist --optimize-autoloader --no-progress --no-interaction $require";
 
         run("cd {{release_path}} && {{env_vars}} $composer install $options");
