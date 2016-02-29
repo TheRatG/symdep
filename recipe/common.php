@@ -167,7 +167,6 @@ task(
         }
 
         $sharedFiles = get('shared_files');
-        $sharedFiles[] = 'app/config/_secret.yml';
         foreach ($sharedFiles as $file) {
             // Remove from source
             run("if [ -f $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi");

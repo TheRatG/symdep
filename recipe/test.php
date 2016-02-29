@@ -86,7 +86,6 @@ task(
         }
 
         $sharedFiles = get('shared_files');
-        $sharedFiles[] = 'app/config/_secret.yml';
         foreach ($sharedFiles as $file) {
             // Remove from source
             run("if [ -f $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi");
@@ -105,6 +104,10 @@ task(
 
             // Symlink shared dir to release dir
             run("ln -nfs $sharedPath/$file {{release_path}}/$file");
+        }
+
+        if (!\TheRat\SymDep\fileExists('{{release_path}}/app/config/_secret.yml')) {
+            run('touch {{release_path}}/app/config/_secret.yml');
         }
     }
 )->desc('Creating symlinks for shared files');
