@@ -389,9 +389,11 @@ task(
         }
 
         $path = env('deploy_path').'/releases';
+        $masterPath = $path.'/master';
         $localBranches = run("ls $path")->toArray();
 
-        $remoteBranches = run("cd $path/master && git branch -r")->toArray();
+        run("cd $masterPath && git fetch && git fetch -p");
+        $remoteBranches = run("cd $masterPath && git branch -r")->toArray();
         array_walk(
             $remoteBranches,
             function (&$item) {
