@@ -38,14 +38,30 @@ task(
 task(
     'project-update:update_code',
     function () {
+        $localBranch = env('local_branch');
         $branch = env('branch');
-        if (false === $branch) {
-            $branch = run('cd {{release_path}} && git rev-parse --abbrev-ref HEAD')
-                ->toString();
+
+        if (empty($localBranch)) {
+            $localBranch = runLocally('git rev-parse --abbrev-ref HEAD')->toString();
         }
+
+        if (empty($branch)) {
+            $branch = $localBranch;
+        }
+
         $repository = get('repository');
         $res = trim(run("git ls-remote $repository $(git symbolic-ref HEAD)")->toString());
+
         if ($res) {
+            $msg = sprintf(
+                'Local "%s" and input "%s" branches are different! There will be merge.',
+                $localBranch,
+                $branch
+            );
+            if ($branch != $localBranch && !askConfirmation($msg)) {
+                throw  new \RuntimeException('Deploy canceled');
+            }
+
             run("git pull origin $branch 2>&1");
         } else {
             writeln("<comment>Remote $branch not found</comment>");

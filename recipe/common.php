@@ -33,10 +33,12 @@ task(
 
         // Deploy branch
         $branch = input()->getArgument('branch');
+        $localBranch = runLocally('git rev-parse --abbrev-ref HEAD')->toString();
         if (!$branch) {
-            $branch = runLocally('git rev-parse --abbrev-ref HEAD')
-                ->toString();
+            $branch = $localBranch;
         }
+
+        env('local_branch', $localBranch);
         env('branch', $branch);
 
         env('lock_keep', 15);
@@ -167,6 +169,7 @@ task(
         }
 
         $sharedFiles = get('shared_files');
+        $sharedFiles[] = 'app/config/_secret.yml';
         foreach ($sharedFiles as $file) {
             // Remove from source
             run("if [ -f $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi");
@@ -389,11 +392,9 @@ task(
         }
 
         $path = env('deploy_path').'/releases';
-        $masterPath = $path.'/master';
         $localBranches = run("ls $path")->toArray();
 
-        run("cd $masterPath && git fetch && git fetch -p");
-        $remoteBranches = run("cd $masterPath && git branch -r")->toArray();
+        $remoteBranches = run("cd $path/master && git branch -r")->toArray();
         array_walk(
             $remoteBranches,
             function (&$item) {
