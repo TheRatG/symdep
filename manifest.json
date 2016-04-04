@@ -1,6 +1,12 @@
 [
     {
         "name": "symdep.phar",
+        "sha1": "553b28c747340ef86273b15b94e0a2ed825a4d8f",
+        "url": "https://github.com/TheRatG/symdep/releases/download/3.1.2/symdep.phar",
+        "version": "3.1.2"
+    },
+    {
+        "name": "symdep.phar",
         "sha1": "b2e39903987b944b5927d2377820ded8a4b58569",
         "url": "https://github.com/TheRatG/symdep/releases/download/3.1.1/symdep.phar",
         "version": "3.1.1"
