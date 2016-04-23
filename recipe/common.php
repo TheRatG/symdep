@@ -257,12 +257,13 @@ task(
         if (run("if hash composer 2>/dev/null; then echo 'true'; fi")->toBool()) {
             $composer = 'composer';
         } else {
-            run("cd {{release_path}} && curl -sS https://getcomposer.org/installer | php");
+            run('cd {{release_path}} && curl -sS https://getcomposer.org/installer | php');
             $composer = 'php composer.phar';
         }
 
-        $require = env('composer_no_dev') ? '--no-dev' : '';
-        $options = "--prefer-dist --optimize-autoloader --no-progress --no-interaction $require";
+        $options = '--optimize-autoloader --no-progress --no-interaction';
+        $options .= env('composer_no_dev') ? ' --no-dev' : '';
+        $options .= 'dev' == env('env') ? ' --prefer-source' : ' --prefer-dist';
 
         run("cd {{release_path}} && {{env_vars}} $composer install $options");
         run("cd {{release_path}} && {{env_vars}} $composer dump-autoload");
