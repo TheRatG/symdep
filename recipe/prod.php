@@ -2,6 +2,8 @@
 /**
  * Preparing server for deployment.
  */
+use TheRat\SymDep\FileHelper;
+
 task(
     'deploy-on-prod:properties',
     function () {
@@ -15,7 +17,7 @@ task(
 
         // Environment vars
         $env = 'prod';
-        env('env_vars', "SYMFONY_ENV=$env");
+        env('env_vars', 'SYMFONY_ENV='.$env);
         env('env', $env);
         env('env_real', $env);
         env('no_debug', true);
@@ -24,7 +26,7 @@ task(
         set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
 
         if (!\Deployer\Task\Context::get()->getEnvironment()->has('current')
-            && \TheRat\SymDep\fileExists('{{deploy_path}}/current')
+            && FileHelper::fileExists('{{deploy_path}}/current')
         ) {
             $current = run("readlink {{deploy_path}}/current")->toString();
             env('current', $current);

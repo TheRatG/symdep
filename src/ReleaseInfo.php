@@ -83,7 +83,7 @@ class ReleaseInfo
      */
     public function setCurrentLink($currentLink)
     {
-        if (!\TheRat\SymDep\dirExists($currentLink)) {
+        if (!FileHelper::dirExists($currentLink)) {
             throw new \RuntimeException('Current link "'.$currentLink.'" does not exists');
         }
         $this->currentLink = $currentLink;
@@ -125,7 +125,7 @@ class ReleaseInfo
             if (askConfirmation('Would you like to continue deploy on prod')) {
 
             } else {
-                throw new \RunTimeException('Deploy canceled');
+                throw new \RuntimeException('Deploy canceled');
             }
         } else {
             $message = 'There are no changes between current directory and remote';

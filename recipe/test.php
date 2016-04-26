@@ -2,6 +2,8 @@
 /**
  * Preparing server for deployment.
  */
+use TheRat\SymDep\FileHelper;
+
 task(
     'deploy-on-test:properties',
     function () {
@@ -48,7 +50,7 @@ task(
         $repository = get('repository');
         $branch = env('branch');
 
-        if (\TheRat\SymDep\dirExists($releasePath)) {
+        if (FileHelper::dirExists($releasePath)) {
             run("cd $releasePath && git pull origin $branch --quiet");
         } else {
             run("mkdir -p $releasesDir");
@@ -94,8 +96,8 @@ task(
             run("mkdir -p $sharedPath/".dirname($file));
 
             //Copy master shared file
-            if (!\TheRat\SymDep\fileExists("$sharedPath/$file")
-                && \TheRat\SymDep\fileExists("$masterSharedPath/$file")
+            if (!FileHelper::fileExists("$sharedPath/$file")
+                && FileHelper::fileExists("$masterSharedPath/$file")
             ) {
                 run("cp $masterSharedPath/$file $sharedPath/$file");
             }
@@ -106,7 +108,7 @@ task(
             run("ln -nfs $sharedPath/$file {{release_path}}/$file");
         }
 
-        if (!\TheRat\SymDep\fileExists('{{release_path}}/app/config/_secret.yml')) {
+        if (!FileHelper::fileExists('{{release_path}}/app/config/_secret.yml')) {
             run('touch {{release_path}}/app/config/_secret.yml');
         }
     }
