@@ -76,7 +76,7 @@ DOCHERE;
         $result = [];
         foreach ($templateFiles as $src) {
             $name = str_replace($srcDir, '', $src);
-            $dst = sprintf(' % s % s', $dstDir, $name);
+            $dst = sprintf('%s%s', $dstDir, $name);
             $res = self::generateFile($src, $dst, null);
             if ($res) {
                 $result[] = $dst;

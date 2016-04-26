@@ -12,24 +12,22 @@ class UpdateConfig
      *
      * @param string $srcFilename
      * @param string $dstFilename
+     * @return bool
      */
     public static function updateNginx($srcFilename, $dstFilename)
     {
-        if (!$srcFilename) {
-            writeln('Env "nginx_src_filename" is not defined');
-
-            return;
+        if (empty($srcFilename)) {
+            throw new \InvalidArgumentException('Invalid argument $srcFilename, must be not empty');
+        }
+        if (empty($dstFilename)) {
+            throw new \InvalidArgumentException('Invalid argument $dstFilename, must be not empty');
         }
         if (!FileHelper::fileExists($srcFilename)) {
             throw new \RuntimeException(
                 sprintf('File nginx_src_filename:"%s" not found', $srcFilename)
             );
         }
-        if (!$dstFilename) {
-            writeln('Env "nginx_dst_filename" is not defined');
 
-            return;
-        }
         $backupDir = env('backup_dir', '');
         $backupDir = $backupDir ?: '{{deploy_path}}/backup/nginx';
 
@@ -45,27 +43,31 @@ class UpdateConfig
             sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo "true"; fi', $backupFilename, $srcFilename)
         )->toBool();
 
+        $result = false;
         if ($diff) {
             run(sprintf('cp "%s" "%s"', $srcFilename, $dstFilename));
             !isVerbose() ?: writeln(run(sprintf('cat %s', $dstFilename))->getOutput());
+            $result = true;
         } else {
             !isVerbose() ?: writeln('Nginx has no diff');
             run('rm '.$backupFilename);
         }
+
+        return $result;
     }
 
     /**
      * Update user crontab
      *
      * @param string $srcFilename
+     * @return bool
      */
     public static function updateCrontab($srcFilename)
     {
-        if (!$srcFilename) {
-            writeln('Env "crontab_filename" is not defined');
-
-            return;
+        if (empty($srcFilename)) {
+            throw new \InvalidArgumentException('Invalid argument $srcFilename, must be not empty');
         }
+
         if (!FileHelper::fileExists(env('crontab_filename'))) {
             throw new \RuntimeException(
                 sprintf(
@@ -94,12 +96,17 @@ class UpdateConfig
             sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo "true"; fi', $backupFilename, $sourceFilename)
         )->toBool();
 
+        $result = false;
         if ($diff) {
             run(sprintf('crontab "%s"', $sourceFilename));
             !isVerbose() ?: writeln(run('crontab -l')->getOutput());
+
+            $result = true;
         } else {
             !isVerbose() ?: writeln('Crontab has no diff');
             run('rm '.$backupFilename);
         }
+
+        return $result;
     }
 }
