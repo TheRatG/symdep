@@ -451,3 +451,76 @@ task(
         }
     }
 )->desc('Release info');
+
+task(
+    'crontab',
+    function () {
+        if (!env('crontab_filename')) {
+            writeln('Env "crontab_filename" is not defined');
+
+            return;
+        }
+        $sourceFilename = env('crontab_filename');
+        $backupDir = env('backup_dir', '');
+        $backupDir = $backupDir ?: '{{deploy_path}}/backup/crontab';
+
+        if (!\TheRat\SymDep\dirExists($backupDir)) {
+            run('mkdir -p '.$backupDir);
+            !isVerbose() ?: writeln(sprintf('Backup dir "%s" created', $backupDir));
+        }
+
+        $backupFilename = sprintf('%s/crontab.%s', $backupDir, date('Y-m-d_H:i:s'));
+        run(sprintf('crontab -l > %s', $backupFilename));
+
+        $diff = run(sprintf('diff "%s" "%s"', $backupFilename, $sourceFilename))->toString();
+
+        if (!empty($diff)) {
+            run(sprintf('crontab "%s"', $sourceFilename));
+            !isVerbose() ?: writeln(run('crontab -l')->getOutput());
+        } else {
+            !isVerbose() ?: writeln('Crontab has no diff');
+            run('rm '.$backupFilename);
+        }
+    }
+);
+
+task(
+    'nginx',
+    function () {
+        if (!env('nginx_src_filename')) {
+            writeln('Env "nginx_src_filename" is not defined');
+
+            return;
+        }
+        if (!env('nginx_dst_filename')) {
+            writeln('Env "nginx_dst_filename" is not defined');
+
+            return;
+        }
+        $srcFilename = env('nginx_src_filename');
+        $dstFilename = env('nginx_dst_filename');
+        $backupDir = env('backup_dir', '');
+        $backupDir = $backupDir ?: '{{deploy_path}}/backup/nginx';
+
+        if (!\TheRat\SymDep\dirExists($backupDir)) {
+            run('mkdir -p '.$backupDir);
+            !isVerbose() ?: writeln(sprintf('Backup dir "%s" created', $backupDir));
+        }
+
+        $backupFilename = sprintf('%s/nginx.%s', $backupDir, date('Y-m-d_H:i:s'));
+        run(sprintf('cat %s > %s', $dstFilename, $backupFilename));
+
+
+        $diff = run(
+            sprintf('if ! diff -q %s %s > /dev/null  2>&1; then echo "true"; fi', $backupFilename, $srcFilename)
+        )->toBool();
+
+        if ($diff) {
+            run(sprintf('cp "%s" "%s"', $srcFilename, $dstFilename));
+            !isVerbose() ?: writeln(run(sprintf('cat %s', $dstFilename))->getOutput());
+        } else {
+            !isVerbose() ?: writeln('Nginx has no diff');
+            run('rm '.$backupFilename);
+        }
+    }
+);

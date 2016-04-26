@@ -68,6 +68,22 @@ task(
     ]
 )->desc('Delete useless branches, which no in remote repository');
 
+task(
+    'update-nginx',
+    [
+        'properties',
+        'nginx'
+    ]
+)->desc('Update nginx virtual host conf');
+
+task(
+    'update-crontab',
+    [
+        'properties',
+        'crontab'
+    ]
+)->desc('Update user crontab');
+
 switch ($buildType) {
     case \TheRat\SymDep\BUILD_TYPE_UNIT_TEST:
     case \TheRat\SymDep\BUILD_TYPE_DEV:
