@@ -57,7 +57,6 @@ if (empty($userSpecifiedFile)) {
     $deployFile = ($userSpecifiedFile[0] === '/' ? '' : getcwd().'/').$userSpecifiedFile;
 }
 
-require_once dirname(__DIR__).'/src/functions.php';
 require_once dirname(__DIR__).'/recipe/symdep.php';
 
 if (is_file($deployFile) && is_readable($deployFile)) {

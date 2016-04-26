@@ -1,4 +1,6 @@
 <?php
+use TheRat\SymDep\FileHelper;
+
 task(
     'properties',
     function () {
@@ -184,7 +186,7 @@ task(
             run("ln -nfs $sharedPath/$file {{release_path}}/$file");
         }
 
-        if (!\TheRat\SymDep\fileExists('{{release_path}}/app/config/_secret.yml')) {
+        if (!FileHelper::fileExists('{{release_path}}/app/config/_secret.yml')) {
             run('touch {{release_path}}/app/config/_secret.yml');
         }
     }
@@ -241,7 +243,7 @@ task(
         $time = date('Ymdhi.s');
 
         foreach ($assets as $dir) {
-            if (\TheRat\SymDep\dirExists($dir)) {
+            if (FileHelper::dirExists($dir)) {
                 run("find $dir -exec touch -t $time {} ';' &> /dev/null || true");
             }
         }
@@ -420,7 +422,7 @@ task(
 
         foreach ($diff as $deleteDir) {
             $full = "$path/$deleteDir";
-            if (\TheRat\SymDep\dirExists($full)) {
+            if (FileHelper::dirExists($full)) {
                 $cmd = sprintf('rm -rf %s', escapeshellarg($full));
                 if (isVerbose() && askConfirmation("Do you want delete: $full")) {
                     run($cmd);
@@ -435,7 +437,7 @@ task(
 task(
     'release-info-before',
     function () {
-        if (\TheRat\SymDep\dirExists(env()->parse('{{deploy_path}}/current'))) {
+        if (FileHelper::dirExists(env()->parse('{{deploy_path}}/current'))) {
             $releaseInfo = new \TheRat\SymDep\ReleaseInfo();
             $releaseInfo->run();
         }
@@ -445,7 +447,7 @@ task(
 task(
     'release-info-after',
     function () {
-        if (\TheRat\SymDep\dirExists(env()->parse('{{deploy_path}}/current'))) {
+        if (FileHelper::dirExists(env()->parse('{{deploy_path}}/current'))) {
             $releaseInfo = new \TheRat\SymDep\ReleaseInfo();
             $releaseInfo->showIssues();
         }
@@ -460,21 +462,35 @@ task(
 
             return;
         }
+        if (!FileHelper::fileExists(env('crontab_filename'))) {
+            throw new \RuntimeException(
+                sprintf(
+                    'File crontab_filename:"%s" not found',
+                    env()->parse('{{crontab_filename}}')
+                )
+            );
+        }
         $sourceFilename = env('crontab_filename');
         $backupDir = env('backup_dir', '');
         $backupDir = $backupDir ?: '{{deploy_path}}/backup/crontab';
 
-        if (!\TheRat\SymDep\dirExists($backupDir)) {
+        if (!FileHelper::dirExists($backupDir)) {
             run('mkdir -p '.$backupDir);
             !isVerbose() ?: writeln(sprintf('Backup dir "%s" created', $backupDir));
         }
 
         $backupFilename = sprintf('%s/crontab.%s', $backupDir, date('Y-m-d_H:i:s'));
-        run(sprintf('crontab -l > %s', $backupFilename));
+        if (run('if crontab -l > /dev/null 2>&1; then echo "true"; else echo \'false\'; fi')->toBool()) {
+            run(sprintf('crontab -l > %s', $backupFilename));
+        } else {
+            run(sprintf('touch %s', $backupFilename));
+        }
 
-        $diff = run(sprintf('diff "%s" "%s"', $backupFilename, $sourceFilename))->toString();
+        $diff = run(
+            sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo "true"; fi', $backupFilename, $sourceFilename)
+        )->toBool();
 
-        if (!empty($diff)) {
+        if ($diff) {
             run(sprintf('crontab "%s"', $sourceFilename));
             !isVerbose() ?: writeln(run('crontab -l')->getOutput());
         } else {
@@ -492,6 +508,14 @@ task(
 
             return;
         }
+        if (!FileHelper::fileExists(env('nginx_src_filename'))) {
+            throw new \RuntimeException(
+                sprintf(
+                    'File nginx_src_filename:"%s" not found',
+                    env()->parse('{{nginx_src_filename}}')
+                )
+            );
+        }
         if (!env('nginx_dst_filename')) {
             writeln('Env "nginx_dst_filename" is not defined');
 
@@ -502,7 +526,7 @@ task(
         $backupDir = env('backup_dir', '');
         $backupDir = $backupDir ?: '{{deploy_path}}/backup/nginx';
 
-        if (!\TheRat\SymDep\dirExists($backupDir)) {
+        if (!FileHelper::dirExists($backupDir)) {
             run('mkdir -p '.$backupDir);
             !isVerbose() ?: writeln(sprintf('Backup dir "%s" created', $backupDir));
         }
@@ -510,9 +534,8 @@ task(
         $backupFilename = sprintf('%s/nginx.%s', $backupDir, date('Y-m-d_H:i:s'));
         run(sprintf('cat %s > %s', $dstFilename, $backupFilename));
 
-
         $diff = run(
-            sprintf('if ! diff -q %s %s > /dev/null  2>&1; then echo "true"; fi', $backupFilename, $srcFilename)
+            sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo "true"; fi', $backupFilename, $srcFilename)
         )->toBool();
 
         if ($diff) {

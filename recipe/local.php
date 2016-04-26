@@ -2,6 +2,8 @@
 /**
  * Preparing server for deployment.
  */
+use TheRat\SymDep\BuildHelper;
+
 task(
     'project-update:properties',
     function () {
@@ -14,14 +16,14 @@ task(
         set('shared_dirs', []);
 
         // Environment vars
-        $env = \TheRat\SymDep\getBuildType();
+        $env = BuildHelper::getBuildType();
         env('env_real', $env);
         env('no_debug', false);
         if ('test' == $env && 'master' == env('branch')) {
             $env = 'prod';
             env('no_debug', true);
         }
-        env('env_vars', "SYMFONY_ENV=$env");
+        env('env_vars', 'SYMFONY_ENV='.$env);
         env('env', $env);
 
         env('release_path', env('deploy_path'));

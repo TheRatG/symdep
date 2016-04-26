@@ -5,4 +5,3 @@ set('repository', '<project_repository_url>');
 server('local', 'localhost', 22)
     ->stage('dev')
     ->env('deploy_path', __DIR__);
-

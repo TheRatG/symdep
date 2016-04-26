@@ -1,6 +1,7 @@
 <?php
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use TheRat\SymDep\BuildHelper;
 
 /** @var Symfony\Component\Console\Input\InputDefinition $input */
 $inputDefinition = \Deployer\Deployer::get()->getConsole()->getDefinition();
@@ -26,7 +27,7 @@ if (!$inputDefinition->hasOption('build-type')) {
             't',
             \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED,
             'Deploy strategy (build type), D|T|P',
-            \TheRat\SymDep\BUILD_TYPE_DEV
+            BuildHelper::TYPE_DEV
         )
     );
 }
@@ -46,7 +47,7 @@ if (!$inputDefinition->hasOption('lock-wait')) {
     );
 }
 
-$buildType = \TheRat\SymDep\getBuildType();
+$buildType = BuildHelper::getBuildType();
 
 require_once 'common.php';
 
@@ -72,7 +73,7 @@ task(
     'update-nginx',
     [
         'properties',
-        'nginx'
+        'nginx',
     ]
 )->desc('Update nginx virtual host conf');
 
@@ -80,13 +81,13 @@ task(
     'update-crontab',
     [
         'properties',
-        'crontab'
+        'crontab',
     ]
 )->desc('Update user crontab');
 
 switch ($buildType) {
-    case \TheRat\SymDep\BUILD_TYPE_UNIT_TEST:
-    case \TheRat\SymDep\BUILD_TYPE_DEV:
+    case BuildHelper::TYPE_UNIT_TEST:
+    case BuildHelper::TYPE_DEV:
         require_once 'local.php';
 
         before('properties', 'check_connection');
@@ -116,7 +117,7 @@ switch ($buildType) {
         after('link', 'link-after');
 
         break;
-    case \TheRat\SymDep\BUILD_TYPE_TEST:
+    case BuildHelper::TYPE_TEST:
         require_once 'test.php';
 
         before('properties', 'check_connection');
@@ -146,7 +147,7 @@ switch ($buildType) {
         after('link', 'link-after');
 
         break;
-    case \TheRat\SymDep\BUILD_TYPE_PROD:
+    case BuildHelper::TYPE_PROD:
         require_once 'prod.php';
 
         before('properties', 'check_connection');
