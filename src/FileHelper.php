@@ -5,6 +5,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 
 /**
  * Class FileHelper
+ *
  * @package TheRat\SymDep
  */
 class FileHelper
@@ -13,11 +14,25 @@ class FileHelper
      * @param string $srcFilename
      * @param string $dstFilename
      * @param string $mode
+     * @param array  $copyOnce
      * @return string
      */
-    public static function generateFile($srcFilename, $dstFilename, $mode = null)
+    public static function generateFile($srcFilename, $dstFilename, $mode = null, array $copyOnce = [])
     {
         $mode = !is_null($mode) ? (string) $mode : null;
+
+        $copyOnce = array_map(
+            function ($value) {
+                return env()->parse($value);
+            },
+            $copyOnce
+        );
+
+        if (in_array($srcFilename, $copyOnce) && fileExists($dstFilename)) {
+            !isDebug() ?: writeln(sprintf('File "%s" skipped, because is in copyOnce list', $srcFilename));
+
+            return '';
+        }
 
         $dstDir = dirname($dstFilename);
         if (!self::fileExists($srcFilename)) {
@@ -63,9 +78,10 @@ DOCHERE;
     /**
      * @param string $srcDir
      * @param string $dstDir
+     * @param array  $copyOnce
      * @return array
      */
-    public static function generateFiles($srcDir, $dstDir)
+    public static function generateFiles($srcDir, $dstDir, array $copyOnce = [])
     {
         $srcDir = rtrim($srcDir, ' / ');
         $dstDir = rtrim($dstDir, ' / ');

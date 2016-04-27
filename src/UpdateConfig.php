@@ -3,6 +3,7 @@ namespace TheRat\SymDep;
 
 /**
  * Class UpdateConfig
+ *
  * @package TheRat\SymDep
  */
 class UpdateConfig
@@ -10,8 +11,8 @@ class UpdateConfig
     /**
      * Update nginx config
      *
-     * @param string $srcFilename
-     * @param string $dstFilename
+     * @param  string $srcFilename
+     * @param  string $dstFilename
      * @return bool
      */
     public static function updateNginx($srcFilename, $dstFilename)
@@ -59,7 +60,7 @@ class UpdateConfig
     /**
      * Update user crontab
      *
-     * @param string $srcFilename
+     * @param  string $srcFilename
      * @return bool
      */
     public static function updateCrontab($srcFilename)

@@ -3,6 +3,7 @@ namespace TheRat\SymDep;
 
 /**
  * Class Locker
+ *
  * @package TheRat\SymDep
  */
 class Locker
@@ -15,8 +16,8 @@ class Locker
     const INFO_STATUS_KEY = 'status';
 
     /**
-     * @param string $filename
-     * @param int $keep Lock filename lifetime in minutes (default 15)
+     * @param string $filename Filename
+     * @param int    $keep     Lock filename lifetime in minutes (default 15)
      */
     public function __construct($filename, $keep = null)
     {
@@ -26,6 +27,7 @@ class Locker
 
     /**
      * Check lock file
+     *
      * @return bool
      */
     public function isLocked()
@@ -47,6 +49,7 @@ class Locker
 
     /**
      * Create lock file
+     *
      * @param array $additionalInfo
      */
     public function lock(array $additionalInfo = [])
@@ -82,7 +85,8 @@ class Locker
             self::INFO_STATUS_KEY => null,
         ];
         if (fileExists($this->filename)) {
-            $content = trim(run("cat '$this->filename'")->toString());
+            $cmd = sprintf('cat "%s"', $this->filename);
+            $content = trim(run($cmd)->toString());
             $data = json_decode($content, true);
             if ($data) {
                 $result = $data;
@@ -92,6 +96,9 @@ class Locker
         return $result;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         $info = $this->info();

@@ -5,6 +5,11 @@ use TheRat\SymDep\ReleaseInfo\Issue;
 use TheRat\SymDep\ReleaseInfo\Jira;
 use TheRat\SymDep\ReleaseInfo\LogParser;
 
+/**
+ * Class ReleaseInfo
+ *
+ * @package TheRat\SymDep
+ */
 class ReleaseInfo
 {
     const PARAMETER_JIRA_ISSUES = 'jira-issues';
@@ -28,6 +33,9 @@ class ReleaseInfo
      */
     protected $jira;
 
+    /**
+     * ReleaseInfo constructor.
+     */
     public function __construct()
     {
         $jiraUrl = null;
@@ -79,6 +87,7 @@ class ReleaseInfo
 
     /**
      * @param mixed $currentLink
+     *
      * @return self
      */
     public function setCurrentLink($currentLink)
@@ -91,6 +100,9 @@ class ReleaseInfo
         return $this;
     }
 
+    /**
+     *
+     */
     public function run()
     {
         $this->checkCurrentDeployDir();
@@ -110,7 +122,7 @@ class ReleaseInfo
 
             writeln('Git log:');
             foreach ($log as $item) {
-                writeln(" * ".$item);
+                writeln(' * '.$item);
             }
 
             if ($countTask && $this->getJira()) {
@@ -133,21 +145,29 @@ class ReleaseInfo
         }
     }
 
+    /**
+     *
+     */
     public function showIssues()
     {
         if (has(self::PARAMETER_JIRA_ISSUES)) {
             $issues = get(self::PARAMETER_JIRA_ISSUES);
             writeln('Jira:');
             foreach ($issues as $issue) {
-                /** @var Issue $issue */
-                writeln(" * ".$issue->__toString());
+                /**
+                 * @var Issue $issue
+                 */
+                writeln(' * '.$issue->__toString());
             }
         }
     }
 
+    /**
+     *
+     */
     protected function checkCurrentDeployDir()
     {
-        $cmd = sprintf("cd %s && git rev-parse --abbrev-ref HEAD", $this->getLocalDeployPath());
+        $cmd = sprintf('cd %s && git rev-parse --abbrev-ref HEAD', $this->getLocalDeployPath());
         if ('master' !== trim(runLocally($cmd)->toString())) {
             throw new \RuntimeException('Current deploy path is not master');
         }

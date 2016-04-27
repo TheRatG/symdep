@@ -23,7 +23,11 @@
                 "Tester",
                 "Tests",
                 "tests",
-                "yaml"
+                "yaml",
+                "leaphub/phpcs-symfony2-standard",
+                "phpro/grumphp",
+                "sensio/distribution-bundle",
+                "squizlabs/php_codesniffer"
             ],
             "in": ""
         }

@@ -3,6 +3,7 @@ namespace TheRat\SymDep;
 
 /**
  * Class BuildHelper
+ *
  * @package TheRat\SymDep
  */
 class BuildHelper
