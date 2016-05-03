@@ -11,12 +11,13 @@ class UpdateConfig
     /**
      * Update nginx config
      *
-     * @param  string $srcFilename
-     * @param  string $dstFilename
+     * @param string $srcFilename
+     * @param string $dstFilename
+     * @param null   $backupDir
      *
      * @return bool
      */
-    public static function updateNginx($srcFilename, $dstFilename)
+    public static function updateNginx($srcFilename, $dstFilename, $backupDir = null)
     {
         if (empty($srcFilename)) {
             throw new \InvalidArgumentException('Invalid argument $srcFilename, must be not empty');
@@ -30,7 +31,6 @@ class UpdateConfig
             );
         }
 
-        $backupDir = env('backup_dir', '');
         $backupDir = $backupDir ?: '{{deploy_path}}/backup/nginx';
 
         if (!FileHelper::dirExists($backupDir)) {
@@ -61,11 +61,12 @@ class UpdateConfig
     /**
      * Update user crontab
      *
-     * @param  string $sourceFilename
+     * @param string $sourceFilename
+     * @param null   $backupDir
      *
      * @return bool
      */
-    public static function updateCrontab($sourceFilename)
+    public static function updateCrontab($sourceFilename, $backupDir = null)
     {
         if (empty($sourceFilename)) {
             throw new \InvalidArgumentException('Invalid argument $srcFilename, must be not empty');
@@ -79,7 +80,6 @@ class UpdateConfig
                 )
             );
         }
-        $backupDir = env('backup_dir', '');
         $backupDir = $backupDir ?: '{{deploy_path}}/backup/crontab';
 
         if (!FileHelper::dirExists($backupDir)) {
