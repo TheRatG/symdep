@@ -115,11 +115,22 @@ DOCHERE;
 
     /**
      * @param string $filename
-     * @return mixed
+     * @return boolean
      */
     public static function fileExists($filename)
     {
         $cmd = sprintf('if [ -f "%s" ]; then echo true; fi', $filename);
+
+        return run($cmd)->toBool();
+    }
+
+    /**
+     * @param string $filename
+     * @return boolean
+     */
+    public static function isWritable($filename)
+    {
+        $cmd = sprintf('if [ -w "%s" ]; then echo true; fi', $filename);
 
         return run($cmd)->toBool();
     }
