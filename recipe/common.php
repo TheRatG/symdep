@@ -156,16 +156,13 @@ task(
         $sharedPath = "{{deploy_path}}/shared";
 
         foreach (get('shared_dirs') as $dir) {
-            // Remove from source
+            // Remove from source.
             run("if [ -d $(echo {{release_path}}/$dir) ]; then rm -rf {{release_path}}/$dir; fi");
-
-            // Create shared dir if it does not exist
+            // Create shared dir if it does not exist.
             run("mkdir -p $sharedPath/$dir");
-
-            // Create path to shared dir in release dir if it does not exist
+            // Create path to shared dir in release dir if it does not exist.
             // (symlink will not create the path and will fail otherwise)
             run("mkdir -p `dirname {{release_path}}/$dir`");
-
             // Symlink shared dir to release dir
             run("ln -nfs $sharedPath/$dir {{release_path}}/$dir");
         }
@@ -173,15 +170,15 @@ task(
         $sharedFiles = get('shared_files');
         $sharedFiles[] = 'app/config/_secret.yml';
         foreach ($sharedFiles as $file) {
-            // Remove from source
+            $dirname = dirname($file);
+            // Remove from source.
             run("if [ -f $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi");
-
+            // Ensure dir is available in release
+            run("if [ ! -d $(echo {{release_path}}/$dirname) ]; then mkdir -p {{release_path}}/$dirname;fi");
             // Create dir of shared file
-            run("mkdir -p $sharedPath/".dirname($file));
-
+            run("mkdir -p $sharedPath/".$dirname);
             // Touch shared
             run("touch $sharedPath/$file");
-
             // Symlink shared dir to release dir
             run("ln -nfs $sharedPath/$file {{release_path}}/$file");
         }
@@ -202,7 +199,7 @@ task(
         env('cache_dir', '{{release_path}}/'.trim(get('var_dir'), '/').'/cache');
 
         // Remove cache dir if it exist
-        run('if [ -d "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi');
+        run('if [ -f "{{cache_dir}}" ]; then rm -rf {{cache_dir}}; fi');
 
         // Create cache dir
         run('mkdir -p {{cache_dir}}');
