@@ -3,9 +3,18 @@ namespace TheRat\SymDep\Console;
 
 use Deployer\Console\Application as BaseApplication;
 use KevinGH\Amend\Command;
+use KevinGH\Amend\Helper;
 
+/**
+ * Class Application
+ *
+ * @package TheRat\SymDep\Console
+ */
 class Application extends BaseApplication
 {
+    /**
+     * @return array|\Symfony\Component\Console\Command\Command[]
+     */
     protected function getDefaultCommands()
     {
         $commands = parent::getDefaultCommands();
@@ -14,6 +23,9 @@ class Application extends BaseApplication
         return $commands;
     }
 
+    /**
+     * @return Command
+     */
     protected function selfUpdateCommand()
     {
         $selfUpdate = new Command('self-update');

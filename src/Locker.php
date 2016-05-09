@@ -84,7 +84,7 @@ class Locker
             self::INFO_UPDATED_AT_KEY => null,
             self::INFO_STATUS_KEY => null,
         ];
-        if (fileExists($this->filename)) {
+        if (FileHelper::fileExists($this->filename)) {
             $cmd = sprintf('cat "%s"', $this->filename);
             $content = trim(run($cmd)->toString());
             $data = json_decode($content, true);
