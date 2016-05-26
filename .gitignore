@@ -7,12 +7,5 @@
 /composer.phar
 /composer.lock
 
-/bin/*
-!bin/symdep
-!bin/update
-!bin/deploy_on_test
-!bin/deploy_on_prod
-!bin/drop_branches_from_test
-
 /manifest.phar
 /symdep.phar

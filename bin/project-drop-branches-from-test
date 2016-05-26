@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+REAL_PATH=`readlink -f "$0"`;
+DIR=`dirname "$REAL_PATH"`;
+BIN_TARGET="$DIR/symdep"
+
+SRC_DIR="`pwd`"
+cd "$SRC_DIR"
+"$BIN_TARGET" --build-type="test" drop-branches-from-test test "$@"
