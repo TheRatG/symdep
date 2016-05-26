@@ -37,9 +37,10 @@
     },
     "bin": [
         "bin/symdep",
-        "bin/update",
-        "bin/deploy_on_test",
-        "bin/deploy_on_prod"
+        "bin/project-update",
+        "bin/project-deploy-on-test",
+        "bin/project-deploy-on-prod",
+        "bin/project-drop-branches-from-test"
     ],
     "config": {
         "bin-dir": "bin"
