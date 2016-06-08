@@ -13,7 +13,6 @@ task(
 
         // Symfony shared files
         set('shared_files', []);
-        set('shared_dirs', []);
 
         // Environment vars
         $env = BuildHelper::getBuildType();

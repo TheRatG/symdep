@@ -9,7 +9,7 @@
         "symfony/process": "~2.3|~3.0",
         "deployer/deployer": "~3.0",
         "herrera-io/phar-update": "~2.0",
-        "kherge/amend": "^3.0",
+        "kherge/amend": "3.0.x-dev",
         "guzzlehttp/guzzle": "~5.0|~6.0",
         "symfony/var-dumper": "~2.8|~3.0"
     },
@@ -37,9 +37,10 @@
     },
     "bin": [
         "bin/symdep",
-        "bin/update",
-        "bin/deploy_on_test",
-        "bin/deploy_on_prod"
+        "bin/project-update",
+        "bin/project-deploy-on-test",
+        "bin/project-deploy-on-prod",
+        "bin/project-drop-branches-from-test"
     ],
     "config": {
         "bin-dir": "bin"
