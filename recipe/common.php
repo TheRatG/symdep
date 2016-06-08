@@ -42,6 +42,7 @@ task(
 
         env('local_branch', $localBranch);
         env('branch', $branch);
+        set('branch', $branch);
 
         env('lock_keep', 15);
         env('lock_dir', '');

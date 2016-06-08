@@ -49,6 +49,7 @@ class UpdateConfig
         if ($diff) {
             run(sprintf('cp "%s" "%s"', $srcFilename, $dstFilename));
             !isVerbose() ?: writeln(run(sprintf('cat %s', $dstFilename))->getOutput());
+            !isVerbose() ?: writeln(run(sprintf('Nginx %s updated', $dstFilename))->getOutput());
             $result = true;
         } else {
             !isVerbose() ?: writeln('Nginx has no diff');
