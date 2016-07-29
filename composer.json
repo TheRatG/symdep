@@ -3,20 +3,21 @@
     "description": "Additional tool for symfony deploy",
     "require": {
         "php": ">=5.4.0",
-        "symfony/finder": "~2.3|~3.0",
-        "symfony/console": "~2.3|~3.0",
-        "symfony/yaml": "~2.3|~3.0",
-        "symfony/process": "~2.3|~3.0",
+
         "deployer/deployer": "~3.0",
-        "herrera-io/phar-update": "~2.0",
-        "kherge/amend": "3.0.x-dev",
         "guzzlehttp/guzzle": "~5.0|~6.0",
-        "symfony/var-dumper": "~2.8|~3.0"
+        "symfony/console": "~2.3|~3.0",
+        "symfony/finder": "~2.3|~3.0",
+        "symfony/process": "~2.3|~3.0",
+        "symfony/yaml": "~2.3|~3.0"
     },
     "require-dev": {
+        "herrera-io/phar-update": "~2.0",
+        "kherge/amend": "^3.0-dev",
         "leaphub/phpcs-symfony2-standard": "^2.0",
         "phpro/grumphp": "^0.7",
-        "sensio/distribution-bundle": "^5.0"
+        "sensio/distribution-bundle": "^5.0",
+        "symfony/var-dumper": "~2.8|~3.0"
     },
     "license": "MIT",
     "authors": [
@@ -41,8 +42,5 @@
         "bin/project-deploy-on-test",
         "bin/project-deploy-on-prod",
         "bin/project-drop-branches-from-test"
-    ],
-    "config": {
-        "bin-dir": "bin"
-    }
+    ]
 }
