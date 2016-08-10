@@ -1,11 +1,14 @@
 {
     "directories": [
+        "recipe/",
         "src/"
+    ],
+    "blacklist": [
+        "Tests"
     ],
     "files": [
         "LICENSE",
         "README.md",
-        "version",
         "vendor/autoload.php",
         "vendor/herrera-io/phar-update/res/schema.json"
     ],
@@ -22,14 +25,16 @@
                 "phpunit",
                 "Tester",
                 "Tests",
-                "tests",
-                "yaml",
+                "tests"
+            ],
+            "notPath": [
+                "phpunit/",
+                "phpdocumentor/",
                 "leaphub/phpcs-symfony2-standard",
                 "phpro/grumphp",
-                "sensio/distribution-bundle",
                 "squizlabs/php_codesniffer"
             ],
-            "in": ""
+            "in": "vendor"
         }
     ],
     "compactors": [
@@ -37,7 +42,7 @@
         "Herrera\\Box\\Compactor\\Php"
     ],
     "compression": "GZ",
-    "git-version": "3.0.7",
+    "git-version": "package_version",
     "main": "bin/symdep",
     "output": "symdep.phar",
     "stub": true,

@@ -3,17 +3,16 @@
     "description": "Additional tool for symfony deploy",
     "require": {
         "php": ">=5.4.0",
-
-        "deployer/deployer": "~3.0",
+        "deployer/deployer": "~3.3",
         "guzzlehttp/guzzle": "~5.0|~6.0",
-        "symfony/console": "~2.3|~3.0",
-        "symfony/finder": "~2.3|~3.0",
-        "symfony/process": "~2.3|~3.0",
-        "symfony/yaml": "~2.3|~3.0"
+        "symfony/console": "~2.6|~3.0",
+        "symfony/finder": "~2.6|~3.0",
+        "symfony/process": "~2.6|~3.0",
+        "symfony/yaml": "~2.6|~3.0"
     },
     "require-dev": {
         "herrera-io/phar-update": "~2.0",
-        "kherge/amend": "^3.0-dev",
+        "kherge/amend": "3.0.x-dev",
         "leaphub/phpcs-symfony2-standard": "^2.0",
         "phpro/grumphp": "^0.7",
         "sensio/distribution-bundle": "^5.0",
@@ -28,7 +27,7 @@
     ],
     "extra": {
         "branch-alias": {
-            "dev-master": "3.2.x-dev"
+            "dev-master": "3.3.x-dev"
         }
     },
     "autoload": {

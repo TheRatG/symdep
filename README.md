@@ -42,8 +42,6 @@ task('env', function () {
 after('properties', 'env');
 ```
 
-manifest  publish:gh-pages TheRatG/symdep -vvv
-
 ### Delete useless branch folder from test
 
 ```bash
@@ -62,4 +60,17 @@ task('drop-old-db', function () {
     run($path . ' octava:branching:drop-old');
 });
 after('drop-branches-from-test', 'drop-old-db');
+```
+
+## Build new version of geggs
+
+* Create and push tag
+* Create phar 
+```
+ulimit -Sn 4096; box build --verbose
+```
+* Go to github and upload new `geggs.phar` into new release
+* Publish new manifest
+```
+manifest publish:gh-pages TheRatG/symdep -vvv
 ```
