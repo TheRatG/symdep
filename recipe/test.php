@@ -51,10 +51,10 @@ task(
         $branch = env('branch');
 
         if (FileHelper::dirExists($releasePath)) {
-            run("cd $releasePath && git pull origin $branch --quiet");
+            run("cd $releasePath && {{bin/git}} pull origin $branch --quiet");
         } else {
             run("mkdir -p $releasesDir");
-            run("cd $releasesDir && git clone -b $branch --depth 1 --recursive -q $repository $releasePath");
+            run("cd $releasesDir && {{bin/git}} clone -b $branch --depth 1 --recursive -q $repository $releasePath");
         }
     }
 )->desc('Updating code');

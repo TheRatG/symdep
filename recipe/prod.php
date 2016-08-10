@@ -69,7 +69,7 @@ task(
         if (!empty($branch)) {
             $at = "-b $branch";
         }
-        run("git clone $at --depth 1 --recursive -q $repository {{release_path}} 2>&1");
+        run("{{bin/git}} clone $at --depth 1 --recursive -q $repository {{release_path}} 2>&1");
 
     }
 )->desc('Updating code');
