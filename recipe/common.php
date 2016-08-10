@@ -52,8 +52,12 @@ task(
         /**
          * Custom bins.
          */
-        env('bin/php', run('which php')->toString());
-        env('bin/git', run('which git')->toString());
+        if (!env()->has('bin/php')) {
+            env('bin/php', run('which php')->toString());
+        }
+        if (!env()->has('bin/git')) {
+            env('bin/git', run('which git')->toString());
+        }
     }
 )->desc('1. Prepare environment properties');
 
@@ -123,25 +127,28 @@ task(
 /**
  * Rollback to previous release.
  */
-task('rollback', function () {
-    $releases = env('releases_list');
+task(
+    'rollback',
+    function () {
+        $releases = env('releases_list');
 
-    if (isset($releases[1])) {
-        $releaseDir = "{{deploy_path}}/releases/{$releases[1]}";
+        if (isset($releases[1])) {
+            $releaseDir = "{{deploy_path}}/releases/{$releases[1]}";
 
-        // Symlink to old release.
-        run("cd {{deploy_path}} && ln -nfs $releaseDir current");
+            // Symlink to old release.
+            run("cd {{deploy_path}} && ln -nfs $releaseDir current");
 
-        // Remove release
-        run("rm -rf {{deploy_path}}/releases/{$releases[0]}");
+            // Remove release
+            run("rm -rf {{deploy_path}}/releases/{$releases[0]}");
 
-        if (isVerbose()) {
-            writeln("Rollback to `{$releases[1]}` release was successful.");
+            if (isVerbose()) {
+                writeln("Rollback to `{$releases[1]}` release was successful.");
+            }
+        } else {
+            writeln("<comment>No more releases you can revert to.</comment>");
         }
-    } else {
-        writeln("<comment>No more releases you can revert to.</comment>");
     }
-})->desc('Rollback to previous release');
+)->desc('Rollback to previous release');
 
 task(
     'check_connection',
