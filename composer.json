@@ -15,7 +15,6 @@
         "kherge/amend": "3.0.x-dev",
         "leaphub/phpcs-symfony2-standard": "^2.0",
         "phpro/grumphp": "^0.7",
-        "sensio/distribution-bundle": "^5.0",
         "symfony/var-dumper": "~2.8|~3.0"
     },
     "license": "MIT",
