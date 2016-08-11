@@ -38,7 +38,9 @@ $console = new \TheRat\SymDep\Console\Application('SymDep', '@package_version@')
 $input = new \Symfony\Component\Console\Input\ArgvInput();
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 $deployer = new \Deployer\Deployer($console, $input, $output);
-$deployer->getConsole()->getHelperSet()->set(new \KevinGH\Amend\Helper());
+if (class_exists('\\KevinGH\\Amend\\Helper')) {
+    $deployer->getConsole()->getHelperSet()->set(new \KevinGH\Amend\Helper());
+}
 
 // Require deploy.php script
 $options = getopt('f::', ['file::']);
