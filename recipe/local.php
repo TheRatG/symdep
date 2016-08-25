@@ -44,7 +44,7 @@ task(
         $branch = env('branch');
 
         if (empty($localBranch)) {
-            $localBranch = runLocally('git rev-parse --abbrev-ref HEAD')->toString();
+            $localBranch = runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD')->toString();
         }
 
         if (empty($branch)) {
@@ -52,7 +52,7 @@ task(
         }
 
         $repository = get('repository');
-        $res = trim(run("git ls-remote $repository $(git symbolic-ref HEAD)")->toString());
+        $res = trim(run("{{bin/git}} ls-remote $repository $(git symbolic-ref HEAD)")->toString());
 
         if ($res) {
             $msg = sprintf(

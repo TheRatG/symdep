@@ -169,7 +169,7 @@ class ReleaseInfo
     {
         $cmd = sprintf('cd %s && git rev-parse --abbrev-ref HEAD', $this->getLocalDeployPath());
         if ('master' !== trim(runLocally($cmd)->toString())) {
-            throw new \RuntimeException('Current deploy path is not master');
+            writeln('<error>Current deploy path is not master</error>');
         }
     }
 

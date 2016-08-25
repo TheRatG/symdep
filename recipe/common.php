@@ -49,6 +49,15 @@ task(
         env('lock_wait', input()->getOption('lock-wait'));
         env('no_debug', false); //symfony console option
 
+        /**
+         * Custom bins.
+         */
+        if (!env()->has('bin/php')) {
+            env('bin/php', run('which php')->toString());
+        }
+        if (!env()->has('bin/git')) {
+            env('bin/git', run('which git')->toString());
+        }
     }
 )->desc('1. Prepare environment properties');
 
@@ -115,12 +124,31 @@ task(
     }
 )->desc('10. after link');
 
+/**
+ * Rollback to previous release.
+ */
 task(
     'rollback',
     function () {
+        $releases = env('releases_list');
 
+        if (isset($releases[1])) {
+            $releaseDir = "{{deploy_path}}/releases/{$releases[1]}";
+
+            // Symlink to old release.
+            run("cd {{deploy_path}} && ln -nfs $releaseDir current");
+
+            // Remove release
+            run("rm -rf {{deploy_path}}/releases/{$releases[0]}");
+
+            if (isVerbose()) {
+                writeln("Rollback to `{$releases[1]}` release was successful.");
+            }
+        } else {
+            writeln("<comment>No more releases you can revert to.</comment>");
+        }
     }
-)->desc('Delete deploy ');
+)->desc('Rollback to previous release');
 
 task(
     'check_connection',
@@ -257,8 +285,8 @@ task(
         if (run("if hash composer 2>/dev/null; then echo 'true'; fi")->toBool()) {
             $composer = 'composer';
         } else {
-            run('cd {{release_path}} && curl -sS https://getcomposer.org/installer | php');
-            $composer = 'php composer.phar';
+            run('cd {{release_path}} && curl -sS https://getcomposer.org/installer | {{bin/php}}');
+            $composer = '{{bin/php}} composer.phar';
         }
 
         $options = '--optimize-autoloader --no-progress --no-interaction';
@@ -395,7 +423,7 @@ task(
         $path = env('deploy_path').'/releases';
         $localBranches = run("ls $path")->toArray();
 
-        $remoteBranches = run("cd $path/master && git branch -r")->toArray();
+        $remoteBranches = run("cd $path/master && {{bin/git}} branch -r")->toArray();
         array_walk(
             $remoteBranches,
             function (&$item) {
