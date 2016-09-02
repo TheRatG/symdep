@@ -105,7 +105,9 @@ class ReleaseInfo
      */
     public function run()
     {
-        $this->checkCurrentDeployDir();
+        if (!$this->checkCurrentDeployDir()) {
+            return;
+        }
         $log = $this->getDiffLog();
         $countLog = count($log);
 
@@ -170,7 +172,11 @@ class ReleaseInfo
         $cmd = sprintf('cd %s && git rev-parse --abbrev-ref HEAD', $this->getLocalDeployPath());
         if ('master' !== trim(runLocally($cmd)->toString())) {
             writeln('<error>Current deploy path is not master</error>');
+
+            return false;
         }
+
+        return true;
     }
 
     /**
