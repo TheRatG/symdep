@@ -66,5 +66,7 @@ if (is_file($deployFile) && is_readable($deployFile)) {
     require $deployFile;
 }
 
+env('deploy_file', $deployFile);
+
 // Run Deployer
 $deployer->run();

@@ -49,7 +49,7 @@ class ReleaseInfo
             );
         }
         $this->setCurrentLink(env()->parse('{{deploy_path}}/current'));
-        $this->localDeployPath = dirname(dirname(dirname(dirname(__DIR__))));
+        $this->localDeployPath = dirname(env('deploy_file'));
         $this->logParser = new LogParser();
     }
 
