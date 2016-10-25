@@ -284,7 +284,7 @@ task(
     'vendors',
     function () {
         if (run("if hash composer 2>/dev/null; then echo 'true'; fi")->toBool()) {
-            $composer = 'composer';
+            $composer = run('which composer')->toString();
         } else {
             run('cd {{release_path}} && curl -sS https://getcomposer.org/installer | {{bin/php}}');
             $composer = '{{bin/php}} composer.phar';
@@ -294,8 +294,8 @@ task(
         $options .= env('composer_no_dev') ? ' --no-dev' : '';
         $options .= 'dev' == env('env') ? ' --prefer-source' : ' --prefer-dist';
 
-        run("cd {{release_path}} && {{env_vars}} $composer install $options");
-        run("cd {{release_path}} && {{env_vars}} $composer dump-autoload");
+        run("cd {{release_path}} && {{env_vars}} {{bin/php}} $composer install $options");
+        run("cd {{release_path}} && {{env_vars}} {{bin/php}} $composer dump-autoload");
 
     }
 )->desc('Installing vendors');
