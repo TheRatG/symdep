@@ -287,7 +287,7 @@ task(
             $composer = run('which composer')->toString();
         } else {
             run('cd {{release_path}} && curl -sS https://getcomposer.org/installer | {{bin/php}}');
-            $composer = '{{bin/php}} composer.phar';
+            $composer = 'composer.phar';
         }
 
         $options = '--optimize-autoloader --no-progress --no-interaction';
