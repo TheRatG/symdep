@@ -39,9 +39,32 @@ set('lock_filename', '{{deploy_path}}/deploy.lock');
 task(
     'deploy',
     [
-        'install',
-        'configure',
-        'link',
+        'deploy:check_connection',
+        'install-before',
+        'properties',
+        'deploy:lock',
+        'deploy:release',
+        'deploy:update_code',
+        'deploy:secret_config',
+        'deploy:create_cache_dir',
+        'deploy:shared',
+        'deploy:assets',
+        'deploy:vendors',
+        'install-after',
+        'configure-before',
+        'properties',
+        'deploy:assets:install',
+        'deploy:assetic:dump',
+        'database:cache-clear',
+        'database:migrate',
+        'deploy:cache:warmup',
+        'configure-after',
+        'link-before',
+        'properties',
+        'deploy:symlink',
+        'deploy:unlock',
+        'cleanup',
+        'link-after',
     ]
 )->desc('Run deploy project, depend on --build-type=<[d]ev|[t]est|[p]rod>');
 task(
@@ -193,11 +216,14 @@ task(
     }
 );
 
-task('deploy:secret_config', function () {
-    if (!FileHelper::fileExists('{{release_path}}/app/config/_secret.yml')) {
-        run('touch {{release_path}}/app/config/_secret.yml');
+task(
+    'deploy:secret_config',
+    function () {
+        if (!FileHelper::fileExists('{{release_path}}/app/config/_secret.yml')) {
+            run('touch {{release_path}}/app/config/_secret.yml');
+        }
     }
-});
+);
 
 task(
     'drop-branches-from-test',

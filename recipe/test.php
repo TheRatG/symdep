@@ -8,7 +8,10 @@ task(
     'properties',
     function () {
         set('keep_releases', 2);
-        set('composer_options', '{{composer_action}} --verbose --prefer-dist --no-progress --no-interaction --optimize-autoloader');
+        set(
+            'composer_options',
+            '{{composer_action}} --verbose --prefer-dist --no-progress --no-interaction --optimize-autoloader'
+        );
 
         // Deploy branch
         $branch = input()->getOption('branch');
@@ -38,7 +41,7 @@ task(
         set('env_vars', "SYMFONY_ENV=$env");
 
         set('deploy_path_original', get('deploy_path'));
-        set('deploy_path', '{{deploy_path_original}}/releases/{{branch}}');
+        set('deploy_path', Context::get()->getEnvironment()->parse('{{deploy_path_original}}/releases/{{branch}}'));
 
         set('copy_files', ['app/config/parameters.yml']);
     }
