@@ -148,7 +148,7 @@ DOCHERE;
      * @param string $workingPath
      * @return bool
      */
-    public static function isWritable($filename, $workingPath)
+    public static function isWritable($filename, $workingPath = null)
     {
         $cmd = sprintf('if [ -w "%s" ]; then echo true; fi', $filename);
 

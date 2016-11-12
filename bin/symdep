@@ -101,10 +101,11 @@ $input = new \Symfony\Component\Console\Input\ArgvInput();
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 $deployer = new \Deployer\Deployer($console, $input, $output);
 
+require_once dirname(__DIR__).'/recipe/symdep.php';
+
 // Require deploy.php file
 if (is_readable($deployFile)) {
     require $deployFile;
 }
-require_once dirname(__DIR__).'/recipe/symdep.php';
 // Run Deployer
 $deployer->run();

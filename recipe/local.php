@@ -52,3 +52,9 @@ task(
         }
     }
 );
+
+task(
+    'deploy:release',
+    function () {
+    }
+);
