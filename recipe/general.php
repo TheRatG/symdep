@@ -4,6 +4,22 @@ namespace Deployer;
 use TheRat\SymDep\DeploySection;
 use TheRat\SymDep\FileHelper;
 
+set(
+    'bin/node',
+    function () {
+        return run('which node')->toString();
+    }
+);
+set(
+    'bin/npm',
+    function () {
+        return run('which npm')->toString();
+    }
+);
+set('symfony_console', '{{env_vars}} {{bin/php}} {{bin/console}}');
+set('doctrine_migrate', false);
+set('doctrine_cache_clear', true);
+
 task(
     'deploy',
     [
@@ -98,7 +114,19 @@ task(
         }
     }
 );
-
+/**
+ * Migrate database
+ */
+task(
+    'database:migrate',
+    function () {
+        if (get('doctrine_migrate')) {
+            run(
+                '{{env_vars}} {{bin/php}} {{bin/console}} doctrine:migrations:migrate {{console_options}} --allow-no-migration'
+            );
+        }
+    }
+)->desc('Migrate database');
 task(
     'deploy:lock',
     function () {
@@ -117,9 +145,11 @@ desc('Doctrine cache clear');
 task(
     'database:cache-clear',
     function () {
-        run('{{env_vars}} {{bin/php}} {{bin/console}} doctrine:cache:clear-metadata {{console_options}}');
-        run('{{env_vars}} {{bin/php}} {{bin/console}} doctrine:cache:clear-query {{console_options}}');
-        run('{{env_vars}} {{bin/php}} {{bin/console}} doctrine:cache:clear-result {{console_options}}');
+        if (get('doctrine_cache_clear')) {
+            run('{{env_vars}} {{bin/php}} {{bin/console}} doctrine:cache:clear-metadata {{console_options}}');
+            run('{{env_vars}} {{bin/php}} {{bin/console}} doctrine:cache:clear-query {{console_options}}');
+            run('{{env_vars}} {{bin/php}} {{bin/console}} doctrine:cache:clear-result {{console_options}}');
+        }
     }
 );
 

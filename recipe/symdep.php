@@ -18,5 +18,5 @@ $buildType = $helper->getType();
 set('build_type', $buildType);
 
 require_once 'recipe/symfony3.php';
-require_once 'tasks.php';
+require_once 'general.php';
 require_once $helper->getRecipeFile($buildType);

@@ -21,6 +21,7 @@ task(
 
         set('release_path', '{{deploy_path}}');
         set('current_path', '{{deploy_path}}');
+        set('composer_options', '{{composer_action}} --prefer-source --optimize-autoloader');
     }
 );
 
@@ -55,6 +56,29 @@ task(
 
 task(
     'deploy:release',
+    function () {
+    }
+);
+task(
+    'deploy:symlink',
+    function () {
+    }
+);
+
+/**
+ * Install assets from public dir of bundles
+ */
+task(
+    'deploy:assets:install',
+    function () {
+        run(
+            '{{env_vars}} {{bin/php}} {{bin/console}} assets:install {{console_options}} --symlink --relative {{release_path}}/web'
+        );
+    }
+);
+
+task(
+    'cleanup',
     function () {
     }
 );
