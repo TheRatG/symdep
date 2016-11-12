@@ -1,15 +1,29 @@
 <?php
+use TheRat\SymDep\BuildType;
+use function Deployer\after;
+use function Deployer\get;
+use function Deployer\localServer;
+use function Deployer\server;
+use function Deployer\set;
+use function Deployer\task;
+
 set('repository', '<your_repository>.git');
 
 localServer('local')
     ->stage('local')
-    ->env('deploy_path', __DIR__);
+    ->set('deploy_path', __DIR__);
+
+server('test', '<test_host>', 22)
+    ->user('<test_host>')
+    ->identityFile()
+    ->stage('test')
+    ->set('deploy_path', '<test_host>');
 
 server('prod', '<prod_host>', 22)
     ->user('<prod_user>')
     ->identityFile()
     ->stage('prod')
-    ->env('deploy_path', '<project_path>');
+    ->set('deploy_path', '<project_path>');
 
 /**
  * modify properties
@@ -17,8 +31,14 @@ server('prod', '<prod_host>', 22)
 task(
     'env',
     function () {
-        set('auto_migrate', false);
+        switch (get('build_type')) {
+            case BuildType::TYPE_DEV:
+                break;
+            case BuildType::TYPE_TEST:
+                break;
+            case BuildType::TYPE_PROD:
+                break;
+        }
     }
 );
-
 after('properties', 'env');

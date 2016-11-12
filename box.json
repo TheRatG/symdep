@@ -3,9 +3,7 @@
         "recipe/",
         "src/"
     ],
-    "blacklist": [
-        "Tests"
-    ],
+    "extract": true,
     "files": [
         "LICENSE",
         "README.md",
@@ -41,10 +39,15 @@
         "Herrera\\Box\\Compactor\\Json",
         "Herrera\\Box\\Compactor\\Php"
     ],
+    "replacements": {
+        "manifest_url": "https://raw.githubusercontent.com/TheRatG/symdep/gh-pages/manifest.json",
+        "phar_url": "https://github.com/TheRatG/symdep/releases/download/3.4.0/symdep.phar"
+    },
     "compression": "GZ",
+    "git-commit": "git-commit",
     "git-version": "package_version",
     "main": "bin/symdep",
-    "output": "symdep.phar",
+    "output": "tmp/symdep.phar",
     "stub": true,
     "chmod": "0755"
 }

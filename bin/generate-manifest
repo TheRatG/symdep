@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+REAL_PATH=`readlink -f "$0"`;
+DIR=`dirname "$REAL_PATH"`;
+ROOT_DIR=`dirname "$DIR"`;
+
+[ ! -d ${ROOT_DIR}/tmp ] && mkdir ${ROOT_DIR}/tmp;
+
+if [ which manifest ]; then
+    manifest publish:gh-pages TheRatG/symdep -vvv;
+else
+    cd tmp; curl -O http://www.chrispliakas.com/manifest-publisher/download/latest/manifest.phar;
+    php manifest.phar publish:gh-pages TheRatG/symdep -vvv;
+fi;

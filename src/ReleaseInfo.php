@@ -1,9 +1,17 @@
 <?php
 namespace TheRat\SymDep;
 
+use Deployer\Task\Context;
 use TheRat\SymDep\ReleaseInfo\Issue;
 use TheRat\SymDep\ReleaseInfo\Jira;
 use TheRat\SymDep\ReleaseInfo\LogParser;
+use function Deployer\askConfirmation;
+use function Deployer\get;
+use function Deployer\has;
+use function Deployer\run;
+use function Deployer\runLocally;
+use function Deployer\set;
+use function Deployer\writeln;
 
 /**
  * Class ReleaseInfo
@@ -44,12 +52,11 @@ class ReleaseInfo
             $this->jira = new Jira(get('jira-url'), get('jira-credentials'));
         } else {
             writeln(
-                '<error>Jira plugin does not work,'
-                .' because "jira-url" and "jira-credentials" options are not provided</error>'
+                '<comment>You could connect Jira plugin, just set "jira-url" and "jira-credentials" options.</comment>'
             );
         }
-        $this->setCurrentLink(env()->parse('{{deploy_path}}/current'));
-        $this->localDeployPath = dirname(env('deploy_file'));
+        $this->setCurrentLink(Context::get()->getEnvironment()->parse('{{deploy_path}}/current'));
+        $this->localDeployPath = dirname(get('deploy_file'));
         $this->logParser = new LogParser();
     }
 
@@ -137,7 +144,6 @@ class ReleaseInfo
 
             writeln('');
             if (askConfirmation('Would you like to continue deploy on prod')) {
-
             } else {
                 throw new \RuntimeException('Deploy canceled');
             }

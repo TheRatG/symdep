@@ -1,6 +1,10 @@
 <?php
 namespace TheRat\SymDep;
 
+use function Deployer\isVerbose;
+use function Deployer\run;
+use function Deployer\writeln;
+
 /**
  * Class UpdateConfig
  *

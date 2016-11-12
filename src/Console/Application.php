@@ -1,38 +1,40 @@
 <?php
 namespace TheRat\SymDep\Console;
 
-use Deployer\Console\Application as BaseApplication;
-use KevinGH\Amend\Command;
-use KevinGH\Amend\Helper;
+use Deployer\Component\PharUpdate\Console\Command as PharUpdateCommand;
+use Deployer\Console\Application as DeployerApplication;
+use Symfony\Component\Console\Command\HelpCommand;
+use TheRat\SymDep\Command\ListCommand;
 
 /**
  * Class Application
  *
  * @package TheRat\SymDep\Console
  */
-class Application extends BaseApplication
+class Application extends DeployerApplication
 {
     /**
-     * @return array|\Symfony\Component\Console\Command\Command[]
+     * {@inheritdoc}
      */
     protected function getDefaultCommands()
     {
-        $commands = parent::getDefaultCommands();
-        if (class_exists('\KevinGH\\Amend\\Command')) {
-            $commands[] = $this->selfUpdateCommand();
-        }
+        $commands = [
+            new HelpCommand(),
+            new ListCommand(),
+        ];
+        $commands[] = $this->selfUpdateCommand();
 
         return $commands;
     }
 
     /**
-     * @return Command
+     * @return PharUpdateCommand
      */
-    protected function selfUpdateCommand()
+    private function selfUpdateCommand()
     {
-        $selfUpdate = new Command('self-update');
+        $selfUpdate = new PharUpdateCommand('self-update');
         $selfUpdate->setDescription('Updates symdep.phar to the latest version');
-        $selfUpdate->setManifestUri('https://raw.githubusercontent.com/TheRatG/symdep/gh-pages/manifest.json');
+        $selfUpdate->setManifestUri('@manifest_url@');
 
         return $selfUpdate;
     }

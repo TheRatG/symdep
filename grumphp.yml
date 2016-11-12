@@ -1,9 +1,9 @@
 parameters:
     git_dir: .
-    bin_dir: bin
+    bin_dir: vendor/bin
     tasks:
         phpcs:
-            standard: "vendor/leaphub/phpcs-symfony2-standard/leaphub/phpcs/Symfony2/"
+            standard: "PSR2"
             ignore_patterns:
                 - 'app/*'
                 - 'bin/*'

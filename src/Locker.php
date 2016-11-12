@@ -1,6 +1,8 @@
 <?php
 namespace TheRat\SymDep;
 
+use function Deployer\run;
+
 /**
  * Class Locker
  *

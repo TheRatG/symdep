@@ -1,59 +1,42 @@
 <?php
-/**
- * Preparing server for deployment.
- */
-use TheRat\SymDep\BuildHelper;
+namespace Deployer;
 
 task(
-    'project-update:properties',
+    'properties',
     function () {
+        // nix user
+        set('user', 'vagrant');
 
-        // Composer install --no-dev
-        env('composer_no_dev', input()->getOption('composer-no-dev'));
+        // Symfony build set
+        set('env', '{{build_type}}');
 
-        // Symfony shared files
-        set('shared_files', []);
-
-        // Environment vars
-        $env = BuildHelper::getBuildType();
-        env('env_real', $env);
-        env('no_debug', false);
-        if ('test' == $env && 'master' == env('branch')) {
-            $env = 'prod';
-            env('no_debug', true);
+        // Deploy branch
+        $branch = input()->getOption('branch');
+        $localBranch = runLocally('git rev-parse --abbrev-ref HEAD')->toString();
+        if (!$branch) {
+            $branch = $localBranch;
         }
-        env('env_vars', 'SYMFONY_ENV='.$env);
-        env('env', $env);
+        set('local_branch', $localBranch);
+        set('branch', $branch);
 
-        env('release_path', env('deploy_path'));
-        env('symfony_console', '{{release_path}}/'.trim(get('bin_dir'), '/').'/console');
-        cd('{{release_path}}');
-
-        env('lock_dir', env('deploy_path'));
-        env('current_path', env('release_path'));
+        set('release_path', '{{deploy_path}}');
+        set('current_path', '{{deploy_path}}');
     }
-)->desc('Preparing server for deploy');
+);
 
-/**
- * Update project code
- */
 task(
-    'project-update:update_code',
+    'deploy:update_code',
     function () {
-        $localBranch = env('local_branch');
-        $branch = env('branch');
-
+        $localBranch = get('local_branch');
+        $branch = get('branch');
         if (empty($localBranch)) {
             $localBranch = runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD')->toString();
         }
-
         if (empty($branch)) {
             $branch = $localBranch;
         }
-
         $repository = get('repository');
         $res = trim(run("{{bin/git}} ls-remote $repository $(git symbolic-ref HEAD)")->toString());
-
         if ($res) {
             $msg = sprintf(
                 'Local "%s" and input "%s" branches are different! There will be merge.',
@@ -63,10 +46,9 @@ task(
             if ($branch != $localBranch && !askConfirmation($msg)) {
                 throw  new \RuntimeException('Deploy canceled');
             }
-
             run("git pull origin $branch 2>&1");
         } else {
             writeln("<comment>Remote $branch not found</comment>");
         }
     }
-)->desc('Updating code');
+);

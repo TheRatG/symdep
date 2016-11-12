@@ -35,31 +35,29 @@ Add file `symdep.lock` to your `.gitignore`
 Example 
 
 ```
-task('env', function () {
-    set('auto_migrate', false);
-});
-
+/**
+ * modify properties
+ */
+task(
+    'env',
+    function () {
+        switch (get('build_type')) {
+            case BuildType::TYPE_DEV:
+                break;
+            case BuildType::TYPE_TEST:
+                break;
+            case BuildType::TYPE_PROD:
+                break;
+        }
+    }
+);
 after('properties', 'env');
 ```
 
 ### Delete useless branch folder from test
 
 ```bash
-./bin/drop_branches_from_test
-```
-
-You can extend task for delete old branch db
-
-```
-#file deploy.php
-/**
- * delete old db
- */
-task('drop-old-db', function () {
-    $path = env('deploy_path') . '/releases/master/app/console';
-    run($path . ' octava:branching:drop-old');
-});
-after('drop-branches-from-test', 'drop-old-db');
+./bin/project-drop-branches-from-test
 ```
 
 ## Build new version of geggs
@@ -67,10 +65,10 @@ after('drop-branches-from-test', 'drop-old-db');
 * Create and push tag
 * Create phar 
 ```
-ulimit -Sn 4096; box build --verbose
+./bin/box-build
 ```
 * Go to github and upload new `symdep.phar` into new release
 * Publish new manifest
 ```
-manifest publish:gh-pages TheRatG/symdep -vvv
+./bin/generate-manifest
 ```

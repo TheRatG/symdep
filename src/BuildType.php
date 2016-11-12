@@ -2,21 +2,20 @@
 namespace TheRat\SymDep;
 
 /**
- * Class BuildHelper
+ * Class BuildType
  *
  * @package TheRat\SymDep
  */
-class BuildHelper
+class BuildType
 {
     const TYPE_DEV = 'dev';
     const TYPE_TEST = 'test';
     const TYPE_PROD = 'prod';
-    const TYPE_UNIT_TEST = 'unit_test';
 
     /**
      * @return string
      */
-    public static function getBuildType()
+    public function getType()
     {
         $options = getopt('::', ['build-type::']);
         $result = self::TYPE_DEV;
@@ -24,7 +23,6 @@ class BuildHelper
             $firstLetter = strtolower($options['build-type'])[0];
             $map = [
                 'd' => self::TYPE_DEV,
-                'u' => self::TYPE_UNIT_TEST,
                 't' => self::TYPE_TEST,
                 'p' => self::TYPE_PROD,
             ];
@@ -36,5 +34,20 @@ class BuildHelper
         }
 
         return $result;
+    }
+
+    /**
+     * @param $type
+     * @return string
+     */
+    public function getRecipeFile($type)
+    {
+        $map = [
+            self::TYPE_DEV => 'local.php',
+            self::TYPE_TEST => 'test.php',
+            self::TYPE_PROD => 'prod.php',
+        ];
+
+        return $map[$type];
     }
 }
