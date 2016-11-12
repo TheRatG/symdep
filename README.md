@@ -69,7 +69,7 @@ after('drop-branches-from-test', 'drop-old-db');
 ```
 ulimit -Sn 4096; box build --verbose
 ```
-* Go to github and upload new `geggs.phar` into new release
+* Go to github and upload new `symdep.phar` into new release
 * Publish new manifest
 ```
 manifest publish:gh-pages TheRatG/symdep -vvv
