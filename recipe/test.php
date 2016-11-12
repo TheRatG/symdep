@@ -1,115 +1,132 @@
 <?php
-/**
- * Preparing server for deployment.
- */
+namespace Deployer;
+
+use Deployer\Task\Context;
 use TheRat\SymDep\FileHelper;
 
 task(
-    'deploy-on-test:properties',
+    'properties',
     function () {
+        set('keep_releases', 2);
+        set('composer_options', '{{composer_action}} --verbose --prefer-dist --no-progress --no-interaction --optimize-autoloader');
 
-        // Symfony shared files
-        set('shared_files', ['app/config/parameters.yml']);
+        // Deploy branch
+        $branch = input()->getOption('branch');
+        $localBranch = runLocally('[ -d .git ] && git rev-parse --abbrev-ref HEAD')->toString();
+        if (!empty($branch) && $branch != $localBranch) {
+            $msg = sprintf(
+                'Local branch "%s" does not equal "%s" remote, continue?',
+                $localBranch,
+                $branch
+            );
+            if (!askConfirmation($msg)) {
+                throw new \RuntimeException('Deploy canceled');
+            }
+        }
+        if (!$branch) {
+            $branch = $localBranch;
+        }
+        set('local_branch', $localBranch);
+        set('branch', $branch);
+        input()->setOption('branch', $branch);
 
-        // Environment vars
-        env('env_real', 'test');
         $env = 'test';
-        if ('master' == env('branch')) {
+        if ('master' === $branch) {
             $env = 'prod';
-            env('composer_no_dev', true);
-            env('no_debug', true);
-        } else {
-            env('composer_no_dev', input()->getOption('composer-no-dev'));
-            env('no_debug', false);
         }
-        env('env_vars', "SYMFONY_ENV=$env");
-        env('env', $env);
+        set('env', $env);
+        set('env_vars', "SYMFONY_ENV=$env");
 
-        $deployPath = env()->parse('{{deploy_path}}');
-        $sub = "/releases/".strtolower(env('branch'));
-        if (0 === strpos(strrev($deployPath), strrev($sub))) {
-            $releasePath = $deployPath;
-            $deployPath = dirname(dirname($releasePath));
-        } else {
-            $releasePath = $deployPath.$sub;
-        }
-        env('deploy_path', $deployPath);
-        env('release_path', $releasePath);
-        cd('{{release_path}}');
+        set('deploy_path_original', get('deploy_path'));
+        set('deploy_path', '{{deploy_path_original}}/releases/{{branch}}');
 
-        env('lock_dir', env('release_path'));
-        env('current_path', env('release_path'));
+        set('copy_files', ['app/config/parameters.yml']);
     }
-)->desc('Preparing server for deploy');
+);
 
 task(
-    'deploy-on-test:update_code',
+    'prepare',
     function () {
-        $releasePath = env('release_path');
-        $releasesDir = dirname($releasePath);
-        $repository = get('repository');
-        $branch = env('branch');
+        run('if [ ! -d {{deploy_path}} ]; then mkdir -p {{deploy_path}}; fi');
 
-        if (FileHelper::dirExists($releasePath)) {
-            run("cd $releasePath && {{bin/git}} pull origin $branch --quiet");
-        } else {
-            run("mkdir -p $releasesDir");
-            run("cd $releasesDir && {{bin/git}} clone -b $branch --depth 1 --recursive -q $repository $releasePath");
+        // Check for existing /current directory (not symlink)
+        $result = run(
+            'if [ ! -L {{deploy_path}}/current ] && [ -d {{deploy_path}}/current ]; then echo true; fi'
+        )->toBool();
+        if ($result) {
+            throw new \RuntimeException(
+                'There already is a directory (not symlink) named "current" in '.get(
+                    'deploy_path'
+                ).'. Remove this directory so it can be replaced with a symlink for atomic deployments.'
+            );
+        }
+
+        // Create releases dir.
+        run("cd {{deploy_path}} && if [ ! -d releases ]; then mkdir releases; fi");
+
+        // Create shared dir.
+        run("cd {{deploy_path}} && if [ ! -d shared ]; then mkdir shared; fi");
+
+        $currentMaster = get('deploy_path_original').'/releases/master/current';
+        if (FileHelper::dirExists($currentMaster)) {
+            foreach (get('copy_files') as $name) {
+                $name = Context::get()->getEnvironment()->parse($name);
+                if (DIRECTORY_SEPARATOR !== $name) {
+                    writeln(sprintf('<error>Copy file "%s" must be relative</error>', $name));
+                    continue;
+                }
+                $src = $currentMaster.DIRECTORY_SEPARATOR.$name;
+                $dst = get('release_name').DIRECTORY_SEPARATOR.$name;
+                FileHelper::copyFile($src, $dst);
+            }
         }
     }
-)->desc('Updating code');
+);
+before('deploy:lock', 'prepare');
 
 /**
- * Create symlinks for shared directories and files.
+ * Delete useless branches, which no in remote repository
  */
 task(
-    'deploy-on-test:shared',
+    'drop-branches',
     function () {
-        $sharedPath = "{{release_path}}/shared";
-
-        foreach (get('shared_dirs') as $dir) {
-            // Remove from source
-            run("if [ -d $(echo {{release_path}}/$dir) ]; then rm -rf {{release_path}}/$dir; fi");
-
-            // Create shared dir if it does not exist
-            run("mkdir -p $sharedPath/$dir");
-
-            // Create path to shared dir in release dir if it does not exist
-            // (symlink will not create the path and will fail otherwise)
-            run("mkdir -p `dirname {{release_path}}/$dir`");
-
-            // Symlink shared dir to release dir
-            run("ln -nfs $sharedPath/$dir {{release_path}}/$dir");
+        if ('test' != get('build_type')) {
+            throw new \RuntimeException('This command only for "test" build type');
         }
-
-        $masterSharedPath = $sharedPath;
-        if ('master' != env('branch')) {
-            $masterSharedPath = env()->parse('{{deploy_path}}')."/releases/master";
-        }
-
-        $sharedFiles = get('shared_files');
-        foreach ($sharedFiles as $file) {
-            // Remove from source
-            run("if [ -f $(echo {{release_path}}/$file) ]; then rm -rf {{release_path}}/$file; fi");
-
-            // Create dir of shared file
-            run("mkdir -p $sharedPath/".dirname($file));
-
-            //Copy master shared file
-            if (!FileHelper::fileExists("$sharedPath/$file")
-                && FileHelper::fileExists("$masterSharedPath/$file")
-            ) {
-                run("cp $masterSharedPath/$file $sharedPath/$file");
+        $path = get('deploy_path').'/releases';
+        $localBranches = run("ls $path")->toArray();
+        //TODO: check branch -r
+        $remoteBranches = run("cd {{current_path}} && {{bin/git}} branch -r")->toArray();
+        array_walk(
+            $remoteBranches,
+            function (&$item) {
+                $item = trim($item);
+                $item = substr($item, strpos($item, '/') + 1);
+                $item = explode(' ', $item)[0];
+                $item = strtolower($item);
             }
-            // Touch shared
-            run("touch $sharedPath/$file");
-
-            // Symlink shared dir to release dir
-            run("ln -nfs $sharedPath/$file {{release_path}}/$file");
+        );
+        $diff = array_diff($localBranches, $remoteBranches);
+        if (isVerbose()) {
+            writeln(sprintf('<info>Local dir: %s</info>', implode(', ', $localBranches)));
+            writeln(sprintf('<info>Remote branches: %s</info>', implode(', ', $remoteBranches)));
+            writeln(
+                sprintf(
+                    '<comment>Dir for delete: %s</comment>',
+                    !empty($diff) ? implode(', ', $diff) : 'none'
+                )
+            );
         }
-
-        if (!FileHelper::fileExists('{{release_path}}/app/config/_secret.yml')) {
-            run('touch {{release_path}}/app/config/_secret.yml');
+        foreach ($diff as $deleteDir) {
+            $full = "$path/$deleteDir";
+            if (FileHelper::dirExists($full)) {
+                $cmd = sprintf('rm -rf %s', escapeshellarg($full));
+                if (isVerbose() && askConfirmation("Do you want delete: $full")) {
+                    run($cmd);
+                } else {
+                    run($cmd);
+                }
+            }
         }
     }
-)->desc('Creating symlinks for shared files');
+);

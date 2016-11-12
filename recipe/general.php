@@ -1,8 +1,15 @@
 <?php
 namespace Deployer;
 
+use Symfony\Component\Console\Input\InputOption;
 use TheRat\SymDep\DeploySection;
 use TheRat\SymDep\FileHelper;
+use TheRat\SymDep\Locker;
+
+/**
+ * Default arguments and options.
+ */
+option('lock-wait', 'w', InputOption::VALUE_NONE, 'Release lock');
 
 set(
     'bin/node',
@@ -16,9 +23,18 @@ set(
         return run('which npm')->toString();
     }
 );
-set('symfony_console', '{{env_vars}} {{bin/php}} {{bin/console}}');
+set(
+    'user',
+    function () {
+        return trim(run('whoami')->toString());
+    }
+);
+set('symfony_console', 'cd {{release_path}} && {{env_vars}} {{bin/php}} {{bin/console}}');
 set('doctrine_migrate', false);
 set('doctrine_cache_clear', true);
+set('lock_wait', true);
+set('lock_timeout', 15);
+set('lock_filename', '{{deploy_path}}/deploy.lock');
 
 task(
     'deploy',
@@ -42,10 +58,6 @@ task(
     'install',
     function () {
         set('section', DeploySection::INSTALL);
-
-        if (!FileHelper::fileExists('{{release_path}}/app/config/_secret.yml')) {
-            run('touch {{release_path}}/app/config/_secret.yml');
-        }
     }
 )->desc('Deploy and prepare project files');
 task(
@@ -130,11 +142,39 @@ task(
 task(
     'deploy:lock',
     function () {
+        $lockWait = get('lock_wait');
+        $filename = get('lock_filename');
+        $locker = new Locker($filename, get('lock_timeout'));
+        $needLock = true;
+        if ($locker->isLocked()) {
+            if ($lockWait) {
+                writeln($locker->__toString());
+                $needLock = askConfirmation('Force deploy');
+            } else {
+                $needLock = false;
+            }
+        }
+        if ($needLock) {
+            $locker->lock(
+                [
+                    'date' => trim(run('date -u')->toString()),
+                    'user' => trim(runLocally('whoami')->toString()),
+                    'server' => trim(runLocally('uname -a')->toString()),
+                ]
+            );
+            if (isVerbose()) {
+                writeln(sprintf('Create lock file "%s"', $filename));
+            }
+        } else {
+            throw new \RuntimeException('Deploy process locked');
+        }
     }
 );
 task(
     'deploy:unlock',
     function () {
+        $locker = new Locker(get('lock_filename'), get('lock_timeout'));
+        $locker->unlock();
     }
 );
 
@@ -153,50 +193,22 @@ task(
     }
 );
 
-/**
- * Delete useless branches, which no in remote repository
- */
+task('deploy:secret_config', function () {
+    if (!FileHelper::fileExists('{{release_path}}/app/config/_secret.yml')) {
+        run('touch {{release_path}}/app/config/_secret.yml');
+    }
+});
+
+task(
+    'drop-branches-from-test',
+    [
+        'properties',
+        'drop-branches',
+    ]
+);
 task(
     'drop-branches',
     function () {
-        if ('test' != get('build_type')) {
-            throw new \RuntimeException('This command only for "test" build type');
-        }
-        $path = get('deploy_path').'/releases';
-        $localBranches = run("ls $path")->toArray();
-        //TODO: check branch -r
-        $remoteBranches = run("cd {{release_path}} && {{bin/git}} branch -r")->toArray();
-        array_walk(
-            $remoteBranches,
-            function (&$item) {
-                $item = trim($item);
-                $item = substr($item, strpos($item, '/') + 1);
-                $item = explode(' ', $item)[0];
-                $item = strtolower($item);
-            }
-        );
-        $diff = array_diff($localBranches, $remoteBranches);
-        if (isVerbose()) {
-            writeln(sprintf('<info>Local dir: %s</info>', implode(', ', $localBranches)));
-            writeln(sprintf('<info>Remote branches: %s</info>', implode(', ', $remoteBranches)));
-            writeln(
-                sprintf(
-                    '<comment>Dir for delete: %s</comment>',
-                    !empty($diff) ? implode(', ', $diff) : 'none'
-                )
-            );
-        }
-        foreach ($diff as $deleteDir) {
-            $full = "$path/$deleteDir";
-            if (FileHelper::dirExists($full)) {
-                $cmd = sprintf('rm -rf %s', escapeshellarg($full));
-                if (isVerbose() && askConfirmation("Do you want delete: $full")) {
-                    run($cmd);
-                } else {
-                    run($cmd);
-                }
-            }
-        }
     }
 );
 
@@ -209,6 +221,7 @@ before('install', 'properties');
 after('install', 'deploy:lock');
 after('install', 'deploy:release');
 after('install', 'deploy:update_code');
+after('install', 'deploy:secret_config');
 after('install', 'deploy:create_cache_dir');
 after('install', 'deploy:shared');
 after('install', 'deploy:assets');
@@ -217,7 +230,6 @@ after('install', 'install-after');
 
 before('configure', 'configure-before');
 before('configure', 'properties');
-after('configure', 'deploy:vendors');
 after('configure', 'deploy:assets:install');
 after('configure', 'deploy:assetic:dump');
 after('configure', 'database:cache-clear');

@@ -4,11 +4,12 @@ namespace Deployer;
 task(
     'properties',
     function () {
-        // nix user
-        set('user', 'vagrant');
-
         // Symfony build set
         set('env', '{{build_type}}');
+
+        // Symfony shared dirs
+        set('shared_dirs', []);
+        set('shared_files', []);
 
         // Deploy branch
         $branch = input()->getOption('branch');
@@ -18,6 +19,7 @@ task(
         }
         set('local_branch', $localBranch);
         set('branch', $branch);
+        input()->setOption('branch', $branch);
 
         set('release_path', '{{deploy_path}}');
         set('current_path', '{{deploy_path}}');
@@ -61,6 +63,16 @@ task(
 );
 task(
     'deploy:symlink',
+    function () {
+    }
+);
+task(
+    'deploy:lock',
+    function () {
+    }
+);
+task(
+    'deploy:unlock',
     function () {
     }
 );
