@@ -41,7 +41,7 @@ task(
         set('env_vars', "SYMFONY_ENV=$env");
 
         if (!has('deploy_path_original')) {
-            set('deploy_path_original', get('deploy_path'));
+            set('deploy_path_original', parse('{{deploy_path}}'));
             set('deploy_path', parse('{{deploy_path_original}}/releases/{{branch}}'));
             set('deploy_path_current_master', parse('{{deploy_path_original}}/releases/master/current'));
         }
