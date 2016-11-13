@@ -5,7 +5,7 @@
 [3.4.0]
 * symfony 3 as default recipe
 * file helper with closure command and specific dir
-* deploy on test like master
+* deploy on test as deploy on prod
 * new build-box script
 * prepare list command
 
