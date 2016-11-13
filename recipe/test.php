@@ -40,8 +40,11 @@ task(
         set('env', $env);
         set('env_vars', "SYMFONY_ENV=$env");
 
-        set('deploy_path_original', get('deploy_path'));
-        set('deploy_path', Context::get()->getEnvironment()->parse('{{deploy_path_original}}/releases/{{branch}}'));
+        if (!has('deploy_path_original')) {
+            set('deploy_path_original', get('deploy_path'));
+            set('deploy_path', parse('{{deploy_path_original}}/releases/{{branch}}'));
+            set('deploy_path_current_master', parse('{{deploy_path_original}}/releases/master/current'));
+        }
 
         set('copy_files', ['app/config/parameters.yml']);
     }
@@ -70,10 +73,10 @@ task(
         // Create shared dir.
         run("cd {{deploy_path}} && if [ ! -d shared ]; then mkdir shared; fi");
 
-        $currentMaster = get('deploy_path_original').'/releases/master/current';
+        $currentMaster = get('deploy_path_current_master');
         if (FileHelper::dirExists($currentMaster)) {
             foreach (get('copy_files') as $name) {
-                $name = Context::get()->getEnvironment()->parse($name);
+                $name = parse($name);
                 if (DIRECTORY_SEPARATOR !== $name) {
                     writeln(sprintf('<error>Copy file "%s" must be relative</error>', $name));
                     continue;
@@ -98,7 +101,7 @@ task(
         }
         $path = get('deploy_path').'/releases';
         $localBranches = run("ls $path")->toArray();
-        //TODO: check branch -r
+        run("cd {{deploy_path_current_master}}; git fetch && git fetch -p");
         $remoteBranches = run("cd {{current_path}} && {{bin/git}} branch -r")->toArray();
         array_walk(
             $remoteBranches,
