@@ -1,7 +1,6 @@
 <?php
 namespace Deployer;
 
-use Deployer\Task\Context;
 use TheRat\SymDep\FileHelper;
 
 task(
@@ -46,7 +45,8 @@ task(
             set('deploy_path_current_master', parse('{{deploy_path_original}}/releases/master/current'));
         }
 
-        set('copy_files', ['app/config/parameters.yml']);
+        set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
+        set('copy_files', ['shared/app/config/parameters.yml', 'shared/app/config/parameters.yml']);
     }
 );
 
@@ -73,16 +73,16 @@ task(
         // Create shared dir.
         run("cd {{deploy_path}} && if [ ! -d shared ]; then mkdir shared; fi");
 
-        $currentMaster = get('deploy_path_current_master');
-        if (FileHelper::dirExists($currentMaster)) {
+        $releaseMasterPath = parse('{{deploy_path_original}}/releases/master');
+        if (FileHelper::dirExists($releaseMasterPath)) {
             foreach (get('copy_files') as $name) {
                 $name = parse($name);
-                if (DIRECTORY_SEPARATOR !== $name) {
+                if (DIRECTORY_SEPARATOR === substr($name, 0, 1)) {
                     writeln(sprintf('<error>Copy file "%s" must be relative</error>', $name));
                     continue;
                 }
-                $src = $currentMaster.DIRECTORY_SEPARATOR.$name;
-                $dst = get('release_name').DIRECTORY_SEPARATOR.$name;
+                $src = $releaseMasterPath.DIRECTORY_SEPARATOR.$name;
+                $dst = parse('{{deploy_path}}').DIRECTORY_SEPARATOR.$name;
                 FileHelper::copyFile($src, $dst);
             }
         }
