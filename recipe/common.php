@@ -306,10 +306,8 @@ task(
 task(
     'assetic:dump',
     function () {
-
-        run('cd {{release_path}} && {{symfony_console}} assetic:dump --env={{env}}');
         run('cd {{release_path}} && {{symfony_console}} assets:install --symlink --env={{env}}');
-
+        run('cd {{release_path}} && {{symfony_console}} assetic:dump --env={{env}}');
     }
 )->desc('Dump assets');
 
