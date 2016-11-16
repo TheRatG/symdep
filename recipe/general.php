@@ -30,7 +30,7 @@ set(
     }
 );
 set('symfony_console', 'cd {{release_path}} && {{env_vars}} {{bin/php}} {{bin/console}}');
-set('doctrine_migrate', false);
+set('doctrine_migrate', true);
 set('doctrine_cache_clear', true);
 set('lock_wait', true);
 set('lock_timeout', 15);
