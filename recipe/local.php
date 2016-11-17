@@ -24,6 +24,7 @@ task(
         set('release_path', '{{deploy_path}}');
         set('current_path', '{{deploy_path}}');
         set('composer_options', '{{composer_action}} --prefer-source --optimize-autoloader');
+        set('dump_assets', true);
     }
 );
 

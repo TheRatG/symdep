@@ -14,6 +14,7 @@ task(
 
         // Symfony shared files
         set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
+        set('dump_assets', true);
     }
 );
 

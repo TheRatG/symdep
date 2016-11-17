@@ -47,6 +47,7 @@ task(
 
         set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
         set('copy_files', ['shared/app/config/parameters.yml', 'shared/app/config/parameters.yml']);
+        set('dump_assets', true);
     }
 );
 
