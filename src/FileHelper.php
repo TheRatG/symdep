@@ -1,10 +1,10 @@
 <?php
 namespace TheRat\SymDep;
 
-use Deployer\Task\Context;
 use Deployer\Type\Result;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use function Deployer\isDebug;
+use function Deployer\parse;
 use function Deployer\run;
 use function Deployer\within;
 use function Deployer\writeln;
@@ -44,7 +44,7 @@ class FileHelper
 
         $copyOnce = array_map(
             function ($value) {
-                return Context::get()->getEnvironment()->parse($value);
+                return parse($value);
             },
             $copyOnce
         );
@@ -58,9 +58,7 @@ class FileHelper
         $dstDir = dirname($dstFilename);
         if (!self::fileExists($srcFilename)) {
             throw new \RuntimeException(
-                Context::get()->getEnvironment()->parse(
-                    'Src file "'.$srcFilename.'" does not exists'
-                )
+                parse('Src file "'.$srcFilename.'" does not exists')
             );
         }
         $command = sprintf('if [ -d "%s" ]; then mkdir -p "%s"; fi', $dstDir, $dstDir);
@@ -72,7 +70,7 @@ class FileHelper
         }
 
         $content = run(sprintf('cat "%s"', $srcFilename));
-        $content = Context::get()->getEnvironment()->parse($content);
+        $content = \Deployer\parse($content);
         $command = <<<DOCHERE
 cat > "$dstFilename" <<'_EOF'
 $content

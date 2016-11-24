@@ -1,13 +1,13 @@
 <?php
 namespace TheRat\SymDep;
 
-use Deployer\Task\Context;
 use TheRat\SymDep\ReleaseInfo\Issue;
 use TheRat\SymDep\ReleaseInfo\Jira;
 use TheRat\SymDep\ReleaseInfo\LogParser;
 use function Deployer\askConfirmation;
 use function Deployer\get;
 use function Deployer\has;
+use function Deployer\parse;
 use function Deployer\run;
 use function Deployer\runLocally;
 use function Deployer\set;
@@ -55,7 +55,7 @@ class ReleaseInfo
                 '<comment>You could connect Jira plugin, just set "jira-url" and "jira-credentials" options.</comment>'
             );
         }
-        $this->setCurrentLink(Context::get()->getEnvironment()->parse('{{deploy_path}}/current'));
+        $this->setCurrentLink(parse('{{deploy_path}}/current'));
         $this->localDeployPath = dirname(get('deploy_file'));
         $this->logParser = new LogParser();
     }
