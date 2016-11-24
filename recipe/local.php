@@ -4,12 +4,17 @@ namespace Deployer;
 task(
     'properties',
     function () {
+        if (has('local_branch') && has('branch')) {
+            return;
+        }
+
         // Symfony build set
         set('env', '{{build_type}}');
 
         // Symfony shared dirs
         set('shared_dirs', []);
         set('shared_files', []);
+        set('clear_paths', []);
 
         // Deploy branch
         $branch = input()->getOption('branch');

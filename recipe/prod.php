@@ -4,6 +4,10 @@ namespace Deployer;
 task(
     'properties',
     function () {
+        if (has('branch')) {
+            return;
+        }
+
         // Deploy branch
         $branch = input()->getOption('branch');
         if (!$branch) {

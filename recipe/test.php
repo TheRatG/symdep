@@ -6,6 +6,10 @@ use TheRat\SymDep\FileHelper;
 task(
     'properties',
     function () {
+        if (has('local_branch') && has('branch') && has('deploy_path_original')) {
+            return;
+        }
+
         set('keep_releases', 2);
         set(
             'composer_options',
@@ -35,15 +39,15 @@ task(
         $env = 'test';
         if ('master' === $branch) {
             $env = 'prod';
+        } else {
+            set('clear_paths', []);
         }
         set('env', $env);
         set('env_vars', "SYMFONY_ENV=$env");
 
-        if (!has('deploy_path_original')) {
-            set('deploy_path_original', parse('{{deploy_path}}'));
-            set('deploy_path', parse('{{deploy_path_original}}/releases/{{branch}}'));
-            set('deploy_path_current_master', parse('{{deploy_path_original}}/releases/master/current'));
-        }
+        set('deploy_path_original', parse('{{deploy_path}}'));
+        set('deploy_path', parse('{{deploy_path_original}}/releases/{{branch}}'));
+        set('deploy_path_current_master', parse('{{deploy_path_original}}/releases/master/current'));
 
         set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
         set('copy_files', ['shared/app/config/parameters.yml', 'shared/app/config/parameters.yml']);
