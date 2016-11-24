@@ -37,35 +37,6 @@ set('lock_timeout', 15);
 set('lock_filename', '{{deploy_path}}/deploy.lock');
 
 task(
-    'deploy',
-    [
-        'deploy:check_connection',
-        'install-before',
-        'properties',
-        'deploy:lock',
-        'deploy:release',
-        'deploy:update_code',
-        'deploy:secret_config',
-        'deploy:create_cache_dir',
-        'deploy:shared',
-        'deploy:assets',
-        'deploy:vendors',
-        'install-after',
-        'configure-before',
-        'deploy:assetic:dump',
-        'deploy:assets:install',
-        'database:cache-clear',
-        'database:migrate',
-        'deploy:cache:warmup',
-        'configure-after',
-        'link-before',
-        'deploy:symlink',
-        'deploy:unlock',
-        'cleanup',
-        'link-after',
-    ]
-)->desc('Run deploy project, depend on --build-type=<[d]ev|[t]est|[p]rod>');
-task(
     'properties',
     function () {
     }
@@ -122,31 +93,6 @@ task(
 /**
  * Symdep tasks ------------------------------
  */
-
-task(
-    'deploy:check_connection',
-    function () {
-        // Check if shell is POSIX-compliant
-        try {
-            cd(''); // To run command as raw.
-            $result = run('echo $0')->toString();
-            if ($result == 'stdin: is not a tty') {
-                throw new \RuntimeException(
-                    "Looks like ssh inside another ssh.\n".
-                    "Help: http://goo.gl/gsdLt9"
-                );
-            }
-        } catch (\RuntimeException $e) {
-            $errorMessage = [
-                "Shell on your server is not POSIX-compliant. Please change to sh, bash or similar.",
-                "Usually, you can change your shell to bash by running: chsh -s /bin/bash",
-            ];
-            write(sprintf('<error>%s</error>', $errorMessage));
-
-            throw $e;
-        }
-    }
-);
 /**
  * Migrate database
  */
@@ -236,10 +182,41 @@ task(
     }
 );
 
+
+task(
+    'deploy',
+    [
+        'deploy:prepare',
+        'install-before',
+        'properties',
+        'deploy:lock',
+        'deploy:release',
+        'deploy:update_code',
+        'deploy:clear_paths',
+        'deploy:secret_config',
+        'deploy:create_cache_dir',
+        'deploy:shared',
+        'deploy:assets',
+        'deploy:vendors',
+        'install-after',
+        'configure-before',
+        'deploy:assetic:dump',
+        'deploy:assets:install',
+        'database:cache-clear',
+        'database:migrate',
+        'deploy:cache:warmup',
+        'configure-after',
+        'link-before',
+        'deploy:symlink',
+        'deploy:unlock',
+        'cleanup',
+        'link-after',
+    ]
+)->desc('Run deploy project, depend on --build-type=<[d]ev|[t]est|[p]rod>');
+
 /**
  * Configure deploy command list ------------------------------------------------------------
  */
-before('properties', 'deploy:check_connection');
 before('install', 'install-before');
 before('install', 'properties');
 after('install', 'deploy:lock');
