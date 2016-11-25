@@ -34,11 +34,13 @@ set_include_path(dirname(__DIR__).'/../../deployer/deployer'.PATH_SEPARATOR.get_
 require_once 'src/functions.php';
 
 // Init Deployer
-$console = new \TheRat\SymDep\Console\Application('SymDep', trim(file_get_contents(__DIR__.'/../version')));
+$console = new \TheRat\SymDep\Console\Application('SymDep', '@package_version@');
 $input = new \Symfony\Component\Console\Input\ArgvInput();
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 $deployer = new \Deployer\Deployer($console, $input, $output);
-$deployer->getConsole()->getHelperSet()->set(new \KevinGH\Amend\Helper());
+if (class_exists('\\KevinGH\\Amend\\Helper')) {
+    $deployer->getConsole()->getHelperSet()->set(new \KevinGH\Amend\Helper());
+}
 
 // Require deploy.php script
 $options = getopt('f::', ['file::']);
@@ -63,6 +65,8 @@ require_once dirname(__DIR__).'/recipe/symdep.php';
 if (is_file($deployFile) && is_readable($deployFile)) {
     require $deployFile;
 }
+
+env('deploy_file', $deployFile);
 
 // Run Deployer
 $deployer->run();

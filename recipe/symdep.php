@@ -105,9 +105,9 @@ switch ($buildType) {
         before('configure', 'configure-before');
         before('configure', 'properties');
         after('configure', 'vendors');
+        after('configure', 'cache:warmup');
         after('configure', 'database:migrate');
         after('configure', 'assetic:dump');
-        after('configure', 'cache:warmup');
         after('configure', 'database:cache-clear');
         after('configure', 'configure-after');
         after('configure', 'cache:clear');
@@ -135,9 +135,9 @@ switch ($buildType) {
         before('configure', 'configure-before');
         before('configure', 'properties');
         after('configure', 'vendors');
+        after('configure', 'cache:warmup');
         after('configure', 'database:migrate');
         after('configure', 'assetic:dump');
-        after('configure', 'cache:warmup');
         after('configure', 'database:cache-clear');
         after('configure', 'configure-after');
         after('configure', 'cache:clear');
@@ -167,9 +167,9 @@ switch ($buildType) {
         before('configure', 'configure-before');
         before('configure', 'properties');
         after('configure', 'vendors');
+        after('configure', 'cache:warmup');
         after('configure', 'database:migrate');
         after('configure', 'assetic:dump');
-        after('configure', 'cache:warmup');
         after('configure', 'database:cache-clear');
         after('configure', 'configure-after');
         after('configure', 'cache:clear');

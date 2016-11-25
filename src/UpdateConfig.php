@@ -13,11 +13,23 @@ class UpdateConfig
      *
      * @param string $srcFilename
      * @param string $dstFilename
-     * @param null   $backupDir
+     * @param string $backupDir
      *
      * @return bool
      */
     public static function updateNginx($srcFilename, $dstFilename, $backupDir = null)
+    {
+        return self::updateFile($srcFilename, $dstFilename, 'nginx', $backupDir);
+    }
+
+    /**
+     * @param string $srcFilename
+     * @param string $dstFilename
+     * @param string $backupName
+     * @param string $backupDir
+     * @return bool
+     */
+    public static function updateFile($srcFilename, $dstFilename, $backupName, $backupDir = null)
     {
         if (empty($srcFilename)) {
             throw new \InvalidArgumentException('Invalid argument $srcFilename, must be not empty');
@@ -27,18 +39,18 @@ class UpdateConfig
         }
         if (!FileHelper::fileExists($srcFilename)) {
             throw new \RuntimeException(
-                sprintf('File nginx_src_filename:"%s" not found', $srcFilename)
+                sprintf('Source file "%s" not found', $srcFilename)
             );
         }
 
-        $backupDir = $backupDir ?: '{{deploy_path}}/backup/nginx';
+        $backupDir = $backupDir ?: '{{deploy_path}}/backup/'.$backupName;
 
         if (!FileHelper::dirExists($backupDir)) {
             run('mkdir -p '.$backupDir);
             !isVerbose() ?: writeln(sprintf('Backup dir "%s" created', $backupDir));
         }
 
-        $backupFilename = sprintf('%s/nginx.%s', $backupDir, date('Y-m-d_H:i:s'));
+        $backupFilename = sprintf('%s/%s.%s', $backupDir, $backupName, date('Y-m-d_H:i:s'));
         run(sprintf('cat %s > %s', $dstFilename, $backupFilename));
 
         $diff = run(
@@ -49,10 +61,10 @@ class UpdateConfig
         if ($diff) {
             run(sprintf('cp "%s" "%s"', $srcFilename, $dstFilename));
             !isVerbose() ?: writeln(run(sprintf('cat %s', $dstFilename))->getOutput());
-            !isVerbose() ?: writeln(sprintf('Nginx %s updated', $dstFilename));
+            !isVerbose() ?: writeln(sprintf('File %s updated', $dstFilename));
             $result = true;
         } else {
-            !isVerbose() ?: writeln('Nginx has no diff');
+            !isVerbose() ?: writeln('File has no diff');
             run('rm '.$backupFilename);
         }
 

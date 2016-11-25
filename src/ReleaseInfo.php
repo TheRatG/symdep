@@ -49,7 +49,7 @@ class ReleaseInfo
             );
         }
         $this->setCurrentLink(env()->parse('{{deploy_path}}/current'));
-        $this->localDeployPath = dirname(dirname(dirname(dirname(__DIR__))));
+        $this->localDeployPath = dirname(env('deploy_file'));
         $this->logParser = new LogParser();
     }
 
@@ -105,7 +105,9 @@ class ReleaseInfo
      */
     public function run()
     {
-        $this->checkCurrentDeployDir();
+        if (!$this->checkCurrentDeployDir()) {
+            return;
+        }
         $log = $this->getDiffLog();
         $countLog = count($log);
 
@@ -169,8 +171,12 @@ class ReleaseInfo
     {
         $cmd = sprintf('cd %s && git rev-parse --abbrev-ref HEAD', $this->getLocalDeployPath());
         if ('master' !== trim(runLocally($cmd)->toString())) {
-            throw new \RuntimeException('Current deploy path is not master');
+            writeln('<error>Current deploy path is not master</error>');
+
+            return false;
         }
+
+        return true;
     }
 
     /**

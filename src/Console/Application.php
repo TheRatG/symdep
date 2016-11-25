@@ -18,7 +18,9 @@ class Application extends BaseApplication
     protected function getDefaultCommands()
     {
         $commands = parent::getDefaultCommands();
-        $commands[] = $this->selfUpdateCommand();
+        if (class_exists('\KevinGH\\Amend\\Command')) {
+            $commands[] = $this->selfUpdateCommand();
+        }
 
         return $commands;
     }

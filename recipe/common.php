@@ -1,5 +1,6 @@
 <?php
 use TheRat\SymDep\FileHelper;
+use TheRat\SymDep\UpdateConfig;
 
 task(
     'properties',
@@ -49,6 +50,15 @@ task(
         env('lock_wait', input()->getOption('lock-wait'));
         env('no_debug', false); //symfony console option
 
+        /**
+         * Custom bins.
+         */
+        if (!env()->has('bin/php')) {
+            env('bin/php', run('which php')->toString());
+        }
+        if (!env()->has('bin/git')) {
+            env('bin/git', run('which git')->toString());
+        }
     }
 )->desc('1. Prepare environment properties');
 
@@ -115,12 +125,31 @@ task(
     }
 )->desc('10. after link');
 
+/**
+ * Rollback to previous release.
+ */
 task(
     'rollback',
     function () {
+        $releases = env('releases_list');
 
+        if (isset($releases[1])) {
+            $releaseDir = "{{deploy_path}}/releases/{$releases[1]}";
+
+            // Symlink to old release.
+            run("cd {{deploy_path}} && ln -nfs $releaseDir current");
+
+            // Remove release
+            run("rm -rf {{deploy_path}}/releases/{$releases[0]}");
+
+            if (isVerbose()) {
+                writeln("Rollback to `{$releases[1]}` release was successful.");
+            }
+        } else {
+            writeln("<comment>No more releases you can revert to.</comment>");
+        }
     }
-)->desc('Delete deploy ');
+)->desc('Rollback to previous release');
 
 task(
     'check_connection',
@@ -255,18 +284,18 @@ task(
     'vendors',
     function () {
         if (run("if hash composer 2>/dev/null; then echo 'true'; fi")->toBool()) {
-            $composer = 'composer';
+            $composer = run('which composer')->toString();
         } else {
-            run('cd {{release_path}} && curl -sS https://getcomposer.org/installer | php');
-            $composer = 'php composer.phar';
+            run('cd {{release_path}} && curl -sS https://getcomposer.org/installer | {{bin/php}}');
+            $composer = 'composer.phar';
         }
 
         $options = '--optimize-autoloader --no-progress --no-interaction';
         $options .= env('composer_no_dev') ? ' --no-dev' : '';
         $options .= 'dev' == env('env') ? ' --prefer-source' : ' --prefer-dist';
 
-        run("cd {{release_path}} && {{env_vars}} $composer install $options");
-        run("cd {{release_path}} && {{env_vars}} $composer dump-autoload");
+        run("cd {{release_path}} && {{env_vars}} {{bin/php}} $composer install $options");
+        run("cd {{release_path}} && {{env_vars}} {{bin/php}} $composer dump-autoload");
 
     }
 )->desc('Installing vendors');
@@ -277,10 +306,8 @@ task(
 task(
     'assetic:dump',
     function () {
-
-        run('cd {{release_path}} && {{symfony_console}} assetic:dump --env={{env}}');
         run('cd {{release_path}} && {{symfony_console}} assets:install --symlink --env={{env}}');
-
+        run('cd {{release_path}} && {{symfony_console}} assetic:dump --env={{env}}');
     }
 )->desc('Dump assets');
 
@@ -395,7 +422,7 @@ task(
         $path = env('deploy_path').'/releases';
         $localBranches = run("ls $path")->toArray();
 
-        $remoteBranches = run("cd $path/master && git branch -r")->toArray();
+        $remoteBranches = run("cd $path/master && {{bin/git}} branch -r")->toArray();
         array_walk(
             $remoteBranches,
             function (&$item) {
@@ -470,31 +497,9 @@ task(
         }
         $sourceFilename = env('crontab_filename');
         $backupDir = env('backup_dir', '');
-        $backupDir = $backupDir ?: '{{deploy_path}}/backup/crontab';
+        $backupDir = $backupDir ?: '{{deploy_path}}/backup';
 
-        if (!FileHelper::dirExists($backupDir)) {
-            run('mkdir -p '.$backupDir);
-            !isVerbose() ?: writeln(sprintf('Backup dir "%s" created', $backupDir));
-        }
-
-        $backupFilename = sprintf('%s/crontab.%s', $backupDir, date('Y-m-d_H:i:s'));
-        if (run('if crontab -l > /dev/null 2>&1; then echo "true"; else echo \'false\'; fi')->toBool()) {
-            run(sprintf('crontab -l > %s', $backupFilename));
-        } else {
-            run(sprintf('touch %s', $backupFilename));
-        }
-
-        $diff = run(
-            sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo "true"; fi', $backupFilename, $sourceFilename)
-        )->toBool();
-
-        if ($diff) {
-            run(sprintf('crontab "%s"', $sourceFilename));
-            !isVerbose() ?: writeln(run('crontab -l')->getOutput());
-        } else {
-            !isVerbose() ?: writeln('Crontab has no diff');
-            run('rm '.$backupFilename);
-        }
+        UpdateConfig::updateCrontab($sourceFilename, $backupDir);
     }
 );
 
@@ -522,26 +527,8 @@ task(
         $srcFilename = env('nginx_src_filename');
         $dstFilename = env('nginx_dst_filename');
         $backupDir = env('backup_dir', '');
-        $backupDir = $backupDir ?: '{{deploy_path}}/backup/nginx';
+        $backupDir = $backupDir ?: '{{deploy_path}}/backup';
 
-        if (!FileHelper::dirExists($backupDir)) {
-            run('mkdir -p '.$backupDir);
-            !isVerbose() ?: writeln(sprintf('Backup dir "%s" created', $backupDir));
-        }
-
-        $backupFilename = sprintf('%s/nginx.%s', $backupDir, date('Y-m-d_H:i:s'));
-        run(sprintf('cat %s > %s', $dstFilename, $backupFilename));
-
-        $diff = run(
-            sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo "true"; fi', $backupFilename, $srcFilename)
-        )->toBool();
-
-        if ($diff) {
-            run(sprintf('cp "%s" "%s"', $srcFilename, $dstFilename));
-            !isVerbose() ?: writeln(run(sprintf('cat %s', $dstFilename))->getOutput());
-        } else {
-            !isVerbose() ?: writeln('Nginx has no diff');
-            run('rm '.$backupFilename);
-        }
+        UpdateConfig::updateNginx($srcFilename, $dstFilename, $backupDir);
     }
 );
