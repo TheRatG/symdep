@@ -5,6 +5,7 @@ use Symfony\Component\Console\Input\InputOption;
 use TheRat\SymDep\DeploySection;
 use TheRat\SymDep\FileHelper;
 use TheRat\SymDep\Locker;
+use TheRat\SymDep\ReleaseInfo;
 
 /**
  * Default arguments and options.
@@ -35,6 +36,7 @@ set('doctrine_cache_clear', true);
 set('lock_wait', true);
 set('lock_timeout', 15);
 set('lock_filename', '{{deploy_path}}/deploy.lock');
+set('release_info', false);
 
 task(
     'properties',
@@ -182,6 +184,27 @@ task(
     }
 );
 
+task(
+    'release-info-before',
+    function () {
+        if (get('release_info') && FileHelper::dirExists(parse('{{deploy_path}}/current'))) {
+            $releaseInfo = new ReleaseInfo();
+            $releaseInfo->run();
+        }
+    }
+)->desc('Release info');
+
+task(
+    'release-info-after',
+    function () {
+        if (get('release_info') && FileHelper::dirExists(parse('{{deploy_path}}/current'))) {
+            $releaseInfo = new ReleaseInfo();
+            $releaseInfo->showIssues();
+        }
+    }
+)->desc('Release info');
+
+// -------------
 
 task(
     'deploy',
@@ -217,6 +240,7 @@ task(
 /**
  * Configure deploy command list ------------------------------------------------------------
  */
+before('install', 'release-info-before');
 before('install', 'install-before');
 before('install', 'properties');
 after('install', 'deploy:lock');
@@ -244,3 +268,4 @@ after('link', 'deploy:symlink');
 after('link', 'deploy:unlock');
 after('link', 'cleanup');
 after('link', 'link-after');
+after('link', 'release-info-after');
