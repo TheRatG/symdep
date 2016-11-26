@@ -37,7 +37,7 @@ set('lock_wait', true);
 set('lock_timeout', 15);
 set('lock_filename', '{{deploy_path}}/deploy.lock');
 set('release_info', false);
-set('shared_dirs', ['var/logs', 'var/sessions', 'web/uploads']);
+set('shared_dirs', ['var/logs', 'var/sessions', 'web/uploads', 'web/media']);
 
 task(
     'properties',
