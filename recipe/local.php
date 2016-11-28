@@ -40,6 +40,11 @@ task(
     }
 );
 
+task('deploy:prepare', function () {
+    // Create shared dir.
+    run("cd {{deploy_path}} && if [ ! -d shared ]; then mkdir shared; fi");
+});
+
 task(
     'deploy:update_code',
     function () {
