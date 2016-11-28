@@ -104,10 +104,10 @@ task(
         if ('test' != get('build_type')) {
             throw new \RuntimeException('This command only for "test" build type');
         }
-        $path = get('deploy_path').'/releases';
+        $path = get('deploy_path_original').'/releases';
         $localBranches = run("ls $path")->toArray();
         run("cd {{deploy_path_current_master}}; git fetch && git fetch -p");
-        $remoteBranches = run("cd {{current_path}} && {{bin/git}} branch -r")->toArray();
+        $remoteBranches = run("cd {{deploy_path_current_master}} && {{bin/git}} branch -r")->toArray();
         array_walk(
             $remoteBranches,
             function (&$item) {
