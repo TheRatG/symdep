@@ -18,8 +18,8 @@ task(
 
         // Deploy branch
         $branch = input()->getOption('branch');
-        $localBranch = runLocally('[ -d .git ] && git rev-parse --abbrev-ref HEAD')->toString();
-        if (!empty($branch) && $branch != $localBranch) {
+        $localBranch = runLocally('if [ -d .git ]; then git rev-parse --abbrev-ref HEAD; fi;')->toString();
+        if (!empty($branch) && !empty($localBranch) && $branch != $localBranch) {
             $msg = sprintf(
                 'Local branch "%s" does not equal "%s" remote, continue?',
                 $localBranch,
@@ -62,7 +62,7 @@ task('deploy:prepare', function () {
         $result = run('echo $0')->toString();
         if ($result == 'stdin: is not a tty') {
             throw new \RuntimeException(
-                "Looks like ssh inside another ssh.\n".
+                "Looks like ssh inside another ssh.\n" .
                 "Help: http://goo.gl/gsdLt9"
             );
         }
@@ -107,12 +107,12 @@ task(
                     writeln(sprintf('<error>Copy file "%s" must be relative</error>', $name));
                     continue;
                 }
-                $src = $releaseMasterPath.DIRECTORY_SEPARATOR.$name;
-                $dst = parse('{{deploy_path}}').DIRECTORY_SEPARATOR.$name;
+                $src = $releaseMasterPath . DIRECTORY_SEPARATOR . $name;
+                $dst = parse('{{deploy_path}}') . DIRECTORY_SEPARATOR . $name;
                 if (FileHelper::fileExists($src)) {
                     FileHelper::copyFile($src, $dst);
                 } else {
-                    writeln($src.' skipped');
+                    writeln($src . ' skipped');
                 }
             }
         }
@@ -129,7 +129,7 @@ task(
         if ('test' != get('build_type')) {
             throw new \RuntimeException('This command only for "test" build type');
         }
-        $path = get('deploy_path_original').'/releases';
+        $path = get('deploy_path_original') . '/releases';
         $localBranches = run("ls $path")->toArray();
         run("cd {{deploy_path_current_master}}; git fetch && git fetch -p");
         $remoteBranches = run("cd {{deploy_path_current_master}} && {{bin/git}} branch -r")->toArray();
