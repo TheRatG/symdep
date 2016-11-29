@@ -22,7 +22,9 @@ class Application extends DeployerApplication
             new HelpCommand(),
             new ListCommand(),
         ];
-        $commands[] = $this->selfUpdateCommand();
+        if (('@' . 'git-version@') !== $this->getVersion()) {
+            $commands[] = $this->selfUpdateCommand();
+        }
 
         return $commands;
     }

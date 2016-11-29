@@ -77,26 +77,8 @@ set_include_path($includePath.PATH_SEPARATOR.get_include_path());
 // Include function declarations
 require_once 'src/functions.php';
 
-// Detect version
-$version = 'master';
-$packageName = 'therat/symdep';
-$composerLockFile = $deployFilePath.'/composer.lock';
-if (is_readable($composerLockFile)) {
-    $lock = json_decode(file_get_contents($composerLockFile), true);
-    foreach ($lock['packages'] as $package) {
-        if ($package['name'] === $packageName) {
-            $version = $package['version'];
-        }
-    }
-    foreach ($lock['packages-dev'] as $package) {
-        if ($package['name'] === 'therat/symdep') {
-            $version = $package['version'];
-        }
-    }
-}
-
 // Init Deployer
-$console = new \TheRat\SymDep\Console\Application('Symdep', $version);
+$console = new \TheRat\SymDep\Console\Application('Symdep', '@package_version@');
 $input = new \Symfony\Component\Console\Input\ArgvInput();
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 $deployer = new \Deployer\Deployer($console, $input, $output);
