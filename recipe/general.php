@@ -1,8 +1,9 @@
 <?php
 namespace Deployer;
 
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Symfony\Component\Console\Input\InputOption;
-use TheRat\SymDep\DeploySection;
 use TheRat\SymDep\FileHelper;
 use TheRat\SymDep\Locker;
 use TheRat\SymDep\ReleaseInfo;
@@ -38,6 +39,14 @@ set('lock_timeout', 15);
 set('lock_filename', '{{deploy_path}}/deploy.lock');
 set('release_info', false);
 set('shared_dirs', ['var/logs', 'var/sessions', 'web/uploads', 'web/media']);
+
+set('symdep_log_enable', false);
+set(
+    'symdep_log_dir',
+    function () {
+        return dirname(parse('{{deploy_file}}')).'/var/logs/';
+    }
+);
 
 // helper tasks  ------------------------------
 task(
@@ -79,9 +88,18 @@ task(
 /**
  * Symdep tasks ------------------------------
  */
-/**
- * Migrate database
- */
+task(
+    'logging',
+    function () {
+        if (get('symdep_log_enable')) {
+
+            /** @var Logger $logger */
+            $logger = Deployer::get()->getLogger();
+            $filename = parse(sprintf('{{symdep_log_dir}}/deploy_on_{{build_type}}_%s.log', date('YmdHis')));
+            $logger->pushHandler(new StreamHandler($filename));
+        }
+    }
+);
 task(
     'database:migrate',
     function () {
@@ -193,10 +211,11 @@ task(
 task(
     'deploy',
     [
+        'properties',
+        'logging',
         'deploy:prepare',
         'release-info-before',
         'install-before',
-        'properties',
         'deploy:lock',
         'deploy:release',
         'deploy:update_code',

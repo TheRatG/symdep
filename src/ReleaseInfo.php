@@ -20,7 +20,8 @@ use function Deployer\writeln;
  */
 class ReleaseInfo
 {
-    const PARAMETER_JIRA_ISSUES = 'jira-issues';
+    const PARAMETER_JIRA_ISSUES = 'jira_issues';
+    const PARAMETER_TASK_LIST = 'release_info_task_list';
     /**
      * @var string
      */
@@ -134,6 +135,12 @@ class ReleaseInfo
                 writeln(' * '.$item);
             }
 
+            writeln('Task list:');
+            foreach ($taskNameList as $item) {
+                writeln(' * '.$item);
+            }
+
+            set(self::PARAMETER_TASK_LIST, $taskNameList);
             if ($countTask && $this->getJira()) {
                 $issues = $this->getJira()->generateIssues($taskNameList);
                 if ($issues) {
@@ -166,6 +173,11 @@ class ReleaseInfo
                  * @var Issue $issue
                  */
                 writeln(' * '.$issue->__toString());
+            }
+        } elseif (get(self::PARAMETER_TASK_LIST)) {
+            writeln('Deployed:');
+            foreach (get(self::PARAMETER_TASK_LIST) as $task) {
+                writeln(' * '.$task);
             }
         }
     }
