@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
-REAL_PATH=`readlink -f "$0"`;
-DIR=`dirname "$REAL_PATH"`;
+real_path() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
+FILE=`real_path "$0"`;
+DIR=`dirname ${FILE}`;
 ROOT_DIR=`dirname "$DIR"`;
 
 [ ! -d ${ROOT_DIR}/tmp ] && mkdir ${ROOT_DIR}/tmp;
 
+cd ${ROOT_DIR};
 composer install --no-dev;
 ulimit -Sn 4096 && box build --verbose;
 composer install;
