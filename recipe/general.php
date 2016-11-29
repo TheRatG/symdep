@@ -39,59 +39,42 @@ set('lock_filename', '{{deploy_path}}/deploy.lock');
 set('release_info', false);
 set('shared_dirs', ['var/logs', 'var/sessions', 'web/uploads', 'web/media']);
 
+// helper tasks  ------------------------------
 task(
     'properties',
     function () {
     }
-)->desc('1. Prepare properties');
+)->desc('Prepare properties');
 task(
     'install-before',
     function () {
     }
-)->desc('2. Before install');
-task(
-    'install',
-    function () {
-        set('section', DeploySection::INSTALL);
-    }
-)->desc('Deploy and prepare project files');
+)->desc('Before install');
 task(
     'install-after',
     function () {
     }
-)->desc('4. After install');
+)->desc('After install');
 task(
     'configure-before',
     function () {
     }
-)->desc('5. Before configure');
-task(
-    'configure',
-    function () {
-        set('section', DeploySection::CONFIGURE);
-    }
-)->desc('Configure project, run project scripts');
+)->desc('Before configure');
 task(
     'configure-after',
     function () {
     }
-)->desc('7. After configure');
+)->desc('After configure');
 task(
     'link-before',
     function () {
     }
-)->desc('8. Before link');
-task(
-    'link',
-    function () {
-        set('section', DeploySection::LINK);
-    }
-)->desc('Change symlinks');
+)->desc('Before link');
 task(
     'link-after',
     function () {
     }
-)->desc('10. after link');
+)->desc('after link');
 
 /**
  * Symdep tasks ------------------------------
@@ -211,6 +194,7 @@ task(
     'deploy',
     [
         'deploy:prepare',
+        'release-info-before',
         'install-before',
         'properties',
         'deploy:lock',
@@ -235,38 +219,6 @@ task(
         'deploy:unlock',
         'cleanup',
         'link-after',
+        'release-info-after',
     ]
 )->desc('Run deploy project, depend on --build-type=<[d]ev|[t]est|[p]rod>');
-
-/**
- * Configure deploy command list ------------------------------------------------------------
- */
-before('install', 'release-info-before');
-before('install', 'install-before');
-before('install', 'properties');
-after('install', 'deploy:lock');
-after('install', 'deploy:release');
-after('install', 'deploy:update_code');
-after('install', 'deploy:secret_config');
-after('install', 'deploy:create_cache_dir');
-after('install', 'deploy:shared');
-after('install', 'deploy:assets');
-after('install', 'deploy:vendors');
-after('install', 'install-after');
-
-before('configure', 'configure-before');
-before('configure', 'properties');
-after('configure', 'deploy:assets:install');
-after('configure', 'deploy:assetic:dump');
-after('configure', 'database:cache-clear');
-after('configure', 'database:migrate');
-after('configure', 'deploy:cache:warmup');
-after('configure', 'configure-after');
-
-before('link', 'link-before');
-before('link', 'properties');
-after('link', 'deploy:symlink');
-after('link', 'deploy:unlock');
-after('link', 'cleanup');
-after('link', 'link-after');
-after('link', 'release-info-after');
