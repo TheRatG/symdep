@@ -13,4 +13,3 @@ ROOT_DIR=`dirname "$DIR"`;
 cd ${ROOT_DIR};
 composer install --no-dev;
 ulimit -Sn 4096 && box build --verbose;
-composer install;
