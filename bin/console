@@ -1,0 +1,50 @@
+#!/usr/bin/env php
+<?php
+/* (c) Anton Medvedev <anton@medv.io>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+// Detect source location
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+require_once dirname(__DIR__) . '/vendor/deployer/deployer/src/functions.php';
+
+// Setup include path
+set_include_path(dirname(__DIR__) . '/vendor/deployer/deployer' . PATH_SEPARATOR . get_include_path());
+
+// Deployer constants
+define('SYMDEP', true);
+define('SYMDEP_BIN', __FILE__);
+
+// Detect deploy.php script
+$options = getopt('f::', ['file::']);
+$userSpecifiedFile = null;
+
+if (isset($options['f'])) {
+    $userSpecifiedFile = $options['f'];
+} elseif (isset($options['file'])) {
+    $userSpecifiedFile = $options['file'];
+}
+if (empty($userSpecifiedFile)) {
+    $deployFile = getcwd().'/deploy.php';
+} else {
+    $deployFile = ($userSpecifiedFile[0] === '/' ? '' : getcwd().'/').$userSpecifiedFile;
+}
+
+// Init Deployer
+$console = new \TheRat\SymDep\Console\Application('Symdep', '@package_version@');
+$input = new \Symfony\Component\Console\Input\ArgvInput();
+$output = new \Symfony\Component\Console\Output\ConsoleOutput();
+$deployer = new \Deployer\Deployer($console, $input, $output);
+
+require_once dirname(__DIR__) . '/recipe/symdep.php';
+
+// Require deploy.php file
+if (is_readable($deployFile)) {
+    \Deployer\set('deploy_file', $deployFile);
+    require $deployFile;
+}
+
+// Run Deployer
+$deployer->run();

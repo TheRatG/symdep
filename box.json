@@ -46,7 +46,7 @@
     "compression": "GZ",
     "git-commit": "git-commit",
     "git-version": "package_version",
-    "main": "bin/symdep",
+    "main": "bin/console",
     "output": "tmp/symdep.phar",
     "stub": true,
     "chmod": "0755"
