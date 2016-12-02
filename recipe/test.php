@@ -46,7 +46,7 @@ task(
         set('env_vars', "SYMFONY_ENV=$env");
 
         set('deploy_path_original', parse('{{deploy_path}}'));
-        set('deploy_path', parse('{{deploy_path_original}}/releases/{{branch}}'));
+        set('deploy_path', parse('{{deploy_path_original}}/releases/') . strtolower(get('branch')));
         set('deploy_path_current_master', parse('{{deploy_path_original}}/releases/master/current'));
 
         set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
