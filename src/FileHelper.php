@@ -8,6 +8,7 @@ use function Deployer\parse;
 use function Deployer\run;
 use function Deployer\within;
 use function Deployer\writeln;
+use function Deployer\upload;
 
 /**
  * Class FileHelper
