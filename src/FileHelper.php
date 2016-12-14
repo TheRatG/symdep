@@ -69,8 +69,7 @@ class FileHelper
             run(sprintf('mkdir -p "%s"', $dstDir));
         }
 
-        $content = run(sprintf('cat "%s"', $srcFilename));
-        $content = \Deployer\parse($content);
+        $content = run(sprintf('cat "%s"', $srcFilename))->toString();
         $command = <<<DOCHERE
 cat > "$dstFilename" <<'_EOF'
 $content
