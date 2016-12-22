@@ -70,7 +70,7 @@ class FileHelper
             run(sprintf('mkdir -p "%s"', $dstDir));
         }
 
-        $content = run(sprintf('cat "%s"', $srcFilename))->toString();
+        $content = run(sprintf('cat "%s"', $srcFilename))->getOutput();
         $content = parse($content);
         $tmpFilename = tempnam(sys_get_temp_dir(), "dst");
         file_put_contents($tmpFilename, $content);
