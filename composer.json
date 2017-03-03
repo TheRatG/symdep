@@ -8,7 +8,8 @@
         "symfony/console": "~2.6|~3.0",
         "symfony/finder": "~2.6|~3.0",
         "symfony/process": "~2.6|~3.0",
-        "symfony/yaml": "~2.6|~3.0"
+        "symfony/yaml": "~2.6|~3.0",
+        "deployer/phar-update": "^2.0"
     },
     "license": "MIT",
     "authors": [
