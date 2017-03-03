@@ -21,12 +21,6 @@ task(
             $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->createReleaseBranch();
             output()->writeln(sprintf('<info>Release branch "%s" was automatically created</info>', $branch));
         }
-        $pattern = '/RELEASE-\d+/';
-        if (!preg_match($pattern, $branch) && 'prod' === get('env')) {
-            throw new \RuntimeException(
-                sprintf('Invalid branch name "%s", the pattern is "%s"', $branch, $pattern)
-            );
-        }
 
         set('branch', $branch);
         input()->setOption('branch', $branch);
