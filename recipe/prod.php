@@ -10,9 +10,24 @@ task(
 
         // Deploy branch
         $branch = input()->getOption('branch');
-        if (!$branch) {
-            $branch = 'master';
+        if (!$branch && has('branch')) {
+            $branch = get('branch');
         }
+        if ('last' === strtolower($branch)) {
+            $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->getLastReleaseBranch();
+        }
+
+        if (!$branch) {
+            $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->createReleaseBranch();
+            output()->writeln(sprintf('<info>Release branch "%s" was automatically created</info>', $branch));
+        }
+        $pattern = '/RELEASE-\d+/';
+        if (!preg_match($pattern, $branch) && 'prod' === get('env')) {
+            throw new \RuntimeException(
+                sprintf('Invalid branch name "%s", the pattern is "%s"', $branch, $pattern)
+            );
+        }
+
         set('branch', $branch);
         input()->setOption('branch', $branch);
 
@@ -49,3 +64,12 @@ task(
     }
 );
 before('deploy:lock', 'prepare');
+
+
+task(
+    'cleanup:release-branches',
+    function() {
+        \TheRat\SymDep\ProductionReleaser::getInstance()->deleteReleaseBranches(get('keep_releases'));
+    }
+);
+after('cleanup', 'cleanup:release-branches');
