@@ -12,6 +12,13 @@ option(
     BuildType::TYPE_DEV
 );
 
+option(
+    'skip-branch',
+    null,
+    InputOption::VALUE_NONE,
+    'Skip branch detection'
+);
+
 $helper = new BuildType();
 $buildType = $helper->getType();
 

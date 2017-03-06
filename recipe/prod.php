@@ -8,22 +8,24 @@ task(
             return;
         }
 
-        // Deploy branch
-        $branch = input()->getOption('branch');
-        if (!$branch && has('branch')) {
-            $branch = get('branch');
-        }
-        if ('last' === strtolower($branch)) {
-            $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->getLastReleaseBranch();
-        }
+        if(!input()->getOption('skip-branch')) {
+            // Deploy branch
+            $branch = input()->getOption('branch');
+            if (!$branch && has('branch')) {
+                $branch = get('branch');
+            }
+            if ('last' === strtolower($branch)) {
+                $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->getLastReleaseBranch();
+            }
 
-        if (!$branch) {
-            $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->createReleaseBranch();
-            output()->writeln(sprintf('<info>Release branch "%s" was automatically created</info>', $branch));
-        }
+            if (!$branch) {
+                $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->createReleaseBranch();
+                output()->writeln(sprintf('<info>Release branch "%s" was automatically created</info>', $branch));
+            }
 
-        set('branch', $branch);
-        input()->setOption('branch', $branch);
+            set('branch', $branch);
+            input()->setOption('branch', $branch);
+        }
 
         // Symfony shared files
         set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
