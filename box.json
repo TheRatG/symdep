@@ -7,8 +7,7 @@
     "files": [
         "LICENSE",
         "README.md",
-        "vendor/autoload.php",
-        "vendor/herrera-io/phar-update/res/schema.json"
+        "vendor/autoload.php"
     ],
     "finder": [
         {

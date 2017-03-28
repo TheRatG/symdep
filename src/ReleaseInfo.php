@@ -22,6 +22,12 @@ class ReleaseInfo
 {
     const PARAMETER_JIRA_ISSUES = 'jira_issues';
     const PARAMETER_TASK_LIST = 'release_info_task_list';
+
+    /**
+     * @var self
+     */
+    protected static $instance;
+
     /**
      * @var string
      */
@@ -43,9 +49,14 @@ class ReleaseInfo
     protected $jira;
 
     /**
+     * @var bool
+     */
+    protected $executed = false;
+
+    /**
      * ReleaseInfo constructor.
      */
-    public function __construct()
+    protected function __construct()
     {
         $jiraUrl = null;
         $jiraCredentials = null;
@@ -59,6 +70,18 @@ class ReleaseInfo
         $this->setCurrentLink(parse('{{deploy_path}}/current'));
         $this->localDeployPath = dirname(get('deploy_file'));
         $this->logParser = new LogParser();
+    }
+
+    /**
+     * @return self
+     */
+    public static function getInstance()
+    {
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
     }
 
     /**
@@ -113,6 +136,9 @@ class ReleaseInfo
      */
     public function run()
     {
+        if ($this->executed) {
+            return;
+        }
         if (!$this->checkCurrentDeployDir()) {
             return;
         }
@@ -158,6 +184,8 @@ class ReleaseInfo
             $message = 'There are no changes between current directory and remote';
             throw new \RuntimeException($message);
         }
+
+        $this->executed = true;
     }
 
     /**
@@ -165,6 +193,10 @@ class ReleaseInfo
      */
     public function showIssues()
     {
+        if ($this->executed) {
+            return;
+        }
+
         if (has(self::PARAMETER_JIRA_ISSUES)) {
             $issues = get(self::PARAMETER_JIRA_ISSUES);
             writeln('Jira:');
@@ -174,7 +206,7 @@ class ReleaseInfo
                  */
                 writeln(' * '.$issue->__toString());
             }
-        } elseif (get(self::PARAMETER_TASK_LIST)) {
+        } elseif (has(self::PARAMETER_TASK_LIST)) {
             writeln('Deployed:');
             foreach (get(self::PARAMETER_TASK_LIST) as $task) {
                 writeln(' * '.$task);

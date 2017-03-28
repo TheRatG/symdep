@@ -190,8 +190,7 @@ task(
     'release-info-before',
     function () {
         if (get('release_info') && FileHelper::dirExists(parse('{{deploy_path}}/current'))) {
-            $releaseInfo = new ReleaseInfo();
-            $releaseInfo->run();
+            $releaseInfo = ReleaseInfo::getInstance()->run();
         }
     }
 )->desc('Release info');
@@ -200,8 +199,7 @@ task(
     'release-info-after',
     function () {
         if (get('release_info') && FileHelper::dirExists(parse('{{deploy_path}}/current'))) {
-            $releaseInfo = new ReleaseInfo();
-            $releaseInfo->showIssues();
+            $releaseInfo = ReleaseInfo::getInstance()->showIssues();
         }
     }
 )->desc('Release info');
