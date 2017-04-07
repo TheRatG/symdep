@@ -3,13 +3,6 @@
 namespace Deployer;
 
 task(
-    'deploy:prepare',
-    function () {
-        //skip prepare
-    }
-);
-
-task(
     'properties',
     function () {
         if (has('local_branch') && has('branch')) {
