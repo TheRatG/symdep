@@ -8,6 +8,7 @@ use function Deployer\parse;
 use function Deployer\run;
 use function Deployer\within;
 use function Deployer\writeln;
+use function Deployer\upload;
 
 /**
  * Class FileHelper
@@ -69,14 +70,12 @@ class FileHelper
             run(sprintf('mkdir -p "%s"', $dstDir));
         }
 
-        $content = run(sprintf('cat "%s"', $srcFilename));
-        $content = \Deployer\parse($content);
-        $command = <<<DOCHERE
-cat > "$dstFilename" <<'_EOF'
-$content
-_EOF
-DOCHERE;
-        run($command);
+        $content = run(sprintf('cat "%s"', $srcFilename))->getOutput();
+        $content = parse($content);
+        $tmpFilename = tempnam(sys_get_temp_dir(), "dst");
+        file_put_contents($tmpFilename, $content);
+        upload($tmpFilename, $dstFilename);
+        unlink($tmpFilename);
 
         if (is_null($mode)) {
             try {
