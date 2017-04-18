@@ -1,8 +1,8 @@
 <?php
+
 namespace TheRat\SymDep;
 
 use TheRat\SymDep\ReleaseInfo\Issue;
-use TheRat\SymDep\ReleaseInfo\Jira;
 use TheRat\SymDep\ReleaseInfo\LogParser;
 use function Deployer\askConfirmation;
 use function Deployer\get;
@@ -20,7 +20,6 @@ use function Deployer\writeln;
  */
 class ReleaseInfo
 {
-    const PARAMETER_JIRA_ISSUES = 'jira_issues';
     const PARAMETER_TASK_LIST = 'release_info_task_list';
     /**
      * @var string
@@ -38,24 +37,10 @@ class ReleaseInfo
     protected $logParser;
 
     /**
-     * @var Jira
-     */
-    protected $jira;
-
-    /**
      * ReleaseInfo constructor.
      */
     public function __construct()
     {
-        $jiraUrl = null;
-        $jiraCredentials = null;
-        if (has('jira-url') && has('jira-credentials')) {
-            $this->jira = new Jira(get('jira-url'), get('jira-credentials'));
-        } else {
-            writeln(
-                '<comment>You could connect Jira plugin, just set "jira-url" and "jira-credentials" options.</comment>'
-            );
-        }
         $this->setCurrentLink(parse('{{deploy_path}}/current'));
         $this->localDeployPath = dirname(get('deploy_file'));
         $this->logParser = new LogParser();
@@ -67,14 +52,6 @@ class ReleaseInfo
     public function getLocalDeployPath()
     {
         return $this->localDeployPath;
-    }
-
-    /**
-     * @return Jira
-     */
-    public function getJira()
-    {
-        return $this->jira;
     }
 
     /**
@@ -121,7 +98,6 @@ class ReleaseInfo
 
         if ($countLog) {
             $taskNameList = $this->getLogParser()->execute($log);
-            $countTask = count($taskNameList);
 
             $info = sprintf(
                 '<info>Found %d revision and %d tasks</info>',
@@ -141,14 +117,6 @@ class ReleaseInfo
             }
 
             set(self::PARAMETER_TASK_LIST, $taskNameList);
-            if ($countTask && $this->getJira()) {
-                $issues = $this->getJira()->generateIssues($taskNameList);
-                if ($issues) {
-                    set(self::PARAMETER_JIRA_ISSUES, $issues);
-                    $this->showIssues();
-                }
-            }
-
             writeln('');
             if (askConfirmation('Would you like to continue deploy on prod')) {
             } else {
@@ -165,16 +133,7 @@ class ReleaseInfo
      */
     public function showIssues()
     {
-        if (has(self::PARAMETER_JIRA_ISSUES)) {
-            $issues = get(self::PARAMETER_JIRA_ISSUES);
-            writeln('Jira:');
-            foreach ($issues as $issue) {
-                /**
-                 * @var Issue $issue
-                 */
-                writeln(' * '.$issue->__toString());
-            }
-        } elseif (get(self::PARAMETER_TASK_LIST)) {
+        if (get(self::PARAMETER_TASK_LIST)) {
             writeln('Deployed:');
             foreach (get(self::PARAMETER_TASK_LIST) as $task) {
                 writeln(' * '.$task);
