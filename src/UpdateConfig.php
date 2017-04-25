@@ -1,4 +1,5 @@
 <?php
+
 namespace TheRat\SymDep;
 
 use function Deployer\isVerbose;
@@ -54,12 +55,16 @@ class UpdateConfig
             !isVerbose() ?: writeln(sprintf('Backup dir "%s" created', $backupDir));
         }
 
-        $backupFilename = sprintf('%s/%s.%s', $backupDir, $backupName, date('Y-m-d_H:i:s'));
-        run(sprintf('cat %s > %s', $dstFilename, $backupFilename));
+        $diff = true;
+        $backupFilename = '';
+        if (FileHelper::fileExists($dstFilename)) {
+            $backupFilename = sprintf('%s/%s.%s', $backupDir, $backupName, date('Y-m-d_H:i:s'));
+            run(sprintf('cat %s > %s', $dstFilename, $backupFilename));
 
-        $diff = run(
-            sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo "true"; fi', $backupFilename, $srcFilename)
-        )->toBool();
+            $diff = run(
+                sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo "true"; fi', $backupFilename, $srcFilename)
+            )->toBool();
+        }
 
         $result = false;
         if ($diff) {
@@ -69,7 +74,9 @@ class UpdateConfig
             $result = true;
         } else {
             !isVerbose() ?: writeln('File has no diff');
-            run('rm '.$backupFilename);
+            if ($backupFilename) {
+                run('rm '.$backupFilename);
+            }
         }
 
         return $result;
