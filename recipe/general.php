@@ -150,6 +150,13 @@ task(
 );
 
 /**
+ * Clear Cache
+ */
+task('deploy:cache:clear', function () {
+    run('{{env_vars}} {{bin/php}} {{bin/console}} cache:clear {{console_options}} --no-warmup');
+})->desc('Clear cache');
+
+/**
  * Doctrine cache clear database
  */
 desc('Doctrine cache clear');

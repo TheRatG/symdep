@@ -72,10 +72,12 @@ class FileHelper
 
         $content = run(sprintf('cat "%s"', $srcFilename))->getOutput();
         $content = parse($content);
-        $tmpFilename = tempnam(sys_get_temp_dir(), "dst");
-        file_put_contents($tmpFilename, $content);
-        upload($tmpFilename, $dstFilename);
-        unlink($tmpFilename);
+        $command = <<<DOCHERE
+cat > "$dstFilename" <<'_EOF'
+$content
+_EOF
+DOCHERE;
+        run($command);
 
         if (is_null($mode)) {
             try {
