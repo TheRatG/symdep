@@ -3,13 +3,13 @@
     "description": "Additional tool for symfony deploy",
     "require": {
         "php": ">=5.4.0",
-        "deployer/deployer": "^4.0.1",
+        "deployer/deployer": "^5.1.0",
+        "deployer/phar-update": "^2.0",
         "guzzlehttp/guzzle": "~5.0|~6.0",
         "symfony/console": "~2.6|~3.0",
         "symfony/finder": "~2.6|~3.0",
         "symfony/process": "~2.6|~3.0",
-        "symfony/yaml": "~2.6|~3.0",
-        "deployer/phar-update": "^2.0"
+        "symfony/yaml": "~2.6|~3.0"
     },
     "license": "MIT",
     "authors": [
@@ -20,7 +20,7 @@
     ],
     "extra": {
         "branch-alias": {
-            "dev-master": "4.1.x-dev"
+            "dev-master": "5.1.x-dev"
         }
     },
     "autoload": {
