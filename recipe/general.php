@@ -1,4 +1,5 @@
 <?php
+
 namespace Deployer;
 
 use Monolog\Handler\StreamHandler;
@@ -157,6 +158,13 @@ task('deploy:cache:clear', function () {
 })->desc('Clear cache');
 
 /**
+ * Warm up cache
+ */
+task('deploy:cache:warmup', function () {
+    run('{{env_vars}} {{bin/php}} {{bin/console}} cache:warmup {{console_options}}', ['timeout' => 600]);
+})->desc('Warm up cache');
+
+/**
  * Doctrine cache clear database
  */
 desc('Doctrine cache clear');
@@ -235,9 +243,9 @@ task(
         'deploy:assets:install',
         'deploy:assetic:dump',
         'deploy:cache:clear',
-        'deploy:cache:warmup',
         'database:cache-clear',
         'database:migrate',
+        'deploy:cache:warmup',
         'configure-after',
         'link-before',
         'deploy:symlink',
