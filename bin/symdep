@@ -107,6 +107,7 @@ set_exception_handler(function ($e) use ($input, $output) {
 if (is_readable($deployFile)) {
     // Prevent variable leak into deploy.php file
     call_user_func(function () use ($deployFile) {
+        \Deployer\set('deploy_file', $deployFile);
         require $deployFile;
     });
 }

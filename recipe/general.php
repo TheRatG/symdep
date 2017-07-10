@@ -90,18 +90,6 @@ task(
  * Symdep tasks ------------------------------
  */
 task(
-    'logging',
-    function () {
-        if (get('symdep_log_enable')) {
-
-            /** @var Logger $logger */
-            $logger = Deployer::get()->getLogger();
-            $filename = parse(sprintf('{{symdep_log_dir}}/deploy_on_{{build_type}}_%s.log', date('YmdHis')));
-            $logger->pushHandler(new StreamHandler($filename));
-        }
-    }
-);
-task(
     'database:migrate',
     function () {
         if (get('doctrine_migrate')) {
@@ -225,7 +213,6 @@ task(
     'deploy',
     [
         'properties',
-        'logging',
         'deploy:prepare',
         'release-info-before',
         'install-before',
