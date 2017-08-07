@@ -164,7 +164,7 @@ class ReleaseInfo
             return;
         }
 
-        if (get(self::PARAMETER_TASK_LIST)) {
+        if (has(self::PARAMETER_TASK_LIST)) {
             writeln('Deployed:');
             foreach (get(self::PARAMETER_TASK_LIST) as $task) {
                 writeln(' * '.$task);
