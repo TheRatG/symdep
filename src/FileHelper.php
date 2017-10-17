@@ -70,7 +70,7 @@ class FileHelper
             run(sprintf('mkdir -p "%s"', $dstDir));
         }
 
-        $content = run(sprintf('cat "%s"', $srcFilename))->getOutput();
+        $content = run(sprintf('cat "%s"', $srcFilename));
         $content = parse($content);
         $command = <<<DOCHERE
 cat > "$dstFilename" <<'_EOF'
