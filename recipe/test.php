@@ -18,7 +18,7 @@ task(
 
         // Deploy branch
         $branch = input()->getOption('branch');
-        $localBranch = runLocally('if [ -d .git ]; then git rev-parse --abbrev-ref HEAD; fi;')->toString();
+        $localBranch = runLocally('if [ -d .git ]; then git rev-parse --abbrev-ref HEAD; fi;');
         if (!empty($branch) && !empty($localBranch) && $branch != $localBranch) {
             $msg = sprintf(
                 'Local branch "%s" does not equal "%s" remote, continue?',
@@ -42,8 +42,7 @@ task(
         } else {
             set('clear_paths', []);
         }
-        set('env', $env);
-        set('env_vars', "SYMFONY_ENV=$env");
+        set('symfony_env', $env);
 
         set('deploy_path_original', parse('{{deploy_path}}'));
         set('deploy_path', parse('{{deploy_path_original}}/releases/') . strtolower(get('branch')));
@@ -59,7 +58,7 @@ task('deploy:prepare', function () {
     // Check if shell is POSIX-compliant
     try {
         cd(''); // To run command as raw.
-        $result = run('echo $0')->toString();
+        $result = run('echo $0');
         if ($result == 'stdin: is not a tty') {
             throw new \RuntimeException(
                 "Looks like ssh inside another ssh.\n" .
@@ -85,7 +84,7 @@ task(
         run('if [ ! -d {{deploy_path}} ]; then mkdir -p {{deploy_path}}; fi');
 
         // Check for existing /current directory (not symlink)
-        $result = run('if [ ! -L {{deploy_path}}/current ] && [ -d {{deploy_path}}/current ]; then echo true; fi')->toBool();
+        $result = (bool)run('if [ ! -L {{deploy_path}}/current ] && [ -d {{deploy_path}}/current ]; then echo 1; fi');
         if ($result) {
             throw new \RuntimeException('There already is a directory (not symlink) named "current" in ' . get('deploy_path') . '. Remove this directory so it can be replaced with a symlink for atomic deployments.');
         }
@@ -130,9 +129,9 @@ task(
             throw new \RuntimeException('This command only for "test" build type');
         }
         $path = get('deploy_path_original') . '/releases';
-        $localBranches = run("ls $path")->toArray();
+        $localBranches = explode("\n", run("ls $path"));
         run("cd {{deploy_path_current_master}}; git fetch && git fetch -p");
-        $remoteBranches = run("cd {{deploy_path_current_master}} && {{bin/git}} branch -r")->toArray();
+        $remoteBranches = explode("\n", run("cd {{deploy_path_current_master}} && {{bin/git}} branch -r"));
         array_walk(
             $remoteBranches,
             function (&$item) {

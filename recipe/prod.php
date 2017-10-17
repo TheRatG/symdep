@@ -41,9 +41,9 @@ task(
         run('if [ ! -d {{deploy_path}} ]; then mkdir -p {{deploy_path}}; fi');
 
         // Check for existing /current directory (not symlink)
-        $result = run(
-            'if [ ! -L {{deploy_path}}/current ] && [ -d {{deploy_path}}/current ]; then echo true; fi'
-        )->toBool();
+        $result = (bool)run(
+            'if [ ! -L {{deploy_path}}/current ] && [ -d {{deploy_path}}/current ]; then echo 1; fi'
+        );
         if ($result) {
             throw new \RuntimeException(
                 'There already is a directory (not symlink) named "current" in '.get(

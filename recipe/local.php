@@ -10,7 +10,7 @@ task(
         }
 
         // Symfony build set
-        set('env', '{{build_type}}');
+        set('symfony_env', '{{build_type}}');
 
         // Symfony shared dirs
         set('shared_dirs', []);
@@ -19,7 +19,7 @@ task(
 
         // Deploy branch
         $branch = input()->getOption('branch');
-        $localBranch = runLocally('git rev-parse --abbrev-ref HEAD')->toString();
+        $localBranch = runLocally('git rev-parse --abbrev-ref HEAD');
         if (!$branch) {
             $branch = $localBranch;
         }
@@ -50,13 +50,13 @@ task(
         $localBranch = get('local_branch');
         $branch = get('branch');
         if (empty($localBranch)) {
-            $localBranch = runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD')->toString();
+            $localBranch = runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD');
         }
         if (empty($branch)) {
             $branch = $localBranch;
         }
         $repository = get('repository');
-        $res = trim(run("{{bin/git}} ls-remote $repository $(git symbolic-ref HEAD)")->toString());
+        $res = trim(run("{{bin/git}} ls-remote $repository $(git symbolic-ref HEAD)"));
         if ($res) {
             $msg = sprintf(
                 'Local "%s" and input "%s" branches are different! There will be merge.',
@@ -108,7 +108,7 @@ task(
     'deploy:assets:install',
     function () {
         run(
-            '{{env_vars}} {{bin/php}} {{bin/console}} assets:install {{console_options}} --symlink --relative {{release_path}}/web'
+            '{{bin/php}} {{bin/console}} assets:install {{console_options}} --symlink --relative {{release_path}}/web'
         );
     }
 );

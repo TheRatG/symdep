@@ -82,10 +82,10 @@ DOCHERE;
         if (is_null($mode)) {
             try {
                 $command = sprintf('stat -c "%%a" % s', $srcFilename);
-                $mode = trim(run($command)->toString());
+                $mode = trim(run($command));
             } catch (ProcessFailedException $e) {
                 $command = sprintf('stat -f "%%A" % s', $srcFilename);
-                $mode = trim(run($command)->toString());
+                $mode = trim(run($command));
             }
         }
 
@@ -107,7 +107,7 @@ DOCHERE;
         $dstDir = rtrim($dstDir, ' / ');
 
         $command = sprintf('find "%s" -type f', $srcDir);
-        $templateFiles = run($command)->toArray();
+        $templateFiles = explode("\n", run($command));
 
         $result = [];
         foreach ($templateFiles as $src) {
@@ -129,7 +129,7 @@ DOCHERE;
      */
     public static function dirExists($dir, $workingPath = null)
     {
-        return self::runWithin("if [ -d \"$dir\" ]; then echo true; fi", $workingPath)->toBool();
+        return (bool)self::runWithin("if [ -d \"$dir\" ]; then echo 1; fi", $workingPath);
     }
 
     /**
@@ -139,7 +139,7 @@ DOCHERE;
      */
     public static function fileExists($filename, $workingPath = null)
     {
-        return self::runWithin("if [ -f \"$filename\" ]; then echo true; fi", $workingPath)->toBool();
+        return (bool)self::runWithin("if [ -f \"$filename\" ]; then echo 1; fi", $workingPath);
     }
 
     /**
@@ -151,7 +151,7 @@ DOCHERE;
     {
         $cmd = sprintf('if [ -w "%s" ]; then echo true; fi', $filename);
 
-        return self::runWithin($cmd, $workingPath)->toBool();
+        return (bool)self::runWithin($cmd, $workingPath);
     }
 
     /**

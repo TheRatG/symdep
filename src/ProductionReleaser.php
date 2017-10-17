@@ -131,7 +131,7 @@ class ProductionReleaser
      */
     public function getLocalBranch()
     {
-        return runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD')->toString();
+        return runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD');
     }
 
     /**
@@ -141,7 +141,7 @@ class ProductionReleaser
     public function getReleaseList($dir)
     {
         // find will list only dirs in releases/
-        $releaseList = run("find \"$dir\" -maxdepth 1 -mindepth 1 -type d")->toArray();
+        $releaseList = explode("\n", run("find \"$dir\" -maxdepth 1 -mindepth 1 -type d"));
         // filter out anything that does not look like a release
         foreach ($releaseList as $key => $item) {
             $item = basename($item); // strip path returned from find
