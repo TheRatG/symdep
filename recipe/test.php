@@ -1,4 +1,5 @@
 <?php
+
 namespace Deployer;
 
 use TheRat\SymDep\FileHelper;
@@ -43,6 +44,12 @@ task(
             set('clear_paths', []);
         }
         set('symfony_env', $env);
+        set(
+            'env',
+            [
+                'SYMFONY_ENV' => get('symfony_env')
+            ]
+        );
 
         set('deploy_path_original', parse('{{deploy_path}}'));
         set('deploy_path', parse('{{deploy_path_original}}/releases/') . strtolower(get('branch')));
