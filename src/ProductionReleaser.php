@@ -116,7 +116,7 @@ class ProductionReleaser
     }
 
     /**
-     * @return \Deployer\Type\Result
+     * @return string
      */
     public function getBranches()
     {
