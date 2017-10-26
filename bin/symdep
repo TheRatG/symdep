@@ -71,11 +71,13 @@ if (!$loaded) {
 }
 
 foreach ($includes as $include) {
-    $dir = realpath($include);
-    if (file_exists($dir) && false !== strpos($dir, 'deployer/deployer')) {
-        set_include_path($dir . PATH_SEPARATOR . get_include_path());
+    if (strlen(Phar::running()) > 0) {
+        set_include_path(dirname(__DIR__) . '/vendor/deployer/deployer' . PATH_SEPARATOR . get_include_path());
+    } elseif (file_exists($include) && false !== strpos($include, 'deployer/deployer')) {
+        set_include_path($include . PATH_SEPARATOR . get_include_path());
     }
 }
+
 set_include_path(dirname(__DIR__) . PATH_SEPARATOR . get_include_path());
 
 // Include function declarations
