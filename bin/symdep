@@ -72,7 +72,7 @@ if (!$loaded) {
 
 foreach ($includes as $include) {
     $dir = realpath($include);
-    if (file_exists($dir) && false !== strpos('deployer/deployer', $dir)) {
+    if (file_exists($dir) && false !== strpos($dir, 'deployer/deployer')) {
         set_include_path($dir . PATH_SEPARATOR . get_include_path());
     }
 }

@@ -1,6 +1,6 @@
 <?php
 namespace Deployer;
 
-localServer('local')
-    ->stage(['local'])
+localhost('local')
+    ->stage('local')
     ->set('deploy_path', __DIR__);
