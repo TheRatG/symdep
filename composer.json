@@ -2,7 +2,7 @@
     "name": "therat/symdep",
     "description": "Additional tool for symfony deploy",
     "require": {
-        "php": ">=5.4.0",
+        "php": ">=7.1",
         "deployer/deployer": "^6.0.3",
         "deployer/phar-update": "^2.0",
         "guzzlehttp/guzzle": "~5.0|~6.0",

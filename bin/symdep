@@ -10,15 +10,6 @@
 define('SYMDEP', true);
 define('SYMDEP_BIN', __FILE__);
 
-// Check for php7
-if (!defined('PHP_MAJOR_VERSION') || PHP_MAJOR_VERSION < 7) {
-    die(
-        'Upgrade to php7' . PHP_EOL .
-        'Deployer 5.x supports only php7 and above.' . PHP_EOL .
-        'If you want to use older php version use Deployer 4.x' . PHP_EOL
-    );
-}
-
 // Detect deploy.php script
 $options = getopt('f::', ['file::']);
 $userSpecifiedFile = null;
@@ -62,12 +53,10 @@ $includes = [
 ];
 
 $loaded = false;
-$includePath = false;
 
 for ($i = 0; $i < count($autoload); $i++) {
     if (file_exists($autoload[$i]) && file_exists($includes[$i])) {
         require $autoload[$i];
-        $includePath = $includes[$i];
         $loaded = true;
         break;
     }
@@ -81,8 +70,13 @@ if (!$loaded) {
     );
 }
 
-// Setup include path
-set_include_path($includePath . PATH_SEPARATOR . get_include_path());
+foreach ($includes as $include) {
+    $dir = realpath($include);
+    if (file_exists($dir) && false !== strpos('deployer/deployer', $dir)) {
+        set_include_path($dir . PATH_SEPARATOR . get_include_path());
+    }
+}
+set_include_path(dirname(__DIR__) . PATH_SEPARATOR . get_include_path());
 
 // Include function declarations
 require_once 'src/functions.php';
