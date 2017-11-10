@@ -2,7 +2,6 @@
 
 namespace TheRat\SymDep;
 
-use TheRat\SymDep\ReleaseInfo\Issue;
 use TheRat\SymDep\ReleaseInfo\LogParser;
 use function Deployer\askConfirmation;
 use function Deployer\get;
@@ -46,6 +45,7 @@ class ReleaseInfo
      * @var bool
      */
     protected $executed = false;
+
     /**
      * ReleaseInfo constructor.
      */
@@ -66,45 +66,6 @@ class ReleaseInfo
         }
 
         return self::$instance;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLocalDeployPath()
-    {
-        return $this->localDeployPath;
-    }
-
-    /**
-     * @return LogParser
-     */
-    public function getLogParser()
-    {
-        return $this->logParser;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCurrentLink()
-    {
-        return $this->currentLink;
-    }
-
-    /**
-     * @param mixed $currentLink
-     *
-     * @return self
-     */
-    public function setCurrentLink($currentLink)
-    {
-        if (!FileHelper::dirExists($currentLink)) {
-            throw new \RuntimeException('Current link "'.$currentLink.'" does not exists');
-        }
-        $this->currentLink = $currentLink;
-
-        return $this;
     }
 
     /**
@@ -158,23 +119,6 @@ class ReleaseInfo
     /**
      *
      */
-    public function showIssues()
-    {
-        if ($this->executed) {
-            return;
-        }
-
-        if (get(self::PARAMETER_TASK_LIST)) {
-            writeln('Deployed:');
-            foreach (get(self::PARAMETER_TASK_LIST) as $task) {
-                writeln(' * '.$task);
-            }
-        }
-    }
-
-    /**
-     *
-     */
     protected function checkCurrentDeployDir()
     {
         $cmd = sprintf('cd %s && git rev-parse --abbrev-ref HEAD', $this->getLocalDeployPath());
@@ -185,6 +129,14 @@ class ReleaseInfo
         }
 
         return true;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocalDeployPath()
+    {
+        return $this->localDeployPath;
     }
 
     /**
@@ -200,5 +152,53 @@ class ReleaseInfo
         $log = runLocally($cmd)->toArray();
 
         return $log;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrentLink()
+    {
+        return $this->currentLink;
+    }
+
+    /**
+     * @param mixed $currentLink
+     *
+     * @return self
+     */
+    public function setCurrentLink($currentLink)
+    {
+        if (!FileHelper::dirExists($currentLink)) {
+            throw new \RuntimeException('Current link "'.$currentLink.'" does not exists');
+        }
+        $this->currentLink = $currentLink;
+
+        return $this;
+    }
+
+    /**
+     * @return LogParser
+     */
+    public function getLogParser()
+    {
+        return $this->logParser;
+    }
+
+    /**
+     *
+     */
+    public function showIssues()
+    {
+        if ($this->executed) {
+            return;
+        }
+
+        if (has(self::PARAMETER_TASK_LIST) && get(self::PARAMETER_TASK_LIST)) {
+            writeln('Deployed:');
+            foreach (get(self::PARAMETER_TASK_LIST) as $task) {
+                writeln(' * '.$task);
+            }
+        }
     }
 }

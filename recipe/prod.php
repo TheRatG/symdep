@@ -1,4 +1,5 @@
 <?php
+
 namespace Deployer;
 
 task(
@@ -8,7 +9,7 @@ task(
             return;
         }
 
-        if(!input()->getOption('skip-branch')) {
+        if (!input()->getOption('skip-branch')) {
             // Deploy branch
             $branch = input()->getOption('branch');
             if (!$branch && has('branch')) {
@@ -64,8 +65,12 @@ before('deploy:lock', 'prepare');
 
 task(
     'cleanup:release-branches',
-    function() {
-        \TheRat\SymDep\ProductionReleaser::getInstance()->deleteReleaseBranches(get('keep_releases'));
+    function () {
+        try {
+            \TheRat\SymDep\ProductionReleaser::getInstance()->deleteReleaseBranches(get('keep_releases'));
+        } catch (\Symfony\Component\Process\Exception\ProcessFailedException $e) {
+            writeln($e->getMessage());
+        }
     }
 );
 after('cleanup', 'cleanup:release-branches');
