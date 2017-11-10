@@ -19,35 +19,49 @@ if (isset($options['f'])) {
 } elseif (isset($options['file'])) {
     $userSpecifiedFile = $options['file'];
 }
+
 if (empty($userSpecifiedFile)) {
     $deployFile = getcwd() . '/deploy.php';
+
+    if (!is_readable($deployFile)) {
+        $currentDir = getcwd();
+        $count = 0;
+        do {
+            $currentDir = dirname($currentDir);
+            $deployFile = $currentDir . '/deploy.php';
+            $count++;
+        } while (!is_readable($deployFile) && $count < 100);
+    }
 } else {
     $deployFile = ($userSpecifiedFile[0] === '/' ? '' : getcwd() . '/') . $userSpecifiedFile;
 }
 
 $deployFilePath = dirname($deployFile);
+
 // Detect source location
+
 $autoload = [
     $deployFilePath . '/vendor/autoload.php',
     __DIR__ . '/../../../autoload.php',
     __DIR__ . '/../vendor/autoload.php'
 ];
+
 $includes = [
     $deployFilePath . '/vendor/deployer/deployer',
     __DIR__ . '/../../../deployer/deployer',
-    __DIR__ . '/../vendor/deployer/deployer'
+    __DIR__ . '/../'
 ];
 
 $loaded = false;
-$includePath = false;
+
 for ($i = 0; $i < count($autoload); $i++) {
     if (file_exists($autoload[$i]) && file_exists($includes[$i])) {
         require $autoload[$i];
-        $includePath = $includes[$i];
         $loaded = true;
         break;
     }
 }
+
 if (!$loaded) {
     die(
         'You need to set up the project dependencies using the following commands:' . PHP_EOL .
@@ -55,8 +69,16 @@ if (!$loaded) {
         'php composer.phar install' . PHP_EOL
     );
 }
-// Setup include path
-set_include_path($includePath . PATH_SEPARATOR . get_include_path());
+
+foreach ($includes as $include) {
+    if (strlen(Phar::running()) > 0) {
+        set_include_path(dirname(__DIR__) . '/vendor/deployer/deployer' . PATH_SEPARATOR . get_include_path());
+    } elseif (file_exists($include) && false !== strpos($include, 'deployer/deployer')) {
+        set_include_path($include . PATH_SEPARATOR . get_include_path());
+    }
+}
+
+set_include_path(dirname(__DIR__) . PATH_SEPARATOR . get_include_path());
 
 // Include function declarations
 require_once 'src/functions.php';
@@ -65,15 +87,27 @@ require_once 'src/functions.php';
 $console = new \TheRat\SymDep\Console\Application('Symdep', '@package_version@');
 $input = new \Symfony\Component\Console\Input\ArgvInput();
 $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-$deployer = new \Deployer\Deployer($console, $input, $output);
+$deployer = new \Deployer\Deployer($console);
 
 require_once dirname(__DIR__) . '/recipe/symdep.php';
 
+// Pretty-print uncaught exceptions in symfony-console
+set_exception_handler(function ($e) use ($input, $output) {
+    $io = new \Symfony\Component\Console\Style\SymfonyStyle($input, $output);
+    $io->block($e->getMessage(), get_class($e), 'fg=white;bg=red', ' ', true);
+    $io->block($e->getTraceAsString());
+    exit(1);
+});
+
 // Require deploy.php file
 if (is_readable($deployFile)) {
-    \Deployer\set('deploy_file', $deployFile);
-    require $deployFile;
+    // Prevent variable leak into deploy.php file
+    call_user_func(function () use ($deployFile) {
+        \Deployer\set('deploy_file', $deployFile);
+        require $deployFile;
+    });
 }
 
 // Run Deployer
-$deployer->run();
+$deployer->init();
+$console->run();

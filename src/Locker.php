@@ -88,7 +88,7 @@ class Locker
         ];
         if (FileHelper::fileExists($this->filename)) {
             $cmd = sprintf('cat "%s"', $this->filename);
-            $content = trim(run($cmd)->toString());
+            $content = trim(run($cmd));
             $data = json_decode($content, true);
             if ($data) {
                 $result = $data;

@@ -1,4 +1,5 @@
 <?php
+
 namespace Deployer;
 
 use Monolog\Handler\StreamHandler;
@@ -16,22 +17,22 @@ option('lock-wait', 'w', InputOption::VALUE_NONE, 'Release lock');
 set(
     'bin/node',
     function () {
-        return run('which node')->toString();
+        return run('which node');
     }
 );
 set(
     'bin/npm',
     function () {
-        return run('which npm')->toString();
+        return run('which npm');
     }
 );
 set(
     'user',
     function () {
-        return trim(run('whoami')->toString());
+        return trim(run('whoami'));
     }
 );
-set('symfony_console', 'cd {{release_path}} && {{env_vars}} {{bin/php}} {{bin/console}}');
+set('symfony_console', 'cd {{release_path}} && {{bin/php}} {{bin/console}}');
 set('doctrine_migrate', true);
 set('doctrine_cache_clear', true);
 set('lock_wait', true);
@@ -89,23 +90,11 @@ task(
  * Symdep tasks ------------------------------
  */
 task(
-    'logging',
-    function () {
-        if (get('symdep_log_enable')) {
-
-            /** @var Logger $logger */
-            $logger = Deployer::get()->getLogger();
-            $filename = parse(sprintf('{{symdep_log_dir}}/deploy_on_{{build_type}}_%s.log', date('YmdHis')));
-            $logger->pushHandler(new StreamHandler($filename));
-        }
-    }
-);
-task(
     'database:migrate',
     function () {
         if (get('doctrine_migrate')) {
             run(
-                '{{env_vars}} {{bin/php}} {{bin/console}} doctrine:migrations:migrate {{console_options}} --allow-no-migration'
+                '{{bin/php}} {{bin/console}} doctrine:migrations:migrate {{console_options}} --allow-no-migration'
             );
         }
     }
@@ -128,9 +117,9 @@ task(
         if ($needLock) {
             $locker->lock(
                 [
-                    'date' => trim(run('date -u')->toString()),
-                    'user' => trim(runLocally('whoami')->toString()),
-                    'server' => trim(runLocally('uname -a')->toString()),
+                    'date' => trim(run('date -u')),
+                    'user' => trim(runLocally('whoami')),
+                    'server' => trim(runLocally('uname -a')),
                 ]
             );
             if (isVerbose()) {
@@ -150,6 +139,20 @@ task(
 );
 
 /**
+ * Clear Cache
+ */
+task('deploy:cache:clear', function () {
+    run('{{bin/php}} {{bin/console}} cache:clear {{console_options}} --no-warmup');
+})->desc('Clear cache');
+
+/**
+ * Warm up cache
+ */
+task('deploy:cache:warmup', function () {
+    run('{{bin/php}} {{bin/console}} cache:warmup {{console_options}}', ['timeout' => 600]);
+})->desc('Warm up cache');
+
+/**
  * Doctrine cache clear database
  */
 desc('Doctrine cache clear');
@@ -157,9 +160,9 @@ task(
     'database:cache-clear',
     function () {
         if (get('doctrine_cache_clear')) {
-            run('{{env_vars}} {{bin/php}} {{bin/console}} doctrine:cache:clear-metadata {{console_options}}');
-            run('{{env_vars}} {{bin/php}} {{bin/console}} doctrine:cache:clear-query {{console_options}}');
-            run('{{env_vars}} {{bin/php}} {{bin/console}} doctrine:cache:clear-result {{console_options}}');
+            run('{{bin/php}} {{bin/console}} doctrine:cache:clear-metadata {{console_options}}');
+            run('{{bin/php}} {{bin/console}} doctrine:cache:clear-query {{console_options}}');
+            run('{{bin/php}} {{bin/console}} doctrine:cache:clear-result {{console_options}}');
         }
     }
 );
@@ -210,7 +213,6 @@ task(
     'deploy',
     [
         'properties',
-        'logging',
         'deploy:prepare',
         'release-info-before',
         'install-before',
@@ -227,6 +229,7 @@ task(
         'configure-before',
         'deploy:assets:install',
         'deploy:assetic:dump',
+        'deploy:cache:clear',
         'database:cache-clear',
         'database:migrate',
         'deploy:cache:warmup',

@@ -61,15 +61,15 @@ class UpdateConfig
             $backupFilename = sprintf('%s/%s.%s', $backupDir, $backupName, date('Y-m-d_H:i:s'));
             run(sprintf('cat %s > %s', $dstFilename, $backupFilename));
 
-            $diff = run(
-                sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo "true"; fi', $backupFilename, $srcFilename)
-            )->toBool();
+            $diff = (bool)run(
+                sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo 1; fi', $backupFilename, $srcFilename)
+            );
         }
 
         $result = false;
         if ($diff) {
             run(sprintf('cp "%s" "%s"', $srcFilename, $dstFilename));
-            !isVerbose() ?: writeln(run(sprintf('cat %s', $dstFilename))->getOutput());
+            !isVerbose() ?: writeln(run(sprintf('cat %s', $dstFilename)));
             !isVerbose() ?: writeln(sprintf('File %s updated', $dstFilename));
             $result = true;
         } else {
@@ -112,20 +112,20 @@ class UpdateConfig
         }
 
         $backupFilename = sprintf('%s/crontab.%s', $backupDir, date('Y-m-d_H:i:s'));
-        if (run('if crontab -l > /dev/null 2>&1; then echo "true"; else echo \'false\'; fi')->toBool()) {
+        if ((bool)run('if crontab -l > /dev/null 2>&1; then echo 1; else echo 0; fi')) {
             run(sprintf('crontab -l > %s', $backupFilename));
         } else {
             run(sprintf('touch %s', $backupFilename));
         }
 
-        $diff = run(
-            sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo "true"; fi', $backupFilename, $sourceFilename)
-        )->toBool();
+        $diff = (bool)run(
+            sprintf('if ! diff -q %s %s > /dev/null 2>&1; then echo 1; fi', $backupFilename, $sourceFilename)
+        );
 
         $result = false;
         if ($diff) {
             run(sprintf('crontab "%s"', $sourceFilename));
-            !isVerbose() ?: writeln(run('crontab -l')->getOutput());
+            !isVerbose() ?: writeln(run('crontab -l'));
 
             $result = true;
         } else {

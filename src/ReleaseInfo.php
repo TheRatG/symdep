@@ -122,7 +122,7 @@ class ReleaseInfo
     protected function checkCurrentDeployDir()
     {
         $cmd = sprintf('cd %s && git rev-parse --abbrev-ref HEAD', $this->getLocalDeployPath());
-        if ('master' !== trim(runLocally($cmd)->toString())) {
+        if ('master' !== trim(runLocally($cmd))) {
             writeln('<error>Current deploy path is not master</error>');
 
             return false;
@@ -145,11 +145,11 @@ class ReleaseInfo
     protected function getDiffLog()
     {
         $cmd = sprintf('cd %s && git rev-parse --verify HEAD', $this->getCurrentLink());
-        $remoteRevision = trim(run($cmd)->toString());
+        $remoteRevision = trim(run($cmd));
 
         runLocally('git pull origin master');
         $cmd = sprintf('git log %s..HEAD --pretty=format:"[%%h]|(%%cE): %%s"', $remoteRevision);
-        $log = runLocally($cmd)->toArray();
+        $log = explode("\n", runLocally($cmd));
 
         return $log;
     }

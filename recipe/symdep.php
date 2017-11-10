@@ -22,9 +22,11 @@ option(
 $helper = new BuildType();
 $buildType = $helper->getType();
 
-set('build_type', $buildType);
-set('env', '{{build_type}}');
-
 require_once 'recipe/symfony3.php';
+
+set('build_type', $buildType);
+set('symfony_env', '{{build_type}}');
+
 require_once 'general.php';
+
 require_once $helper->getRecipeFile($buildType);

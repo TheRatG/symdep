@@ -70,20 +70,22 @@ class FileHelper
             run(sprintf('mkdir -p "%s"', $dstDir));
         }
 
-        $content = run(sprintf('cat "%s"', $srcFilename))->getOutput();
+        $content = run(sprintf('cat "%s"', $srcFilename));
         $content = parse($content);
-        $tmpFilename = tempnam(sys_get_temp_dir(), "dst");
-        file_put_contents($tmpFilename, $content);
-        upload($tmpFilename, $dstFilename);
-        unlink($tmpFilename);
+        $command = <<<DOCHERE
+cat > "$dstFilename" <<'_EOF'
+$content
+_EOF
+DOCHERE;
+        run($command);
 
         if (is_null($mode)) {
             try {
                 $command = sprintf('stat -c "%%a" % s', $srcFilename);
-                $mode = trim(run($command)->toString());
+                $mode = trim(run($command));
             } catch (ProcessFailedException $e) {
                 $command = sprintf('stat -f "%%A" % s', $srcFilename);
-                $mode = trim(run($command)->toString());
+                $mode = trim(run($command));
             }
         }
 
@@ -105,7 +107,7 @@ class FileHelper
         $dstDir = rtrim($dstDir, ' / ');
 
         $command = sprintf('find "%s" -type f', $srcDir);
-        $templateFiles = run($command)->toArray();
+        $templateFiles = explode("\n", run($command));
 
         $result = [];
         foreach ($templateFiles as $src) {
@@ -127,7 +129,7 @@ class FileHelper
      */
     public static function dirExists($dir, $workingPath = null)
     {
-        return self::runWithin("if [ -d \"$dir\" ]; then echo true; fi", $workingPath)->toBool();
+        return (bool)self::runWithin("if [ -d \"$dir\" ]; then echo 1; fi", $workingPath);
     }
 
     /**
@@ -137,7 +139,7 @@ class FileHelper
      */
     public static function fileExists($filename, $workingPath = null)
     {
-        return self::runWithin("if [ -f \"$filename\" ]; then echo true; fi", $workingPath)->toBool();
+        return (bool)self::runWithin("if [ -f \"$filename\" ]; then echo 1; fi", $workingPath);
     }
 
     /**
@@ -149,7 +151,7 @@ class FileHelper
     {
         $cmd = sprintf('if [ -w "%s" ]; then echo true; fi', $filename);
 
-        return self::runWithin($cmd, $workingPath)->toBool();
+        return (bool)self::runWithin($cmd, $workingPath);
     }
 
     /**
