@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-REAL_PATH=`readlink -f "$0"`;
-DIR=`dirname "$REAL_PATH"`;
-BIN_TARGET="$DIR/symdep"
+REAL_PATH="$(cd "$(dirname "$0")" && pwd -P)";
+DIR=`dirname "${REAL_PATH}"`;
+BIN_TARGET="$DIR/symdep";
 
 SRC_DIR="`pwd`"
 cd "$SRC_DIR"
