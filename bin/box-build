@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 
-real_path() {
-    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-}
-
-FILE=`real_path "$0"`;
-DIR=`dirname ${FILE}`;
-ROOT_DIR=`dirname "$DIR"`;
+REAL_PATH="$(cd "$(dirname "$0")" && pwd -P)";
+ROOT_DIR=`dirname "${REAL_PATH}"`;
 
 [ ! -d ${ROOT_DIR}/tmp ] && mkdir ${ROOT_DIR}/tmp;
 
