@@ -138,12 +138,12 @@ task(
         $path = get('deploy_path_original') . '/releases';
         $localBranches = explode("\n", run("ls $path"));
         run("cd {{deploy_path_current_master}}; git fetch && git fetch -p");
-        $remoteBranches = explode("\n", run("cd {{deploy_path_current_master}} && {{bin/git}} branch -r"));
+        $remoteBranches = explode("\n", run("cd {{deploy_path_current_master}} && {{bin/git}} ls-remote"));
         array_walk(
             $remoteBranches,
             function (&$item) {
                 $item = trim($item);
-                $item = substr($item, strpos($item, '/') + 1);
+                $item = substr($item, strrpos($item, '/') + 1);
                 $item = explode(' ', $item)[0];
                 $item = strtolower($item);
             }
@@ -166,7 +166,7 @@ task(
                 if (isVerbose() && askConfirmation("Do you want delete: $full")) {
                     run($cmd);
                 } else {
-                    run($cmd);
+                    writeln(sprintf('Remove of "%s" skipped', $full));
                 }
             }
         }
