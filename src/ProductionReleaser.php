@@ -1,4 +1,5 @@
 <?php
+
 namespace TheRat\SymDep;
 
 use function Deployer\isVerbose;
@@ -24,6 +25,11 @@ class ProductionReleaser
      * @var array
      */
     protected $deletedBranches;
+
+    /**
+     * @var bool
+     */
+    protected $executed = false;
 
     /**
      * ProductionReleaser constructor.
@@ -87,12 +93,32 @@ class ProductionReleaser
     }
 
     /**
+     * @return string
+     */
+    public function getLocalBranch()
+    {
+        return runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD');
+    }
+
+    /**
+     * @return string
+     */
+    public function getBranches()
+    {
+        runLocally('{{bin/git}} fetch && {{bin/git}} fetch -p && {{bin/git}} pull');
+        $subject = runLocally('{{bin/git}} ls-remote');
+
+        return $subject;
+    }
+
+    /**
      * @param int $keepReleases
      * @return array
      */
     public function deleteReleaseBranches($keepReleases = 5)
     {
-        if (!$this->deletedBranches) {
+        if (!$this->deletedBranches && !$this->executed) {
+            $this->executed = true;
             $subject = $this->getBranches();
             $pattern = '/(release-\d+)/i';
             $matches = null;
@@ -113,25 +139,6 @@ class ProductionReleaser
         }
 
         return $this->deletedBranches;
-    }
-
-    /**
-     * @return string
-     */
-    public function getBranches()
-    {
-        runLocally('{{bin/git}} fetch && {{bin/git}} fetch -p && {{bin/git}} pull');
-        $subject = runLocally('{{bin/git}} ls-remote');
-
-        return $subject;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLocalBranch()
-    {
-        return runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD');
     }
 
     /**
