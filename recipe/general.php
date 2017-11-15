@@ -2,8 +2,6 @@
 
 namespace Deployer;
 
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Symfony\Component\Console\Input\InputOption;
 use TheRat\SymDep\FileHelper;
 use TheRat\SymDep\Locker;
@@ -45,7 +43,7 @@ set('symdep_log_enable', false);
 set(
     'symdep_log_dir',
     function () {
-        return dirname(parse('{{deploy_file}}')).'/var/logs/';
+        return dirname(parse('{{deploy_file}}')) . '/var/logs/';
     }
 );
 
@@ -96,6 +94,8 @@ task(
             run(
                 '{{bin/php}} {{bin/console}} doctrine:migrations:migrate {{console_options}} --allow-no-migration'
             );
+        } else {
+            writeln('Doctrine migrations skipped');
         }
     }
 )->desc('Migrate database');
