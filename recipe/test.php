@@ -163,10 +163,14 @@ task(
             $full = "$path/$deleteDir";
             if (FileHelper::dirExists($full)) {
                 $cmd = sprintf('rm -rf %s', escapeshellarg($full));
-                if (isVerbose() && askConfirmation("Do you want delete: $full")) {
-                    run($cmd);
+                if (isVerbose()) {
+                    if (askConfirmation("Do you want delete: $full")) {
+                        run($cmd);
+                    } else {
+                        writeln(sprintf('Remove of "%s" skipped', $full));
+                    }
                 } else {
-                    writeln(sprintf('Remove of "%s" skipped', $full));
+                    run($cmd);
                 }
             }
         }
