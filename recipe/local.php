@@ -108,7 +108,7 @@ task(
     'deploy:assets:install',
     function () {
         run(
-            '{{bin/php}} {{bin/console}} assets:install {{console_options}} --symlink --relative {{release_path}}/web'
+            '{{bin/php}} {{bin/console}} assets:install {{console_options}} --symlink --relative {{release_path}}/public'
         );
     }
 );

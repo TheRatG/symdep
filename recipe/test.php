@@ -44,19 +44,13 @@ task(
             set('clear_paths', []);
         }
         set('symfony_env', $env);
-        set(
-            'env',
-            [
-                'SYMFONY_ENV' => get('symfony_env')
-            ]
-        );
 
         set('deploy_path_original', parse('{{deploy_path}}'));
         set('deploy_path', parse('{{deploy_path_original}}/releases/') . strtolower(get('branch')));
         set('deploy_path_current_master', parse('{{deploy_path_original}}/releases/master/current'));
 
-        set('shared_files', ['app/config/parameters.yml', 'app/config/_secret.yml']);
-        set('copy_files', ['shared/app/config/parameters.yml', 'shared/app/config/parameters.yml']);
+        set('shared_files', ['.env', 'config/packages/_secret.yml']);
+        set('copy_files', ['shared/.env', 'shared/config/packages/parameters.yml']);
         set('dump_assets', true);
     }
 );

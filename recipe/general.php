@@ -37,7 +37,7 @@ set('lock_wait', true);
 set('lock_timeout', 15);
 set('lock_filename', '{{deploy_path}}/deploy.lock');
 set('release_info', false);
-set('shared_dirs', ['var/logs', 'var/sessions', 'web/uploads', 'web/media']);
+set('shared_dirs', ['var/logs', 'var/sessions', 'public/uploads', 'public/media']);
 
 set('symdep_log_enable', false);
 set(
@@ -170,8 +170,8 @@ task(
 task(
     'deploy:secret_config',
     function () {
-        if (!FileHelper::fileExists('{{release_path}}/app/config/_secret.yml')) {
-            run('touch {{release_path}}/app/config/_secret.yml');
+        if (!FileHelper::fileExists('{{release_path}}/config/packages/_secret.yml')) {
+            run('touch {{release_path}}/config/packages/_secret.yml');
         }
     }
 );

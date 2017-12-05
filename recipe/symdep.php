@@ -24,6 +24,8 @@ $buildType = $helper->getType();
 
 require_once 'recipe/symfony3.php';
 
+// Environment vars
+set('env', []);
 set('build_type', $buildType);
 set('symfony_env', '{{build_type}}');
 
