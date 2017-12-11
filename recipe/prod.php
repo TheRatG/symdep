@@ -29,7 +29,7 @@ task(
         }
 
         // Symfony shared files
-        set('shared_files', ['.env', 'config/packages/_secret.yml']);
+        set('shared_files', ['.env']);
         set('dump_assets', true);
         set('release_info', true);
         set('symdep_log_enable', true);

@@ -1,6 +1,5 @@
 [features]
 * CopyDbCommand - copy database command for test
-* documentation about **test** and **_secret.yml**
 
 [3.4.0]
 * symfony 3 as default recipe

@@ -49,8 +49,8 @@ task(
         set('deploy_path', parse('{{deploy_path_original}}/releases/') . strtolower(get('branch')));
         set('deploy_path_current_master', parse('{{deploy_path_original}}/releases/master/current'));
 
-        set('shared_files', ['.env', 'config/packages/_secret.yml']);
-        set('copy_files', ['shared/.env', 'shared/config/packages/parameters.yml']);
+        set('shared_files', ['.env']);
+        set('copy_files', ['shared/.env']);
         set('dump_assets', true);
     }
 );
