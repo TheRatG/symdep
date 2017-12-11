@@ -168,6 +168,15 @@ task(
 );
 
 task(
+    'deploy:secret_config',
+    function () {
+        if (!FileHelper::fileExists('{{release_path}}/config/_secret.yml')) {
+            run('touch {{release_path}}/config/_secret.yml');
+        }
+    }
+);
+
+task(
     'drop-branches-from-test',
     [
         'properties',
@@ -211,6 +220,7 @@ task(
         'deploy:release',
         'deploy:update_code',
         'deploy:clear_paths',
+        'deploy:secret_config',
         'deploy:create_cache_dir',
         'deploy:shared',
         'deploy:assets',
