@@ -170,8 +170,8 @@ task(
 task(
     'deploy:secret_config',
     function () {
-        if (!FileHelper::fileExists('{{release_path}}/config/_secret.yml')) {
-            run('touch {{release_path}}/config/_secret.yml');
+        if (!FileHelper::fileExists('{{release_path}}/config/_secret.yaml')) {
+            run('touch {{release_path}}/config/_secret.yaml');
         }
     }
 );
