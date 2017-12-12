@@ -166,6 +166,12 @@ task(
         }
     }
 );
+/**
+ * Install assets from public dir of bundles
+ */
+task('deploy:assets:install', function () {
+    run('{{bin/php}} {{bin/console}} assets:install {{release_path}}/public {{console_options}}');
+})->desc('Install bundle assets');
 
 task(
     'deploy:secret_config',

@@ -100,19 +100,6 @@ task(
     function () {
     }
 );
-
-/**
- * Install assets from public dir of bundles
- */
-task(
-    'deploy:assets:install',
-    function () {
-        run(
-            '{{bin/php}} {{bin/console}} assets:install {{console_options}} --symlink --relative {{release_path}}/public'
-        );
-    }
-);
-
 task(
     'cleanup',
     function () {
