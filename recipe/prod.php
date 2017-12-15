@@ -73,4 +73,4 @@ task(
         }
     }
 );
-after('cleanup', 'cleanup:release-branches');
+after('release-info-after', 'cleanup:release-branches');
