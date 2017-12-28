@@ -7,8 +7,8 @@
  */
 
 // Deployer constants
-define('SYMDEP', true);
-define('SYMDEP_BIN', __FILE__);
+define('DEPLOYER', true);
+define('DEPLOYER_BIN', __FILE__);
 
 // Detect deploy.php script
 $options = getopt('f::', ['file::']);
