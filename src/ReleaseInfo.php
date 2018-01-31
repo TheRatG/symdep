@@ -104,10 +104,10 @@ class ReleaseInfo
 
             set(self::PARAMETER_TASK_LIST, $taskNameList);
             writeln('');
-            if (askConfirmation('Would you like to continue deploy on prod')) {
-            } else {
-                throw new \RuntimeException('Deploy canceled');
-            }
+//            if (askConfirmation('Would you like to continue deploy on prod')) {
+//            } else {
+//                throw new \RuntimeException('Deploy canceled');
+//            }
         } else {
             $message = 'There are no changes between current directory and remote';
             throw new \RuntimeException($message);

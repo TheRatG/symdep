@@ -4,7 +4,6 @@ namespace Deployer;
 
 use Symfony\Component\Console\Input\InputOption;
 use TheRat\SymDep\FileHelper;
-use TheRat\SymDep\Locker;
 use TheRat\SymDep\ReleaseInfo;
 
 /**
@@ -43,7 +42,7 @@ set('symdep_log_enable', false);
 set(
     'symdep_log_dir',
     function () {
-        return dirname(parse('{{deploy_file}}')) . '/var/logs/';
+        return dirname(parse('{{deploy_file}}')).'/var/logs/';
     }
 );
 
@@ -99,44 +98,45 @@ task(
         }
     }
 )->desc('Migrate database');
-task(
-    'deploy:lock',
-    function () {
-        $lockWait = get('lock_wait');
-        $filename = get('lock_filename');
-        $locker = new Locker($filename, get('lock_timeout'));
-        $needLock = true;
-        if ($locker->isLocked()) {
-            if ($lockWait) {
-                writeln($locker->__toString());
-                $needLock = askConfirmation('Force deploy');
-            } else {
-                $needLock = false;
-            }
-        }
-        if ($needLock) {
-            $locker->lock(
-                [
-                    'date' => trim(run('date -u')),
-                    'user' => trim(runLocally('whoami')),
-                    'server' => trim(runLocally('uname -a')),
-                ]
-            );
-            if (isVerbose()) {
-                writeln(sprintf('Create lock file "%s"', $filename));
-            }
-        } else {
-            throw new \RuntimeException('Deploy process locked');
-        }
-    }
-);
-task(
-    'deploy:unlock',
-    function () {
-        $locker = new Locker(get('lock_filename'), get('lock_timeout'));
-        $locker->unlock();
-    }
-);
+
+//task(
+//    'deploy:lock',
+//    function () {
+//        $lockWait = get('lock_wait');
+//        $filename = get('lock_filename');
+//        $locker = new Locker($filename, get('lock_timeout'));
+//        $needLock = true;
+////        if ($locker->isLocked()) {
+////            if ($lockWait) {
+////                writeln($locker->__toString());
+////                $needLock = askConfirmation('Force deploy');
+////            } else {
+////                $needLock = false;
+////            }
+////        }
+//        if ($needLock) {
+//            $locker->lock(
+//                [
+//                    'date' => trim(run('date -u')),
+//                    'user' => trim(runLocally('whoami')),
+//                    'server' => trim(runLocally('uname -a')),
+//                ]
+//            );
+//            if (isVerbose()) {
+//                writeln(sprintf('Create lock file "%s"', $filename));
+//            }
+//        } else {
+//            throw new \RuntimeException('Deploy process locked');
+//        }
+//    }
+//);
+//task(
+//    'deploy:unlock',
+//    function () {
+//        $locker = new Locker(get('lock_filename'), get('lock_timeout'));
+//        $locker->unlock();
+//    }
+//);
 
 /**
  * Clear Cache
@@ -202,7 +202,7 @@ task(
             ReleaseInfo::getInstance()->run();
         }
     }
-)->desc('Release info');
+)->local()->desc('Release info');
 
 task(
     'release-info-after',
@@ -211,7 +211,7 @@ task(
             ReleaseInfo::getInstance()->showIssues();
         }
     }
-)->desc('Release info');
+)->local()->desc('Release info');
 
 // -------------
 

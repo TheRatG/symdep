@@ -2,32 +2,34 @@
 
 namespace Deployer;
 
+task('create_release_branch', function () {
+    if (has('branch')) {
+        return;
+    }
+
+    if (!input()->getOption('skip-branch')) {
+        // Deploy branch
+        $branch = input()->getOption('branch');
+        if (!$branch && has('branch')) {
+            $branch = get('branch');
+        }
+        if ('last' === strtolower($branch)) {
+            $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->getLastReleaseBranch();
+        }
+
+        if (!$branch) {
+            $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->createReleaseBranch();
+            output()->writeln(sprintf('<info>Release branch "%s" was automatically created</info>', $branch));
+        }
+
+        set('branch', $branch);
+        input()->setOption('branch', $branch);
+    }
+})->local();
+
 task(
     'properties',
     function () {
-        if (has('branch')) {
-            return;
-        }
-
-        if (!input()->getOption('skip-branch')) {
-            // Deploy branch
-            $branch = input()->getOption('branch');
-            if (!$branch && has('branch')) {
-                $branch = get('branch');
-            }
-            if ('last' === strtolower($branch)) {
-                $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->getLastReleaseBranch();
-            }
-
-            if (!$branch) {
-                $branch = \TheRat\SymDep\ProductionReleaser::getInstance()->createReleaseBranch();
-                output()->writeln(sprintf('<info>Release branch "%s" was automatically created</info>', $branch));
-            }
-
-            set('branch', $branch);
-            input()->setOption('branch', $branch);
-        }
-
         // Symfony shared files
         set('shared_files', ['.env', 'config/_secret.yaml']);
         set('dump_assets', true);
@@ -35,6 +37,8 @@ task(
         set('symdep_log_enable', true);
     }
 );
+
+before('properties', 'create_release_branch');
 
 task(
     'prepare',
@@ -72,5 +76,5 @@ task(
             writeln($e->getMessage());
         }
     }
-);
+)->local();
 after('release-info-after', 'cleanup:release-branches');
