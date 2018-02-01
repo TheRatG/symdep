@@ -99,45 +99,6 @@ task(
     }
 )->desc('Migrate database');
 
-//task(
-//    'deploy:lock',
-//    function () {
-//        $lockWait = get('lock_wait');
-//        $filename = get('lock_filename');
-//        $locker = new Locker($filename, get('lock_timeout'));
-//        $needLock = true;
-////        if ($locker->isLocked()) {
-////            if ($lockWait) {
-////                writeln($locker->__toString());
-////                $needLock = askConfirmation('Force deploy');
-////            } else {
-////                $needLock = false;
-////            }
-////        }
-//        if ($needLock) {
-//            $locker->lock(
-//                [
-//                    'date' => trim(run('date -u')),
-//                    'user' => trim(runLocally('whoami')),
-//                    'server' => trim(runLocally('uname -a')),
-//                ]
-//            );
-//            if (isVerbose()) {
-//                writeln(sprintf('Create lock file "%s"', $filename));
-//            }
-//        } else {
-//            throw new \RuntimeException('Deploy process locked');
-//        }
-//    }
-//);
-//task(
-//    'deploy:unlock',
-//    function () {
-//        $locker = new Locker(get('lock_filename'), get('lock_timeout'));
-//        $locker->unlock();
-//    }
-//);
-
 /**
  * Clear Cache
  */
@@ -213,8 +174,6 @@ task(
     }
 )->local()->desc('Release info');
 
-// -------------
-
 task(
     'deploy',
     [
@@ -248,3 +207,8 @@ task(
         'release-info-after',
     ]
 )->desc('Run deploy project, depend on --build-type=<[d]ev|[t]est|[p]rod>');
+
+task('unlock', [
+    'properties',
+    'deploy:unlock',
+]);
