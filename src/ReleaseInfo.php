@@ -103,32 +103,12 @@ class ReleaseInfo
             }
 
             set(self::PARAMETER_TASK_LIST, $taskNameList);
-            writeln('');
-            if (askConfirmation('Would you like to continue deploy on prod')) {
-            } else {
-                throw new \RuntimeException('Deploy canceled');
-            }
+
         } else {
             $message = 'There are no changes between current directory and remote';
             throw new \RuntimeException($message);
         }
-
         $this->executed = true;
-    }
-
-    /**
-     *
-     */
-    protected function checkCurrentDeployDir()
-    {
-        $cmd = sprintf('cd %s && git rev-parse --abbrev-ref HEAD', $this->getLocalDeployPath());
-        if ('master' !== trim(runLocally($cmd))) {
-            writeln('<error>Current deploy path is not master</error>');
-
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -137,21 +117,6 @@ class ReleaseInfo
     public function getLocalDeployPath()
     {
         return $this->localDeployPath;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getDiffLog()
-    {
-        $cmd = sprintf('cd %s && git rev-parse --verify HEAD', $this->getCurrentLink());
-        $remoteRevision = trim(run($cmd));
-
-        runLocally('git pull origin master');
-        $cmd = sprintf('git log %s..HEAD --pretty=format:"[%%h]|(%%cE): %%s"', $remoteRevision);
-        $log = explode("\n", runLocally($cmd));
-
-        return $log;
     }
 
     /**
@@ -200,5 +165,35 @@ class ReleaseInfo
                 writeln(' * '.$task);
             }
         }
+    }
+
+    /**
+     *
+     */
+    protected function checkCurrentDeployDir()
+    {
+        $cmd = sprintf('cd %s && git rev-parse --abbrev-ref HEAD', $this->getLocalDeployPath());
+        if ('master' !== trim(runLocally($cmd))) {
+            writeln('<error>Current deploy path is not master</error>');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getDiffLog()
+    {
+        $cmd = sprintf('cd %s && git rev-parse --verify HEAD', $this->getCurrentLink());
+        $remoteRevision = trim(run($cmd));
+
+        runLocally('git pull origin master');
+        $cmd = sprintf('git log %s..HEAD --pretty=format:"[%%h]|(%%cE): %%s"', $remoteRevision);
+        $log = explode("\n", runLocally($cmd));
+
+        return $log;
     }
 }
