@@ -6,4 +6,4 @@ BIN_TARGET="${REAL_PATH}/symdep";
 SRC_DIR="`pwd`"
 cd "$SRC_DIR"
 
-"$BIN_TARGET" --build-type="test" --lock-wait deploy test "$@"
+"$BIN_TARGET" --build-type="test" deploy test "$@"

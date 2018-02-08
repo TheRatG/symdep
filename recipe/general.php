@@ -6,11 +6,6 @@ use Symfony\Component\Console\Input\InputOption;
 use TheRat\SymDep\FileHelper;
 use TheRat\SymDep\ReleaseInfo;
 
-/**
- * Default arguments and options.
- */
-option('lock-wait', 'w', InputOption::VALUE_NONE, 'Release lock');
-
 set(
     'bin/node',
     function () {
