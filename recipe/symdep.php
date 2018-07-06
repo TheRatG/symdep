@@ -30,4 +30,4 @@ set('build_type', $buildType);
 set('symfony_env', '{{build_type}}');
 
 require_once 'general.php';
-require_once $helper->getRecipeFile($buildType);
+require_once __DIR__ . '/' . $helper->getRecipeFile($buildType);
